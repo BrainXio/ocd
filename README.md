@@ -111,8 +111,8 @@ Each skill in `.claude/skills/` enforces OCD standards with strict type safety, 
 
 Settings in `.claude/settings.json` deny Claude from modifying infrastructure files via Edit, Write, or Bash. New hooks and scripts can still be created — only the existing ones are locked:
 
-- All 5 hooks (`hooks/*.py`)
-- All 6 scripts (`scripts/*.py`)
-- `pyproject.toml` and `settings.json`
+- All 7 hooks (`hooks/*.py`, `hooks/pre-commit`, `hooks/commit-msg`)
+- All 7 scripts (`scripts/*.py`, `scripts/setup-hooks.sh`)
+- `pyproject.toml`
 
 To modify protected files, remove the deny rule in `settings.json` first.
