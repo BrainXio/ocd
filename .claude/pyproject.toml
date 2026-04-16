@@ -8,6 +8,7 @@ dependencies = [
     "mdformat>=0.7",
     "mypy>=1.13",
     "ruff>=0.8",
+    "yamllint>=1.35",
 ]
 
 [tool.ruff]

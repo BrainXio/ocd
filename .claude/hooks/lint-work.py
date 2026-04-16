@@ -52,8 +52,15 @@ LINTERS: list[tuple[Any, ...]] = [
     (("py",), "ruff check {file}", None, True, 8, "file", "pip:ruff"),
     (("py",), "mypy {file}", None, True, 10, "file", "pip:mypy"),
     # Shell
-    (("sh", "bash"), "shellcheck --severity=warning {file}",
-     None, True, 8, "file", "apt:shellcheck"),
+    (
+        ("sh", "bash"),
+        "shellcheck --severity=warning {file}",
+        None,
+        True,
+        8,
+        "file",
+        "apt:shellcheck",
+    ),
     # Rust
     (("rs",), "cargo clippy -- -D warnings", ("Cargo.toml",), True, 15, "project", "rustup:clippy"),
     # Go
@@ -61,29 +68,85 @@ LINTERS: list[tuple[Any, ...]] = [
     (("go",), "gofmt -d {file}", None, False, 5, "file", "go:gofmt"),
     # TypeScript
     (("ts", "tsx"), "tsc --noEmit", ("tsconfig.json",), True, 15, "project", "npm:typescript"),
-    (("ts", "tsx", "js", "jsx"), "eslint {file}", (
-        ".eslintrc", ".eslintrc.js", ".eslintrc.json",
-        ".eslintrc.yml", "eslint.config.js",
-    ), True, 8, "file", "npm:eslint"),
+    (
+        ("ts", "tsx", "js", "jsx"),
+        "eslint {file}",
+        (
+            ".eslintrc",
+            ".eslintrc.js",
+            ".eslintrc.json",
+            ".eslintrc.yml",
+            "eslint.config.js",
+        ),
+        True,
+        8,
+        "file",
+        "npm:eslint",
+    ),
     # Java
-    (("java",), "google-java-format --dry-run {file}",
-     None, False, 8, "file", "brew:google-java-format"),
+    (
+        ("java",),
+        "google-java-format --dry-run {file}",
+        None,
+        False,
+        8,
+        "file",
+        "brew:google-java-format",
+    ),
     # C/C++
-    (("c", "h", "cpp", "hpp"), "clang-format --dry-run {file}", (
-        ".clang-format",
-    ), True, 8, "file", "apt:clang-format"),
+    (
+        ("c", "h", "cpp", "hpp"),
+        "clang-format --dry-run {file}",
+        (".clang-format",),
+        True,
+        8,
+        "file",
+        "apt:clang-format",
+    ),
     # C#
-    (("cs",), "dotnet format --verify-no-changes {file}",
-     (".csproj",), True, 10, "file", "dotnet:format"),
+    (
+        ("cs",),
+        "dotnet format --verify-no-changes {file}",
+        (".csproj",),
+        True,
+        10,
+        "file",
+        "dotnet:format",
+    ),
     # Ruby
     (("rb",), "rubocop {file}", ("Gemfile",), True, 10, "file", "gem:rubocop"),
+    # YAML
+    (
+        ("yml", "yaml"),
+        "yamllint -f parsable {file}",
+        (".yamllint", ".yamllint.yaml", ".yamllint.yml"),
+        False,
+        8,
+        "file",
+        "pip:yamllint",
+    ),
     # PHP
-    (("php",), "phpstan analyse {file}",
-     ("phpstan.neon", "phpstan.neon.dist"),
-     True, 10, "file", "composer:phpstan"),
-    (("php",), "php-cs-fixer fix --dry-run {file}", (
-        ".php-cs-fixer.php", ".php-cs-fixer.dist.php",
-    ), False, 8, "file", "composer:php-cs-fixer"),
+    (
+        ("php",),
+        "phpstan analyse {file}",
+        ("phpstan.neon", "phpstan.neon.dist"),
+        True,
+        10,
+        "file",
+        "composer:phpstan",
+    ),
+    (
+        ("php",),
+        "php-cs-fixer fix --dry-run {file}",
+        (
+            ".php-cs-fixer.php",
+            ".php-cs-fixer.dist.php",
+        ),
+        False,
+        8,
+        "file",
+        "composer:php-cs-fixer",
+    ),
 ]
 
 # Build extension → linters lookup
@@ -204,41 +267,51 @@ def lint_file(file_path: str, include_project: bool = False) -> list[dict[str, A
 
         # Check availability
         if not _tool_available(command_template):
-            results.append({
-                "linter": binary,
-                "status": "missing",
-                "reason": "not_installed",
-                "install_hint": _format_install_hint(entry),
-            })
+            results.append(
+                {
+                    "linter": binary,
+                    "status": "missing",
+                    "reason": "not_installed",
+                    "install_hint": _format_install_hint(entry),
+                }
+            )
             continue
 
         if not _config_present(config_files):
-            results.append({
-                "linter": binary,
-                "status": "missing",
-                "reason": "no_config",
-                "install_hint": _format_install_hint(entry),
-            })
+            results.append(
+                {
+                    "linter": binary,
+                    "status": "missing",
+                    "reason": "no_config",
+                    "install_hint": _format_install_hint(entry),
+                }
+            )
             continue
 
         has_errors, output = run_linter(entry, file_path)
         if has_errors:
-            results.append({
-                "linter": binary,
-                "status": "errors",
-                "output": output,
-            })
+            results.append(
+                {
+                    "linter": binary,
+                    "status": "errors",
+                    "output": output,
+                }
+            )
         elif output:
-            results.append({
-                "linter": binary,
-                "status": "clean",
-                "output": output,
-            })
+            results.append(
+                {
+                    "linter": binary,
+                    "status": "clean",
+                    "output": output,
+                }
+            )
         else:
-            results.append({
-                "linter": binary,
-                "status": "clean",
-            })
+            results.append(
+                {
+                    "linter": binary,
+                    "status": "clean",
+                }
+            )
 
     return results
 

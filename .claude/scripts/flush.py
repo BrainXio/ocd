@@ -14,6 +14,7 @@ from __future__ import annotations
 # isort: off
 # Recursion prevention: set this BEFORE any imports that might trigger Claude
 import os
+
 os.environ["CLAUDE_INVOKED_BY"] = "memory_flush"
 # isort: on
 
@@ -143,6 +144,7 @@ respond with exactly: FLUSH_OK
                 pass
     except Exception as e:
         import traceback
+
         logging.error("Agent SDK error: %s\n%s", e, traceback.format_exc())
         response = f"FLUSH_ERROR: {type(e).__name__}: {e}"
 
@@ -170,6 +172,7 @@ def maybe_trigger_compilation() -> None:
             if today_log in ingested:
                 # Already compiled today - check if the log has changed since
                 from hashlib import sha256
+
                 log_path = DAILY_DIR / today_log
                 if log_path.exists():
                     current_hash = sha256(log_path.read_bytes()).hexdigest()[:16]
@@ -185,8 +188,12 @@ def maybe_trigger_compilation() -> None:
     logging.info("End-of-day compilation triggered (after %d:00)", COMPILE_AFTER_HOUR)
 
     cmd = [
-        "uv", "--directory", str(CLAUDE_DIR),
-        "run", "python", str(compile_script),
+        "uv",
+        "--directory",
+        str(CLAUDE_DIR),
+        "run",
+        "python",
+        str(compile_script),
     ]
 
     kwargs: dict[str, Any] = {}
@@ -218,10 +225,7 @@ def main() -> None:
 
     # Deduplication: skip if same session was flushed within 60 seconds
     state = load_flush_state()
-    if (
-        state.get("session_id") == session_id
-        and time.time() - state.get("timestamp", 0) < 60
-    ):
+    if state.get("session_id") == session_id and time.time() - state.get("timestamp", 0) < 60:
         logging.info("Skipping duplicate flush for session %s", session_id)
         context_file.unlink(missing_ok=True)
         return
@@ -241,9 +245,7 @@ def main() -> None:
     # Append to daily log
     if "FLUSH_OK" in response:
         logging.info("Result: FLUSH_OK")
-        append_to_daily_log(
-            "FLUSH_OK - Nothing worth saving from this session", "Memory Flush"
-        )
+        append_to_daily_log("FLUSH_OK - Nothing worth saving from this session", "Memory Flush")
     elif "FLUSH_ERROR" in response:
         logging.error("Result: %s", response)
         append_to_daily_log(response, "Memory Flush")

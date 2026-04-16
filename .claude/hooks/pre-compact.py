@@ -73,13 +73,13 @@ def main() -> None:
         logging.info("SKIP: only %d turns (min %d)", turn_count, MIN_TURNS_PRE_COMPACT)
         return
 
-    context_file = write_context_file(
-        session_id, context, prefix="flush-context"
-    )
+    context_file = write_context_file(session_id, context, prefix="flush-context")
     spawn_flush(context_file, session_id)
     logging.info(
         "Spawned flush.py for session %s (%d turns, %d chars)",
-        session_id, turn_count, len(context),
+        session_id,
+        turn_count,
+        len(context),
     )
 
 
