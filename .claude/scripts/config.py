@@ -1,6 +1,6 @@
 """Path constants and configuration for the personal knowledge base."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────────────────────
@@ -45,9 +45,9 @@ TIMEZONE = "UTC"
 
 def now_iso() -> str:
     """Current time in ISO 8601 format."""
-    return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+    return datetime.now(UTC).astimezone().isoformat(timespec="seconds")
 
 
 def today_iso() -> str:
     """Current date in ISO 8601 format."""
-    return datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
+    return datetime.now(UTC).astimezone().strftime("%Y-%m-%d")

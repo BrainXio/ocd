@@ -1,0 +1,3 @@
+^Co-Authored-By:
+^Generated (with|by|using)
+^\[AI(-generated)?\]

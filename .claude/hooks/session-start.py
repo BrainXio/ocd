@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 # Reuse path constants from config.py (scripts/ is sibling of hooks/)
 from pathlib import Path
@@ -26,7 +26,7 @@ MAX_LOG_LINES = 30
 
 def get_recent_log() -> str:
     """Read the most recent daily log (today or yesterday)."""
-    today = datetime.now(timezone.utc).astimezone()
+    today = datetime.now(UTC).astimezone()
 
     for offset in range(2):
         date = today - timedelta(days=offset)
@@ -43,7 +43,7 @@ def build_context() -> str:
     """Assemble the context to inject into the conversation."""
     parts = []
 
-    today = datetime.now(timezone.utc).astimezone()
+    today = datetime.now(UTC).astimezone()
     parts.append(f"## Today\n{today.strftime('%A, %B %d, %Y')}")
 
     if INDEX_FILE.exists():

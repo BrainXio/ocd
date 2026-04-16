@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -224,8 +225,7 @@ def run_linter(entry: tuple[Any, ...], file_path: str) -> tuple[bool, str]:
 
     try:
         result = subprocess.run(
-            command,
-            shell=True,
+            shlex.split(command),
             capture_output=True,
             text=True,
             timeout=timeout,

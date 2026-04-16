@@ -6,7 +6,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -133,7 +133,7 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
 def write_context_file(session_id: str, context: str, prefix: str = "flush-context") -> Path:
     """Write conversation context to a temp file for the background flush process."""
     STATE_DIR.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now(timezone.utc).astimezone().strftime("%Y%m%d-%H%M%S")
+    timestamp = datetime.now(UTC).astimezone().strftime("%Y%m%d-%H%M%S")
     context_file = STATE_DIR / f"{prefix}-{session_id}-{timestamp}.md"
     context_file.write_text(context, encoding="utf-8")
     return context_file
