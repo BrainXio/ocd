@@ -44,7 +44,7 @@ def read_stdin() -> dict[str, Any]:
         result: dict[str, Any] = json.loads(raw)
         return result
     except json.JSONDecodeError:
-        fixed = re.sub(r'(?<!\\)\\(?!["\\])', r'\\\\', raw)
+        fixed = re.sub(r'(?<!\\)\\(?!["\\])', r"\\\\", raw)
         result2: dict[str, Any] = json.loads(fixed)
         return result2
 
@@ -94,7 +94,7 @@ def extract_conversation_context(transcript_path: Path) -> tuple[str, int]:
         context = context[-MAX_FLUSH_CONTEXT_CHARS:]
         boundary = context.find("\n**")
         if boundary > 0:
-            context = context[boundary + 1:]
+            context = context[boundary + 1 :]
 
     return context, len(recent)
 
@@ -103,8 +103,14 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
     """Spawn flush.py as a background process to extract knowledge."""
     flush_script = SCRIPTS_DIR / "flush.py"
     cmd = [
-        "uv", "--directory", str(CLAUDE_DIR),
-        "run", "python", str(flush_script), str(context_file), session_id,
+        "uv",
+        "--directory",
+        str(CLAUDE_DIR),
+        "run",
+        "python",
+        str(flush_script),
+        str(context_file),
+        session_id,
     ]
 
     creation_flags = 0
@@ -120,6 +126,7 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
         )
     except Exception as e:
         import logging
+
         logging.error("Failed to spawn flush.py: %s", e)
 
 

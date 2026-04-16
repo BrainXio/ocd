@@ -98,3 +98,7 @@ archive/
 
 # === Claude Code ===
 .claude/settings.local.json
+
+# === act (nektos) ===
+.secrets
+.actrc.local

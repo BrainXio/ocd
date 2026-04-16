@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Stage 1: Gate ───────────────────────────────────────────────────────
+  # Fastest check — reject bad commit messages in under a second.
+  # Patterns mirror .claude/hooks/commit-msg
+  check-commit-messages:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reject AI attribution in commit messages
+        run: |
+          RANGE="${{ github.event.before }}..${{ github.event.after }}"
+          if [ "$RANGE" = "0000000000000000000000000000000000000000..${{ github.event.after }}" ]; then
+            RANGE="${{ github.event.after }}"
+          fi
+          failed=0
+          while IFS= read -r hash; do
+            msg=$(git log -1 --format='%B' "$hash")
+            while IFS= read -r line; do
+              for pattern in '^Co-Authored-By:' '^Generated (with|by|using)' '^\[AI(-generated)?\]'; do
+                if echo "$line" | grep -qiE "$pattern"; then
+                  echo "::error::Commit $hash contains prohibited AI attribution: $line"
+                  failed=1
+                fi
+              done
+            done <<< "$msg"
+          done < <(git rev-list "$RANGE")
+          if [ "$failed" -ne 0 ]; then
+            echo ""
+            echo "Rejecting push: commit messages contain AI attribution."
+            echo "Remove Co-Authored-By lines, 'Generated with/by/using' lines,"
+            echo "or [AI] tags. See: .claude/hooks/commit-msg"
+            exit 1
+          fi
+
+  # ── Stage 2: Fast lints (parallel) ──────────────────────────────────────
+  lint-yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install yamllint
+        run: pip install "yamllint>=1.35"
+      - name: yamllint
+        run: yamllint -f parsable .github/workflows/
+
+  lint-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: ".claude"
+
+  lint-markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install mdformat
+        run: pip install mdformat
+      - name: mdformat --check
+        run: mdformat --check README.md .claude/skills/*/SKILL.md
+
+  # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
+  lint-python:
+    needs: [lint-shell, lint-markdown, lint-yaml]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install linters and dependencies
+        run: pip install "ruff>=0.8" "mypy>=1.13" "claude-agent-sdk>=0.1.29" "mdformat>=0.7"
+      - name: ruff check
+        run: ruff check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/
+      - name: ruff format --check
+        run: ruff format --check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/
+      - name: mypy (strict)
+        run: mypy .claude/hooks/ .claude/scripts/ --strict --config-file=.claude/pyproject.toml

@@ -40,12 +40,14 @@ def check_broken_links() -> list[dict[str, Any]]:
             if link.startswith("daily/"):
                 continue  # daily log references are valid
             if not wiki_article_exists(link):
-                issues.append({
-                    "severity": "error",
-                    "check": "broken_link",
-                    "file": str(rel),
-                    "detail": f"Broken link: [[{link}]] - target does not exist",
-                })
+                issues.append(
+                    {
+                        "severity": "error",
+                        "check": "broken_link",
+                        "file": str(rel),
+                        "detail": f"Broken link: [[{link}]] - target does not exist",
+                    }
+                )
     return issues
 
 
@@ -57,12 +59,14 @@ def check_orphan_pages() -> list[dict[str, Any]]:
         link_target = str(rel).replace(".md", "").replace("\\", "/")
         inbound = count_inbound_links(link_target)
         if inbound == 0:
-            issues.append({
-                "severity": "warning",
-                "check": "orphan_page",
-                "file": str(rel),
-                "detail": f"Orphan page: no other articles link to [[{link_target}]]",
-            })
+            issues.append(
+                {
+                    "severity": "warning",
+                    "check": "orphan_page",
+                    "file": str(rel),
+                    "detail": f"Orphan page: no other articles link to [[{link_target}]]",
+                }
+            )
     return issues
 
 
@@ -73,12 +77,14 @@ def check_orphan_sources() -> list[dict[str, Any]]:
     issues = []
     for log_path in list_raw_files():
         if log_path.name not in ingested:
-            issues.append({
-                "severity": "warning",
-                "check": "orphan_source",
-                "file": f"daily/{log_path.name}",
-                "detail": f"Uncompiled daily log: {log_path.name} has not been ingested",
-            })
+            issues.append(
+                {
+                    "severity": "warning",
+                    "check": "orphan_source",
+                    "file": f"daily/{log_path.name}",
+                    "detail": f"Uncompiled daily log: {log_path.name} has not been ingested",
+                }
+            )
     return issues
 
 
@@ -93,12 +99,14 @@ def check_stale_articles() -> list[dict[str, Any]]:
             stored_hash = ingested[rel].get("hash", "")
             current_hash = file_hash(log_path)
             if stored_hash != current_hash:
-                issues.append({
-                    "severity": "warning",
-                    "check": "stale_article",
-                    "file": f"daily/{rel}",
-                    "detail": f"Stale: {rel} has changed since last compilation",
-                })
+                issues.append(
+                    {
+                        "severity": "warning",
+                        "check": "stale_article",
+                        "file": f"daily/{rel}",
+                        "detail": f"Stale: {rel} has changed since last compilation",
+                    }
+                )
     return issues
 
 
@@ -117,13 +125,15 @@ def check_missing_backlinks() -> list[dict[str, Any]]:
             if target_path.exists():
                 target_content = target_path.read_text(encoding="utf-8")
                 if f"[[{source_link}]]" not in target_content:
-                    issues.append({
-                        "severity": "suggestion",
-                        "check": "missing_backlink",
-                        "file": str(rel),
-                        "detail": f"[[{source_link}]] links to [[{link}]] but not vice versa",
-                        "auto_fixable": True,
-                    })
+                    issues.append(
+                        {
+                            "severity": "suggestion",
+                            "check": "missing_backlink",
+                            "file": str(rel),
+                            "detail": f"[[{source_link}]] links to [[{link}]] but not vice versa",
+                            "auto_fixable": True,
+                        }
+                    )
     return issues
 
 
@@ -134,12 +144,14 @@ def check_sparse_articles() -> list[dict[str, Any]]:
         word_count = get_article_word_count(article)
         if word_count < 200:
             rel = article.relative_to(KNOWLEDGE_DIR)
-            issues.append({
-                "severity": "suggestion",
-                "check": "sparse_article",
-                "file": str(rel),
-                "detail": f"Sparse article: {word_count} words (minimum recommended: 200)",
-            })
+            issues.append(
+                {
+                    "severity": "suggestion",
+                    "check": "sparse_article",
+                    "file": str(rel),
+                    "detail": f"Sparse article: {word_count} words (minimum recommended: 200)",
+                }
+            )
     return issues
 
 
@@ -191,24 +203,28 @@ Do NOT output anything else - no preamble, no explanation, just the formatted li
                     if isinstance(block, TextBlock):
                         response += block.text
     except Exception as e:
-        return [{
-            "severity": "error",
-            "check": "contradiction",
-            "file": "(system)",
-            "detail": f"LLM check failed: {e}",
-        }]
+        return [
+            {
+                "severity": "error",
+                "check": "contradiction",
+                "file": "(system)",
+                "detail": f"LLM check failed: {e}",
+            }
+        ]
 
     issues = []
     if "NO_ISSUES" not in response:
         for line in response.strip().split("\n"):
             line = line.strip()
             if line.startswith("CONTRADICTION:") or line.startswith("INCONSISTENCY:"):
-                issues.append({
-                    "severity": "warning",
-                    "check": "contradiction",
-                    "file": "(cross-article)",
-                    "detail": line,
-                })
+                issues.append(
+                    {
+                        "severity": "warning",
+                        "check": "contradiction",
+                        "file": "(cross-article)",
+                        "detail": line,
+                    }
+                )
 
     return issues
 
