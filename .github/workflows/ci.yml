@@ -16,7 +16,7 @@ permissions:
 jobs:
   # ── Stage 1: Gate ───────────────────────────────────────────────────────
   # Fastest check — reject bad commit messages in under a second.
-  # Patterns mirror .claude/hooks/commit-msg
+  # Patterns read from .claude/scripts/ai-patterns.txt (single source of truth)
   check-commit-messages:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -34,12 +34,12 @@ jobs:
           while IFS= read -r hash; do
             msg=$(git log -1 --format='%B' "$hash")
             while IFS= read -r line; do
-              for pattern in '^Co-Authored-By:' '^Generated (with|by|using)' '^\[AI(-generated)?\]'; do
+              while IFS= read -r pattern; do
                 if echo "$line" | grep -qiE "$pattern"; then
                   echo "::error::Commit $hash contains prohibited AI attribution: $line"
                   failed=1
                 fi
-              done
+              done < .claude/scripts/ai-patterns.txt
             done <<< "$msg"
           done < <(git rev-list "$RANGE")
           if [ "$failed" -ne 0 ]; then
@@ -94,7 +94,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install linters and dependencies
-        run: pip install "ruff>=0.8" "mypy>=1.13" "claude-agent-sdk>=0.1.29" "mdformat>=0.7"
+        run: pip install "ruff>=0.8" "mypy>=1.13" "claude-agent-sdk>=0.1.29"
       - name: ruff check
         run: ruff check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/
       - name: ruff format --check

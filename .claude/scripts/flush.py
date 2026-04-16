@@ -23,7 +23,7 @@ import json
 import logging
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -67,7 +67,7 @@ def save_flush_state(state: dict[str, Any]) -> None:
 
 def append_to_daily_log(content: str, section: str = "Session") -> None:
     """Append content to today's daily log."""
-    today = datetime.now(timezone.utc).astimezone()
+    today = datetime.now(UTC).astimezone()
     log_path = DAILY_DIR / f"{today.strftime('%Y-%m-%d')}.md"
 
     if not log_path.exists():
@@ -158,7 +158,7 @@ def maybe_trigger_compilation() -> None:
     """If it's past the compile hour and today's log hasn't been compiled, run compile.py."""
     import subprocess as _sp
 
-    now = datetime.now(timezone.utc).astimezone()
+    now = datetime.now(UTC).astimezone()
     if now.hour < COMPILE_AFTER_HOUR:
         return
 

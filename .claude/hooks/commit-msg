@@ -8,15 +8,13 @@ msg_file="$1"
 msg=$(cat "$msg_file")
 
 # Patterns that indicate AI attribution (checked against each line).
-# These enforce the project policy from .claude/skills/git/SKILL.md:
-#   - No Co-Authored-By lines
-#   - No "Generated with/by/using" attribution
-#   - No [AI] or [AI-generated] tags
-ai_patterns=(
-    '^Co-Authored-By:'
-    '^Generated (with|by|using)'
-    '^\[AI(-generated)?\]'
-)
+# Single source of truth: .claude/scripts/ai-patterns.txt
+resolved="$(readlink -f "$0")"
+patterns_file="$(dirname "$resolved")"/../scripts/ai-patterns.txt
+ai_patterns=()
+while IFS= read -r pattern; do
+    ai_patterns+=("$pattern")
+done < "$patterns_file"
 
 while IFS= read -r line; do
     for pattern in "${ai_patterns[@]}"; do
