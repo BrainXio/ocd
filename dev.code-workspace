@@ -1,0 +1,62 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": ".agent/daily"
+		},
+		{
+			"path": ".agent/knowledge"
+		},
+		{
+			"path": ".agent/reports"
+		},
+		{
+			"path": ".agent/.state"
+		}
+	],
+	"settings": {
+		"editor.formatOnSave": true,
+		"editor.insertSpaces": true,
+		"editor.rulers": [
+			100
+		],
+		"editor.tabSize": 4,
+		"files.insertFinalNewline": true,
+		"files.trimTrailingWhitespace": true,
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/.ruff_cache": true,
+			"**/.venv": true,
+			"**/.mypy_cache": true
+		},
+		"search.exclude": {
+			"**/__pycache__": true,
+			"**/.venv": true,
+			"**/uv.lock": true
+		},
+		"[python]": {
+			"editor.codeActionsOnSave": {
+				"source.organizeImports": "explicit"
+			}
+		},
+		"[markdown]": {
+			"editor.wordWrap": "on"
+		},
+		"python.analysis.typeCheckingMode": "strict",
+		"python.analysis.diagnosticSeverityOverrides": {
+			"reportUnusedImport": "warning"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"charliermarsh.ruff",
+			"ms-python.mypy-type-checker",
+			"DavidAnson.vscode-markdownlint",
+			"timonwong.shellcheck",
+			"editorconfig.editorconfig",
+			"Anthropic.claude-code"
+		]
+	}
+}

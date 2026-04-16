@@ -1,0 +1,25 @@
+[project]
+name = "obsessive-claude-developer"
+version = "0.1.0"
+description = "A Claude Code environment with a personal knowledge base compiled from AI conversations - inspired by Karpathy's LLM KB architecture"
+requires-python = ">=3.12"
+dependencies = [
+    "claude-agent-sdk>=0.1.29",
+    "mdformat>=0.7",
+    "mypy>=1.13",
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["config", "hookslib", "utils"]
+ignore_missing_imports = true

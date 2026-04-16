@@ -1,0 +1,99 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv --directory .claude run python hooks/session-start.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv --directory .claude run python hooks/pre-compact.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv --directory .claude run python hooks/session-end.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv --directory .claude run python hooks/lint-work.py --edit",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit*)",
+            "command": "uv --directory .claude run python hooks/lint-work.py --commit",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Edit(.claude/hooks/hookslib.py)",
+      "Edit(.claude/hooks/lint-work.py)",
+      "Edit(.claude/hooks/pre-compact.py)",
+      "Edit(.claude/hooks/session-end.py)",
+      "Edit(.claude/hooks/session-start.py)",
+      "Edit(.claude/scripts/compile.py)",
+      "Edit(.claude/scripts/config.py)",
+      "Edit(.claude/scripts/flush.py)",
+      "Edit(.claude/scripts/lint.py)",
+      "Edit(.claude/scripts/query.py)",
+      "Edit(.claude/scripts/utils.py)",
+      "Edit(.claude/pyproject.toml)",
+      "Edit(.claude/settings.json)",
+      "Write(.claude/hooks/hookslib.py)",
+      "Write(.claude/hooks/lint-work.py)",
+      "Write(.claude/hooks/pre-compact.py)",
+      "Write(.claude/hooks/session-end.py)",
+      "Write(.claude/hooks/session-start.py)",
+      "Write(.claude/scripts/compile.py)",
+      "Write(.claude/scripts/config.py)",
+      "Write(.claude/scripts/flush.py)",
+      "Write(.claude/scripts/lint.py)",
+      "Write(.claude/scripts/query.py)",
+      "Write(.claude/scripts/utils.py)",
+      "Write(.claude/pyproject.toml)",
+      "Write(.claude/settings.json)",
+      "Bash(rm *:.claude/hooks/*)",
+      "Bash(rm *:.claude/scripts/*)",
+      "Bash(rm *:.claude/pyproject.toml)",
+      "Bash(rm *:.claude/settings.json)"
+    ]
+  }
+}

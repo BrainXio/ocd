@@ -1,0 +1,8 @@
+# Ignore everything in .agent (runtime data)
+*
+# Except .gitkeep files (preserve directory structure)
+!.gitkeep
+# Except this .gitignore itself
+!.gitignore
+# And subdirectories (so git can traverse into them)
+!*/
