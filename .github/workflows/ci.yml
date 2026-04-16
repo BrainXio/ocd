@@ -46,7 +46,7 @@ jobs:
             echo ""
             echo "Rejecting push: commit messages contain AI attribution."
             echo "Remove Co-Authored-By lines, 'Generated with/by/using' lines,"
-            echo "or [AI] tags. See: .claude/hooks/commit-msg"
+            echo "or [AI] tags. Patterns: .claude/scripts/ai-patterns.txt"
             exit 1
           fi
 

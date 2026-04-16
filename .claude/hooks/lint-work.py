@@ -209,7 +209,7 @@ def run_linter(entry: tuple[Any, ...], file_path: str) -> tuple[bool, str]:
     else:
         command = command_template.format(file=file_path)
 
-    # Ensure venv bin is on PATH so shell=True can find venv-installed tools
+    # Ensure venv bin is on PATH so linters can find venv-installed tools
     env = os.environ.copy()
     existing_path = env.get("PATH", "")
     venv_bin_str = str(VENV_BIN)
