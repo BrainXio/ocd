@@ -66,7 +66,6 @@
     "deny": [
       "Edit(.claude/hooks/commit-msg)",
       "Edit(.claude/hooks/hookslib.py)",
-      "Edit(.claude/hooks/lint-work.py)",
       "Edit(.claude/hooks/pre-commit)",
       "Edit(.claude/hooks/pre-compact.py)",
       "Edit(.claude/hooks/session-end.py)",
@@ -81,7 +80,6 @@
       "Edit(.claude/pyproject.toml)",
       "Write(.claude/hooks/commit-msg)",
       "Write(.claude/hooks/hookslib.py)",
-      "Write(.claude/hooks/lint-work.py)",
       "Write(.claude/hooks/pre-commit)",
       "Write(.claude/hooks/pre-compact.py)",
       "Write(.claude/hooks/session-end.py)",

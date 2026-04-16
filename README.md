@@ -78,7 +78,7 @@ Git hooks enforce branch protection and commit message hygiene:
 | Hook | Purpose |
 |------|---------|
 | `pre-commit` | Block commits on `main` |
-| `commit-msg` | Reject AI attribution (Co-Authored-By, Generated with/by/using, [AI] tags) |
+| `commit-msg` | Reject AI attribution (patterns from `.claude/scripts/ai-patterns.txt`) |
 
 Git hooks are stored in `.claude/hooks/` and installed via symlink:
 
@@ -102,10 +102,32 @@ Each skill in `.claude/skills/` enforces OCD standards with strict type safety, 
 | `kubernetes` | Resource limits, liveness/readiness probes, `runAsNonRoot`, `readOnlyRootFilesystem`. No unbounded pods. |
 | `ocd` | Meta-standard: reviews, refactors, creates code against the Eight Standards. Every line must earn its existence. |
 | `php` | PHP 8.1+, `declare(strict_types=1)`, Composer, PSR-12. No legacy patterns. |
-| `python` | Python 3.10+, strict type hints, `uv` packaging, `ruff` commit gate. No bare `except`, no `Any`. |
+| `python` | Python 3.12+, strict type hints, `uv` packaging, `ruff` commit gate. No bare `except`, no `Any`. |
 | `ruby` | Ruby 3.1+, `frozen_string_literal: true`, Bundler, `rubocop` zero-offense gate. No unfrozen strings. |
 | `rust` | Edition 2021+, `cargo fmt` + `cargo clippy -- -D warnings` commit gates. No `unsafe` without safety comment. |
 | `typescript` | TypeScript 5.x, `strict: true`, `pnpm`, explicit return types. No `any` — use `unknown`. |
+
+## CI/CD
+
+GitHub Actions runs on every push and PR to `main`. The pipeline has three stages:
+
+| Stage | Job | Tool | Trigger |
+|-------|-----|------|---------|
+| 1 (gate) | `check-commit-messages` | grep (reads `.claude/scripts/ai-patterns.txt`) | push only |
+| 2 (parallel) | `lint-yaml` | yamllint | all |
+| 2 (parallel) | `lint-shell` | shellcheck | all |
+| 2 (parallel) | `lint-markdown` | mdformat | all |
+| 3 (after 1+2) | `lint-python` | ruff + mypy | all |
+
+Branch protection requires passing CI, linear history, and resolved conversations before merging.
+
+### Local testing with `act`
+
+```bash
+act -l                          # list all jobs
+act push -s GITHUB_TOKEN="$(gh auth token)"   # test full push pipeline
+act -j lint-python -s GITHUB_TOKEN="$(gh auth token)"  # test single job
+```
 
 ## Protected Files
 

@@ -8,7 +8,7 @@ You are a Python expert who writes clean, typed, modern Python following these c
 
 ## Mandatory Rules
 
-- Target Python 3.10+ (use `match`, `X | Y` union types, `TypeAlias`)
+- Target Python 3.12+ (use `match`, `X | Y` union types, `TypeAlias`, `datetime.UTC`)
 - Use `uv` for package management and virtual environments
 - Every function must have type hints on parameters and return types
 - All modules must have a docstring at the top
@@ -77,7 +77,7 @@ mypy --strict src/
 `ruff` configuration belongs in `pyproject.toml` under `[tool.ruff]`:
 
 - `line-length = 88` (default, matches black)
-- `target-version = "py310"`
+- `target-version = "py312"`
 
 ## Anti-Patterns to Avoid
 
