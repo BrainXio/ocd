@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: prevent commits on main branch.
+# Installed by: bash .claude/scripts/setup-hooks.sh
+
+set -euo pipefail
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ "$branch" = "main" ]; then
+    echo "error: commits on main are prohibited. Create a feature branch first:" >&2
+    echo "  git checkout -b feat/<description>" >&2
+    exit 1
+fi
+
+exit 0

@@ -64,36 +64,39 @@
   },
   "permissions": {
     "deny": [
+      "Edit(.claude/hooks/commit-msg)",
       "Edit(.claude/hooks/hookslib.py)",
       "Edit(.claude/hooks/lint-work.py)",
+      "Edit(.claude/hooks/pre-commit)",
       "Edit(.claude/hooks/pre-compact.py)",
       "Edit(.claude/hooks/session-end.py)",
       "Edit(.claude/hooks/session-start.py)",
       "Edit(.claude/scripts/compile.py)",
+      "Edit(.claude/scripts/setup-hooks.sh)",
       "Edit(.claude/scripts/config.py)",
       "Edit(.claude/scripts/flush.py)",
       "Edit(.claude/scripts/lint.py)",
       "Edit(.claude/scripts/query.py)",
       "Edit(.claude/scripts/utils.py)",
       "Edit(.claude/pyproject.toml)",
-      "Edit(.claude/settings.json)",
+      "Write(.claude/hooks/commit-msg)",
       "Write(.claude/hooks/hookslib.py)",
       "Write(.claude/hooks/lint-work.py)",
+      "Write(.claude/hooks/pre-commit)",
       "Write(.claude/hooks/pre-compact.py)",
       "Write(.claude/hooks/session-end.py)",
       "Write(.claude/hooks/session-start.py)",
       "Write(.claude/scripts/compile.py)",
+      "Write(.claude/scripts/setup-hooks.sh)",
       "Write(.claude/scripts/config.py)",
       "Write(.claude/scripts/flush.py)",
       "Write(.claude/scripts/lint.py)",
       "Write(.claude/scripts/query.py)",
       "Write(.claude/scripts/utils.py)",
       "Write(.claude/pyproject.toml)",
-      "Write(.claude/settings.json)",
       "Bash(rm *:.claude/hooks/*)",
       "Bash(rm *:.claude/scripts/*)",
-      "Bash(rm *:.claude/pyproject.toml)",
-      "Bash(rm *:.claude/settings.json)"
+      "Bash(rm *:.claude/pyproject.toml)"
     ]
   }
 }

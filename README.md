@@ -71,6 +71,21 @@ The Python venv is at `.claude/.venv/`. Dependencies are managed in `.claude/pyp
 
 `hookslib.py` is the shared utility library. It imports path constants from `scripts/config.py`.
 
+### Git Hooks
+
+Git hooks enforce branch protection and commit message hygiene:
+
+| Hook | Purpose |
+|------|---------|
+| `pre-commit` | Block commits on `main` |
+| `commit-msg` | Reject AI attribution (Co-Authored-By, Generated with/by/using, [AI] tags) |
+
+Git hooks are stored in `.claude/hooks/` and installed via symlink:
+
+```bash
+bash .claude/scripts/setup-hooks.sh    # one-time setup after cloning
+```
+
 ## Skills
 
 Each skill in `.claude/skills/` enforces OCD standards with strict type safety, custom error hierarchies, hard prohibitions, and zero-tolerance linting gates.
