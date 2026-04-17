@@ -80,7 +80,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install mdformat
-        run: pip install mdformat
+        run: pip install "mdformat>=0.7" "mdformat-frontmatter>=2.0.10"
       - name: mdformat --check
         run: mdformat --check README.md index.md docs/*.md .claude/skills/*/SKILL.md
 
