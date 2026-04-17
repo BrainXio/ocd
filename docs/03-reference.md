@@ -18,6 +18,7 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 | `css` | CSS Grid/Flexbox layouts, Custom Properties for tokens, BEM or utility-first. No `!important` except utilities. |
 | `docker` | Multi-stage builds, pinned base image digests. No `latest` tags in production. |
 | `git` | Conventional Commits, linear rebase history. Every branch has a purpose. |
+| `github` | Actions workflows pinned to SHA, least-privilege permissions, branch protection, `gh` CLI. No unpinned actions. |
 | `go` | Go 1.22+, `gofmt` commit gate, doc comments on all exports. No `panic` in library code. |
 | `html` | HTML5 semantic elements, accessibility attributes, keyboard navigation. No `<div>` soup. |
 | `java` | Java 17+, `final` by default, records, sealed classes, Javadoc on publics. No `System.out` in production. |
@@ -34,6 +35,7 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 | `swift` | Swift 5.9+, strict concurrency, `async`/`await`, SwiftLint zero-warnings gate. No force-unwrap outside tests. |
 | `terraform` | HCL2, remote state with locking, `sensitive = true` for secrets, module composition. No hardcoded secrets. |
 | `typescript` | TypeScript 5.x, `strict: true`, `pnpm`, explicit return types. No `any` — use `unknown`. |
+| `yaml` | 2-space indent, quoted ambiguous types, `yamllint` zero-errors gate. No tabs, no unquoted booleans. |
 
 All skills live in `.claude/skills/<name>/SKILL.md`.
 
