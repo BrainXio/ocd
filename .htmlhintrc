@@ -1,0 +1,5 @@
+{
+  "attrs": ["alt", "lang", "title", "role", "aria-label", "aria-labelledby", "aria-describedby"],
+  "tag-blacklist": ["font", "center", "marquee", "blink"],
+  "id-class-style": "dash"
+}

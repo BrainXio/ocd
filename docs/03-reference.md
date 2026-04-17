@@ -168,6 +168,24 @@ If gitleaks is not installed locally, the pre-commit hook prints a warning to st
 
 To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.toml`.
 
+## Linter Configurations
+
+| Linter | Config file | Scope | Install |
+|--------|-------------|-------|---------|
+| ruff | `pyproject.toml` `[tool.ruff]` | Python | `uv sync` |
+| mypy | `pyproject.toml` `[tool.mypy]` | Python | `uv sync` |
+| mdformat | `pyproject.toml` (dep) | Markdown | `uv sync` |
+| yamllint | `.yamllint` | YAML | `uv sync` |
+| shellcheck | — | Shell | system package |
+| gitleaks | `.gitleaks.toml` | Secrets | binary install |
+| actionlint | — | GitHub Actions | binary install |
+| stylelint | `.stylelintrc.json` | CSS | `npm ci` |
+| htmlhint | `.htmlhintrc` | HTML | `npm ci` |
+| prettier | `.prettierrc` | JSON | `npm ci` |
+| sqlfluff | `.sqlfluff` | SQL | `uv sync --extra sql` |
+
+Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd-lint-work` hook reports missing linters gracefully — it does not block edits when a linter is unavailable.
+
 ## IDE Configuration
 
 The `ocd.code-workspace` file provides shared workspace settings:
@@ -206,6 +224,10 @@ All entry points are defined in `pyproject.toml` `[project.scripts]` and install
 | 2 (parallel) | `lint-shell` | shellcheck | all |
 | 2 (parallel) | `lint-markdown` | mdformat | all |
 | 2 (parallel) | `secret-scan` | gitleaks (binary install, reads `.gitleaks.toml`) | all |
+| 2 (parallel) | `lint-actions` | actionlint (binary install) | all |
+| 2 (parallel) | `lint-css` | stylelint (npm) | all |
+| 2 (parallel) | `lint-html` | htmlhint (npm) | all |
+| 2 (parallel) | `lint-json` | prettier (npm) | all |
 | 3 (after 1+2) | `lint-python` | ruff + mypy | all |
 | 4 (after 3) | `test-python` | pytest | all |
 

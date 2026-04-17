@@ -143,6 +143,90 @@ LINTERS: list[tuple[Any, ...]] = [
         "file",
         "composer:php-cs-fixer",
     ),
+    # CSS
+    (
+        ("css", "scss", "sass"),
+        "stylelint {file}",
+        (
+            ".stylelintrc",
+            ".stylelintrc.js",
+            ".stylelintrc.json",
+            ".stylelintrc.yml",
+            "stylelint.config.js",
+        ),
+        True,
+        8,
+        "file",
+        "npm:stylelint",
+    ),
+    # HTML
+    (
+        ("html", "htm"),
+        "htmlhint {file}",
+        (
+            ".htmlhintrc",
+            ".htmlhintrc.json",
+        ),
+        True,
+        8,
+        "file",
+        "npm:htmlhint",
+    ),
+    # JSON
+    (
+        ("json",),
+        "prettier --check {file}",
+        (
+            ".prettierrc",
+            ".prettierrc.js",
+            ".prettierrc.json",
+            ".prettierrc.yml",
+            "prettier.config.js",
+        ),
+        False,
+        8,
+        "file",
+        "npm:prettier",
+    ),
+    # SQL
+    (
+        ("sql",),
+        "sqlfluff lint {file}",
+        (".sqlfluff", ".sqlfluff.ini", "pyproject.toml"),
+        True,
+        10,
+        "file",
+        "pip:sqlfluff",
+    ),
+    # Swift
+    (
+        ("swift",),
+        "swiftlint lint --strict {file}",
+        (".swiftlint.yml",),
+        True,
+        10,
+        "file",
+        "brew:swiftlint",
+    ),
+    # Terraform / OpenTofu
+    (
+        ("tf",),
+        "terraform fmt -check -diff {file}",
+        None,
+        True,
+        8,
+        "file",
+        "brew:terraform",
+    ),
+    (
+        ("tf",),
+        "tfsec {file}",
+        None,
+        False,
+        10,
+        "file",
+        "brew:tfsec",
+    ),
 ]
 
 # Build extension → linters lookup
