@@ -36,9 +36,7 @@ class TestSlugify:
 
 class TestExtractWikilinks:
     def test_single_wikilink(self):
-        assert utils.extract_wikilinks("See [[concepts/foo]] for details") == [
-            "concepts/foo"
-        ]
+        assert utils.extract_wikilinks("See [[concepts/foo]] for details") == ["concepts/foo"]
 
     def test_multiple_wikilinks(self):
         result = utils.extract_wikilinks("See [[foo]] and [[bar]] then [[baz]]")

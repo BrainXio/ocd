@@ -24,12 +24,8 @@ _spec.loader.exec_module(session_start)  # type: ignore[union-attr]
 @pytest.fixture
 def mock_session_start_paths(mock_config_paths, monkeypatch):
     """Patch session_start's module-level imports from config."""
-    monkeypatch.setattr(
-        session_start, "DAILY_DIR", mock_config_paths / "daily"
-    )
-    monkeypatch.setattr(
-        session_start, "INDEX_FILE", mock_config_paths / "knowledge" / "index.md"
-    )
+    monkeypatch.setattr(session_start, "DAILY_DIR", mock_config_paths / "daily")
+    monkeypatch.setattr(session_start, "INDEX_FILE", mock_config_paths / "knowledge" / "index.md")
     return mock_config_paths
 
 

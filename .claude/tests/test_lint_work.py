@@ -140,14 +140,10 @@ class TestLintFile:
     def test_missing_config_reported(self, monkeypatch):
         """If a linter has no config, it should be reported as missing."""
         monkeypatch.setattr(lint_work, "_tool_available", lambda cmd: True)
-        monkeypatch.setattr(
-            lint_work, "_config_present", lambda cfg: not cfg
-        )
+        monkeypatch.setattr(lint_work, "_config_present", lambda cfg: not cfg)
         # TypeScript requires tsconfig.json
         results = lint_work.lint_file("test.ts")
-        assert any(
-            r["status"] == "missing" and r["reason"] == "no_config" for r in results
-        )
+        assert any(r["status"] == "missing" and r["reason"] == "no_config" for r in results)
 
     def test_linter_errors_reported(self, monkeypatch):
         """Linter with errors should produce an 'errors' result."""
@@ -234,9 +230,7 @@ class TestCommitMode:
         )
         monkeypatch.setattr(
             "subprocess.run",
-            lambda *a, **kw: MagicMock(
-                stdout="test.py", returncode=0, stderr=""
-            ),
+            lambda *a, **kw: MagicMock(stdout="test.py", returncode=0, stderr=""),
         )
         monkeypatch.setattr("os.chdir", lambda _: None)
 

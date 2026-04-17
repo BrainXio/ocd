@@ -32,9 +32,7 @@ def state_file(tmp_agent_dir):
     """Path to a temporary state.json with default content."""
     sf = tmp_agent_dir / ".state" / "state.json"
     sf.write_text(
-        json.dumps(
-            {"ingested": {}, "query_count": 0, "last_lint": None, "total_cost": 0.0}
-        )
+        json.dumps({"ingested": {}, "query_count": 0, "last_lint": None, "total_cost": 0.0})
     )
     return sf
 

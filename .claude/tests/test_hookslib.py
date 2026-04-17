@@ -43,8 +43,7 @@ class TestExtractConversationContext:
     def test_skips_system_messages(self, tmp_path, mock_config_paths):
         f = tmp_path / "transcript.jsonl"
         f.write_text(
-            json.dumps({"message": {"role": "system", "content": "You are helpful"}})
-            + "\n"
+            json.dumps({"message": {"role": "system", "content": "You are helpful"}}) + "\n"
         )
         _context, count = hookslib.extract_conversation_context(f)
         assert count == 0
@@ -52,9 +51,7 @@ class TestExtractConversationContext:
     def test_truncation_respects_max_chars(self, tmp_path, mock_config_paths):
         lines = []
         for _i in range(100):
-            lines.append(
-                json.dumps({"message": {"role": "user", "content": "x" * 500}})
-            )
+            lines.append(json.dumps({"message": {"role": "user", "content": "x" * 500}}))
         f = tmp_path / "long.jsonl"
         f.write_text("\n".join(lines))
         context, _count = hookslib.extract_conversation_context(f)
@@ -63,9 +60,7 @@ class TestExtractConversationContext:
     def test_turn_limit_respected(self, tmp_path, mock_config_paths):
         lines = []
         for i in range(hookslib.MAX_FLUSH_TURNS + 10):
-            lines.append(
-                json.dumps({"message": {"role": "user", "content": f"turn {i}"}})
-            )
+            lines.append(json.dumps({"message": {"role": "user", "content": f"turn {i}"}}))
         f = tmp_path / "many.jsonl"
         f.write_text("\n".join(lines))
         _context, count = hookslib.extract_conversation_context(f)

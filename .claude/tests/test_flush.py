@@ -32,9 +32,7 @@ class TestLoadFlushState:
         import config
 
         config.FLUSH_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        config.FLUSH_STATE_FILE.write_text(
-            json.dumps({"session_id": "abc", "timestamp": 1234.5})
-        )
+        config.FLUSH_STATE_FILE.write_text(json.dumps({"session_id": "abc", "timestamp": 1234.5}))
         state = flush.load_flush_state()
         assert state["session_id"] == "abc"
 
