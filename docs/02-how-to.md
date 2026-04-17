@@ -10,29 +10,41 @@ Task-oriented guides. Each section is independent — jump to what you need.
 
 ## Add a New Skill
 
-1. Create `.claude/skills/<name>/SKILL.md`
-1. Include the metadata header (`name`, `description`, `argument-hint`)
-1. Define mandatory practices, hard prohibitions, and commit gates
-1. If the skill has a commit-gate linter, add it to `.claude/pyproject.toml` and the CI pipeline (`.github/workflows/ci.yml`)
-1. Restart the session or use `/skills` to load the new skill
-1. Add a deny rule in `.claude/settings.json` to protect the SKILL.md file
+- Create `.claude/skills/<name>/SKILL.md`
+- Include the metadata header (`name`, `description`, `argument-hint`)
+- Define mandatory practices, hard prohibitions, and commit gates
+- If the skill has a commit-gate linter, add it to `pyproject.toml` and the CI pipeline (`.github/workflows/ci.yml`)
+- Restart the session or use `/skills` to load the new skill
+- Add a deny rule in `.claude/settings.json` to protect the SKILL.md file
 
 ## Add a New Subagent
 
-1. Create `.claude/agents/<name>.md` with YAML frontmatter (`name`, `description`, `tools`, `model`)
-1. Quote `description` values containing colons (YAML requirement): `description: 'value with: colon'`
-1. Write the prompt body with scope, output format, and failure conditions
-1. Restart the session or use `/agents` to load the new agent
+- Create `.claude/agents/<name>.md` with YAML frontmatter (`name`, `description`, `tools`, `model`)
+- Quote `description` values containing colons (YAML requirement): `description: 'value with: colon'`
+- Write the prompt body with scope, output format, and failure conditions
+- Restart the session or use `/agents` to load the new agent
 
 See [reference](03-reference.md) for the full agent frontmatter schema.
 
 ## Add a New Hook
 
-1. Create the script in `.claude/hooks/` (e.g., `my-hook.py`)
-1. Add an entry in `.claude/settings.json` under the appropriate event key (`SessionStart`, `PreCompact`, `SessionEnd`, `PostToolUse`, `PreToolUse`)
-1. Set the matcher, command, and timeout
-1. If it's a git hook, add a symlink entry in `.claude/scripts/setup-hooks.sh`
-1. Add deny rules in `settings.json` to protect the new hook file
+Python hooks live in `src/ocd/hooks/` as part of the installable package. Git hooks live in `git_hooks/`.
+
+### Python hook (invoked by Claude Code)
+
+- Create the module in `src/ocd/hooks/` (e.g., `my_hook.py`)
+- Add an entry point in `pyproject.toml` under `[project.scripts]`: `ocd-my-hook = "ocd.hooks.my_hook:main"`
+- Add an entry in `.claude/settings.json` under the appropriate event key (`SessionStart`, `PreCompact`, `SessionEnd`, `PostToolUse`, `PreToolUse`)
+- Set the matcher, command (`ocd-my-hook`), and timeout
+- Add deny rules in `settings.json` to protect the new hook file
+- Run `uv sync` to install the new entry point
+
+### Git hook (invoked by git)
+
+- Create the script in `git_hooks/` (e.g., `my-hook`)
+- Make it executable: `chmod +x git_hooks/my-hook`
+- Add a symlink entry in `git_hooks/setup-hooks.sh`
+- Run `bash git_hooks/setup-hooks.sh` to install the symlink
 
 See [reference](03-reference.md) for the hook configuration schema and available events.
 
@@ -40,11 +52,11 @@ See [reference](03-reference.md) for the hook configuration schema and available
 
 Infrastructure files (hooks, scripts, `pyproject.toml`) are protected by deny rules in `.claude/settings.json`:
 
-1. Open `.claude/settings.json`
-1. Find the deny rules under `permissions.deny` that match the target file path (e.g., `Edit(.claude/hooks/pre-commit)`)
-1. Remove those rules
-1. Make your changes
-1. Re-add the deny rule(s)
+- Open `.claude/settings.json`
+- Find the deny rules under `permissions.deny` that match the target file path (e.g., `Edit(src/ocd/hooks/lint_work.py)`)
+- Remove those rules
+- Make your changes
+- Re-add the deny rule(s)
 
 See [reference](03-reference.md) for the full list of protected files and deny rule patterns.
 
@@ -64,26 +76,28 @@ The knowledge pipeline runs automatically, but you can control it manually:
 
 ```bash
 # Compile knowledge from new/changed daily logs
-uv --directory .claude run python scripts/compile.py
+ocd-compile
 
 # Force recompile all logs
-uv --directory .claude run python scripts/compile.py --all
+ocd-compile --all
 
 # Compile a specific log file
-uv --directory .claude run python scripts/compile.py --file .agent/daily/2026-04-17.md
+ocd-compile --file .agent/daily/2026-04-17.md
 
 # Lint the knowledge base (structural checks only)
-uv --directory .claude run python scripts/lint.py --structural-only
+ocd-lint-kb --structural-only
 
 # Lint the knowledge base (structural + LLM contradiction checks)
-uv --directory .claude run python scripts/lint.py
+ocd-lint-kb
 
 # Query the knowledge base
-uv --directory .claude run python scripts/query.py "how does the flush pipeline work"
+ocd-query "how does the flush pipeline work"
 
 # Query and save answer to a file
-uv --directory .claude run python scripts/query.py "flush pipeline" --file-back
+ocd-query "flush pipeline" --file-back
 ```
+
+All commands are installed entry points — run them directly or via `uv run ocd-<command>`.
 
 ## Add External Knowledge
 
@@ -114,14 +128,14 @@ Create a markdown file at `.agent/daily/YYYY-MM-DD.md` with structured content, 
 ```
 
 ```bash
-uv --directory .claude run python scripts/compile.py --file .agent/daily/2026-04-18.md
+ocd-compile --file .agent/daily/2026-04-18.md
 ```
 
 The compiler will extract concepts and create knowledge articles. The format is advisory — the LLM compiler handles any reasonable markdown. See [explanation](04-explanation.md#the-feedback-loop) for why the pipeline is content-agnostic.
 
-### Via flush.py
+### Via flush
 
-flush.py accepts any markdown file — it doesn't validate that the content came from a session:
+`ocd-flush` accepts any markdown file — it doesn't validate that the content came from a session:
 
 ```bash
 cat > /tmp/external-knowledge.md << 'EOF'
@@ -130,10 +144,10 @@ Key findings from the Go concurrency documentation:
 - Channels are the primary synchronization primitive
 EOF
 
-uv --directory .claude run python scripts/flush.py /tmp/external-knowledge.md external-ingest
+ocd-flush /tmp/external-knowledge.md external-ingest
 ```
 
-flush.py sends the content to the LLM, extracts structured knowledge, and appends it to today's daily log.
+Flush sends the content to the LLM, extracts structured knowledge, and appends it to today's daily log.
 
 ### Via URL
 
@@ -141,5 +155,5 @@ There is no automated URL fetching. Fetch web content yourself and route it thro
 
 ```bash
 curl -s https://example.com/docs | pandoc -f html -t markdown > /tmp/fetched.md
-uv --directory .claude run python scripts/flush.py /tmp/fetched.md url-ingest
+ocd-flush /tmp/fetched.md url-ingest
 ```

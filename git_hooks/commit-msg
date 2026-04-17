@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Git commit-msg hook: reject AI attribution in commit messages.
-# Installed by: bash .claude/scripts/setup-hooks.sh
+# Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
@@ -8,9 +8,9 @@ msg_file="$1"
 msg=$(cat "$msg_file")
 
 # Patterns that indicate AI attribution (checked against each line).
-# Single source of truth: .claude/scripts/ai-patterns.txt
+# Single source of truth: git_hooks/ai-patterns.txt
 resolved="$(readlink -f "$0")"
-patterns_file="$(dirname "$resolved")"/../scripts/ai-patterns.txt
+patterns_file="$(dirname "$resolved")"/ai-patterns.txt
 ai_patterns=()
 while IFS= read -r pattern; do
     ai_patterns+=("$pattern")

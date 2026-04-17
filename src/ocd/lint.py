@@ -1,12 +1,11 @@
-"""
-Lint the knowledge base for structural and semantic health.
+"""Lint the knowledge base for structural and semantic health.
 
 Runs 7 checks: broken links, orphan pages, orphan sources, stale articles,
 contradictions (LLM), missing backlinks, and sparse articles.
 
 Usage:
-    uv run python lint.py                    # all checks
-    uv run python lint.py --structural-only  # skip LLM checks (faster, cheaper)
+    ocd-lint-kb                    # all checks
+    ocd-lint-kb --structural-only  # skip LLM checks (faster, cheaper)
 """
 
 from __future__ import annotations
@@ -15,8 +14,8 @@ import argparse
 import asyncio
 from typing import Any
 
-from config import KNOWLEDGE_DIR, PROJECT_ROOT, REPORTS_DIR, now_iso, today_iso
-from utils import (
+from ocd.config import KNOWLEDGE_DIR, PROJECT_ROOT, REPORTS_DIR, now_iso, today_iso
+from ocd.utils import (
     count_inbound_links,
     extract_wikilinks,
     file_hash,

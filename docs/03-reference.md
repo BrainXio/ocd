@@ -66,13 +66,15 @@ model: haiku
 
 ## Claude Code Hooks
 
-| Hook | Trigger | Purpose |
-|------|---------|---------|
-| `session-start.py` | SessionStart | Inject KB index + recent log as context |
-| `pre-compact.py` | PreCompact | Save context before auto-compaction discards it |
-| `session-end.py` | SessionEnd | Capture transcript → spawn flush.py |
-| `lint-work.py --edit` | PostToolUse (Write|Edit) | Lint edited files, report missing linters |
-| `lint-work.py --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
+| Hook | Entry Point | Trigger | Purpose |
+|------|-------------|---------|---------|
+| SessionStart | `ocd-session-start` | SessionStart | Inject KB index + recent log as context |
+| PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
+| SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
+| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write|Edit) | Lint edited files, report missing linters |
+| Lint (commit) | `ocd-lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
+
+All Python hooks are installed as entry points via `pyproject.toml` `[project.scripts]`. Source code lives in `src/ocd/hooks/`.
 
 ### Hook Configuration Schema
 
@@ -83,7 +85,7 @@ Hooks are declared in `.claude/settings.json` under the `hooks` key:
 | `matcher` | yes | Tool event pattern (e.g., `Write|Edit`, `Bash`) |
 | `if` | no | Conditional filter (e.g., `Bash(git commit*)`). Note: `if` is a YAML reserved word — some parsers require quoting |
 | `type` | yes | Currently only `command` |
-| `command` | yes | Shell command to run |
+| `command` | yes | Shell command to run (entry point name) |
 | `timeout` | yes | Maximum execution time in seconds |
 
 ### Hook Stdin JSON
@@ -98,13 +100,13 @@ Hooks receive a JSON object on stdin:
 }
 ```
 
-### hookslib.py API
+### hookslib API
 
 | Function | Purpose |
 |----------|---------|
 | `read_stdin()` | Parse JSON from stdin (includes Windows backslash fix) |
 | `extract_conversation_context(path)` | Read JSONL transcript, extract last 30 turns as markdown, capped at 15,000 chars |
-| `spawn_flush(context_file, session_id)` | Launch flush.py as detached background process |
+| `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
 | `write_context_file(session_id, context, prefix)` | Write context to `.agent/.state/{prefix}-{session_id}-{timestamp}.md` |
 
 ## Git Hooks
@@ -116,7 +118,7 @@ Hooks receive a JSON object on stdin:
 
 ### AI Attribution Patterns
 
-Single source of truth: `.claude/scripts/ai-patterns.txt`
+Single source of truth: `git_hooks/ai-patterns.txt`
 
 | Pattern | Matches |
 |---------|---------|
@@ -124,69 +126,119 @@ Single source of truth: `.claude/scripts/ai-patterns.txt`
 | `^Generated (with\|by\|using)` | "Generated with/by/using" attribution |
 | `^\[AI(-generated)?\]` | `[AI]` or `[AI-generated]` tags |
 
-Git hooks are installed as symlinks: `.git/hooks/<hook>` → `.claude/hooks/<hook>`. Run `bash .claude/scripts/setup-hooks.sh` after cloning.
+Git hooks are installed as symlinks: `.git/hooks/<hook>` → `git_hooks/<hook>`. Run `bash git_hooks/setup-hooks.sh` after cloning.
 
-## Scripts
+## Package Entry Points
 
-| Script | Purpose |
-|--------|---------|
-| `compile.py` | Daily logs → knowledge articles (LLM compiler) |
-| `config.py` | Path constants and shared configuration |
-| `flush.py` | Extract knowledge from session context (background) |
-| `lint.py` | Structural + LLM contradiction checks on knowledge base |
-| `query.py` | Index-guided knowledge base search |
-| `utils.py` | Shared utilities (hashing, parsing, I/O) |
+| Command | Module | Purpose |
+|---------|--------|---------|
+| `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
+| `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
+| `ocd-lint-kb` | `ocd.lint:main` | Structural + LLM contradiction checks on knowledge base |
+| `ocd-query` | `ocd.query:main` | Index-guided knowledge base search |
+| `ocd-session-start` | `ocd.hooks.session_start:main` | Session start context injection |
+| `ocd-session-end` | `ocd.hooks.session_end:main` | Session end transcript capture |
+| `ocd-pre-compact` | `ocd.hooks.pre_compact:main` | Pre-compaction context save |
+| `ocd-lint-work` | `ocd.hooks.lint_work:main` | Real-time file linting on edit/commit |
 
-All scripts live in `.claude/scripts/` and run via `uv --directory .claude run python scripts/<script>`.
+All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
 
 ## CI Pipeline
 
 | Stage | Job | Tool | Trigger |
 |-------|-----|------|---------|
-| 1 (gate) | `check-commit-messages` | grep (reads `ai-patterns.txt`) | push only |
+| 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | push only |
 | 2 (parallel) | `lint-yaml` | yamllint | all |
 | 2 (parallel) | `lint-shell` | shellcheck | all |
 | 2 (parallel) | `lint-markdown` | mdformat | all |
 | 3 (after 1+2) | `lint-python` | ruff + mypy | all |
+| 4 (after 3) | `test-python` | pytest | all |
 
 Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` only. Branch protection on `main` requires passing CI, linear history, and resolved conversations.
 
-## Protected Files
+## Permissions and Sandbox
 
-Deny rules in `.claude/settings.json` block Claude from modifying infrastructure files:
+### Deny Rules
+
+Deny rules in `.claude/settings.json` block Claude from reading secrets or modifying infrastructure files:
+
+**Read deny** (block access to sensitive files):
+
+| Pattern | What it blocks |
+|---------|----------------|
+| `Read(**/.env*)` | Environment variable files |
+| `Read(**/*.pem)` | TLS certificates |
+| `Read(**/*.key)` | Private keys |
+| `Read(**/*.crt)` | Certificate files |
+| `Read(**/secrets/**)` | Secrets directories |
+| `Read(**/credentials/**)` | Credentials directories |
+| `Read(**/.aws/**)` | AWS configuration |
+| `Read(**/.ssh/**)` | SSH keys |
+| `Read(**/.gnupg/**)` | GPG keys |
+| `Read(**/id_rsa*)` | RSA private keys |
+| `Read(**/docker-compose*.yml)` | Docker Compose files |
+| `Read(**/config/database*.yml)` | Database configuration |
+| `Read(~/Library/Keychains/**)` | macOS keychains |
+| `Read(**/private/**)` | Private directories |
+| `Read(~/)` | Home directory access |
+
+**Edit/Write deny** (block modification of infrastructure):
 
 | Surface | Pattern | What it blocks |
 |---------|---------|----------------|
-| `Edit(path)` | Edit tool on matching files | Direct file modifications |
-| `Write(path)` | Write tool on matching files | Full file overwrites |
+| `Edit(path)` / `Write(path)` | Edit and Write tools on matching files | Direct modification or overwrite |
+
+Protected files (project-root-relative paths):
+
+- `src/ocd/hooks/lint_work.py`, `src/ocd/hooks/hookslib.py`, `src/ocd/hooks/pre_compact.py`, `src/ocd/hooks/session_start.py`, `src/ocd/hooks/session_end.py`
+- `src/ocd/config.py`, `src/ocd/compile.py`, `src/ocd/flush.py`, `src/ocd/lint.py`, `src/ocd/query.py`, `src/ocd/utils.py`
+- `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/setup-hooks.sh`
+
+**Bash deny** (block shell deletion of infrastructure):
+
+| Surface | Pattern | What it blocks |
+|---------|---------|----------------|
 | `Bash(rm *:path)` | `rm` commands targeting matching paths | Deletion via shell |
 
-Protected files (paths relative to `.claude/`):
+Bash deny covers the same paths as Edit/Write deny.
 
-- `hooks/commit-msg`, `hooks/hookslib.py`, `hooks/pre-commit`, `hooks/pre-compact.py`, `hooks/session-end.py`, `hooks/session-start.py`
-- `scripts/compile.py`, `scripts/config.py`, `scripts/flush.py`, `scripts/lint.py`, `scripts/query.py`, `scripts/setup-hooks.sh`, `scripts/utils.py`
-- `pyproject.toml`
+### Sandbox
+
+The sandbox restricts Claude's filesystem access at the process level:
+
+```json
+"sandbox": {
+  "enabled": true,
+  "filesystem": {
+    "allowRead": ["."],
+    "denyRead": ["~/"]
+  }
+}
+```
+
+- `allowRead: ["."]` — read access is scoped to the project directory
+- `denyRead: ["~/"]` — the home directory is explicitly denied even within allowed paths
 
 ## Pipeline Constants
 
 | Constant | Value | Where |
 |----------|-------|-------|
-| Max context chars (session start) | 20,000 | `session-start.py` |
-| Max flush turns | 30 | `config.py` |
-| Max flush context chars | 15,000 | `config.py` |
-| Min turns (session end) | 1 | `config.py` |
-| Min turns (pre-compact) | 5 | `config.py` |
-| Flush dedup window | 60 seconds | `flush.py` |
-| Auto-compile trigger time | 18:00+ local | `flush.py` |
+| Max context chars (session start) | 20,000 | `ocd.hooks.session_start` |
+| Max flush turns | 30 | `ocd.config` |
+| Max flush context chars | 15,000 | `ocd.config` |
+| Min turns (session end) | 1 | `ocd.config` |
+| Min turns (pre-compact) | 5 | `ocd.config` |
+| Flush dedup window | 60 seconds | `ocd.flush` |
+| Auto-compile trigger time | 18:00+ local | `ocd.flush` |
 
 ## Pipeline Commands
 
 ```bash
-uv --directory .claude run python scripts/compile.py                 # compile new/changed logs
-uv --directory .claude run python scripts/compile.py --all            # force recompile
-uv --directory .claude run python scripts/compile.py --file <path>  # compile specific log
-uv --directory .claude run python scripts/lint.py                    # full lint (structural + LLM)
-uv --directory .claude run python scripts/lint.py --structural-only  # skip LLM checks
-uv --directory .claude run python scripts/query.py "question"        # query the KB
-uv --directory .claude run python scripts/query.py "q" --file-back   # query + file answer
+ocd-compile                              # compile new/changed logs
+ocd-compile --all                         # force recompile
+ocd-compile --file .agent/daily/<date>.md # compile specific log
+ocd-lint-kb                              # full lint (structural + LLM)
+ocd-lint-kb --structural-only             # skip LLM checks
+ocd-query "question"                     # query the KB
+ocd-query "q" --file-back                # query + file answer
 ```

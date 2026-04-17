@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from config import (
+from ocd.config import (
     CONCEPTS_DIR,
     CONNECTIONS_DIR,
     DAILY_DIR,

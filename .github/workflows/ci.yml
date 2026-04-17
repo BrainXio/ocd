@@ -16,7 +16,7 @@ permissions:
 jobs:
   # ── Stage 1: Gate ───────────────────────────────────────────────────────
   # Fastest check — reject bad commit messages in under a second.
-  # Patterns read from .claude/scripts/ai-patterns.txt (single source of truth)
+  # Patterns read from git_hooks/ai-patterns.txt (single source of truth)
   check-commit-messages:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -39,14 +39,14 @@ jobs:
                   echo "::error::Commit $hash contains prohibited AI attribution: $line"
                   failed=1
                 fi
-              done < .claude/scripts/ai-patterns.txt
+              done < git_hooks/ai-patterns.txt
             done <<< "$msg"
           done < <(git rev-list "$RANGE")
           if [ "$failed" -ne 0 ]; then
             echo ""
             echo "Rejecting push: commit messages contain AI attribution."
             echo "Remove Co-Authored-By lines, 'Generated with/by/using' lines,"
-            echo "or [AI] tags. Patterns: .claude/scripts/ai-patterns.txt"
+            echo "or [AI] tags. Patterns: git_hooks/ai-patterns.txt"
             exit 1
           fi
 
@@ -70,7 +70,7 @@ jobs:
       - name: Install shellcheck
         run: command -v shellcheck || (sudo apt-get update && sudo apt-get install -y shellcheck)
       - name: Run shellcheck
-        run: shellcheck .claude/hooks/pre-commit .claude/hooks/commit-msg .claude/scripts/setup-hooks.sh
+        run: shellcheck git_hooks/commit-msg git_hooks/pre-commit git_hooks/setup-hooks.sh
 
   lint-markdown:
     runs-on: ubuntu-latest
@@ -82,7 +82,7 @@ jobs:
       - name: Install mdformat
         run: pip install "mdformat>=0.7" "mdformat-frontmatter>=2.0.10"
       - name: mdformat --check
-        run: mdformat --check README.md index.md docs/*.md .claude/skills/*/SKILL.md
+        run: mdformat --check README.md docs/*.md .claude/skills/*/SKILL.md
 
   # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
   lint-python:
@@ -90,17 +90,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install linters and dependencies
-        run: pip install "ruff>=0.8" "mypy>=1.13" "claude-agent-sdk>=0.1.29"
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync
       - name: ruff check
-        run: ruff check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/ .claude/tests/
+        run: uv run ruff check src/ocd/ tests/
       - name: ruff format --check
-        run: ruff format --check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/ .claude/tests/
+        run: uv run ruff format --check src/ocd/ tests/
       - name: mypy (strict)
-        run: mypy .claude/hooks/ .claude/scripts/ --strict --config-file=.claude/pyproject.toml
+        run: uv run mypy src/ocd/ --strict
 
   # ── Stage 4: Python tests ──────────────────────────────────────────────
   test-python:
@@ -110,8 +108,6 @@ jobs:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v6
       - name: Install dependencies
-        run: uv --directory .claude sync
-      - name: Install test dependencies
-        run: uv --directory .claude add --dev pytest pytest-asyncio
+        run: uv sync
       - name: Run tests
-        run: uv --directory .claude run pytest -v
+        run: uv run pytest -v

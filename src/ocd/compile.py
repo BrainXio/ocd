@@ -1,14 +1,13 @@
-"""
-Compile daily conversation logs into structured knowledge articles.
+"""Compile daily conversation logs into structured knowledge articles.
 
 This is the "LLM compiler" - it reads daily logs (source code) and produces
 organized knowledge articles (the executable).
 
 Usage:
-    uv run python compile.py                    # compile new/changed logs only
-    uv run python compile.py --all              # force recompile everything
-    uv run python compile.py --file daily/2026-04-01.md  # compile a specific log
-    uv run python compile.py --dry-run          # show what would be compiled
+    ocd-compile                    # compile new/changed logs only
+    ocd-compile --all              # force recompile everything
+    ocd-compile --file daily/2026-04-01.md  # compile a specific log
+    ocd-compile --dry-run          # show what would be compiled
 """
 
 from __future__ import annotations
@@ -19,7 +18,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from config import (
+from ocd.config import (
     AGENT_DIR,
     CONCEPTS_DIR,
     CONNECTIONS_DIR,
@@ -28,7 +27,7 @@ from config import (
     PROJECT_ROOT,
     now_iso,
 )
-from utils import (
+from ocd.utils import (
     file_hash,
     list_raw_files,
     list_wiki_articles,

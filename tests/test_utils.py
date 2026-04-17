@@ -1,9 +1,11 @@
-"""Tests for utils.py — pure functions and filesystem utilities."""
+"""Tests for ocd.utils — pure functions and filesystem utilities."""
 
 import json
 
 import pytest
-import utils
+
+import ocd.config as config
+import ocd.utils as utils
 
 
 class TestSlugify:
@@ -23,7 +25,7 @@ class TestSlugify:
         assert utils.slugify("--hello--") == "hello"
 
     def test_unicode_handled(self):
-        result = utils.slugify("café mole")
+        result = utils.slugify("cafe mole")
         assert isinstance(result, str)
         assert len(result) > 0
 
@@ -83,8 +85,6 @@ class TestLoadState:
         assert "ingested" in state
 
     def test_corrupt_json_raises(self, mock_config_paths):
-        import config
-
         config.STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
         config.STATE_FILE.write_text("{invalid json")
         with pytest.raises(json.JSONDecodeError):
@@ -94,8 +94,6 @@ class TestLoadState:
 class TestSaveState:
     def test_creates_parent_directory(self, mock_config_paths):
         utils.save_state({"test": True})
-        import config
-
         assert config.STATE_FILE.exists()
 
     def test_writes_valid_json(self, mock_config_paths):
@@ -147,8 +145,6 @@ class TestReadWikiIndex:
         assert "Knowledge Base Index" in result
 
     def test_returns_default_when_file_missing(self, tmp_path, monkeypatch):
-        import config
-
         knowledge = tmp_path / "k"
         knowledge.mkdir()
         monkeypatch.setattr(config, "KNOWLEDGE_DIR", knowledge)

@@ -1,12 +1,11 @@
-"""
-Memory flush agent - extracts important knowledge from conversation context.
+"""Memory flush agent - extracts important knowledge from conversation context.
 
 Spawned by session-end.py or pre-compact.py as a background process. Reads
 pre-extracted conversation context from a .md file, uses the Claude Agent SDK
 to decide what's worth saving, and appends the result to today's daily log.
 
 Usage:
-    uv run python flush.py <context_file.md> <session_id>
+    ocd-flush <context_file.md> <session_id>
 """
 
 from __future__ import annotations
@@ -21,19 +20,18 @@ os.environ["CLAUDE_INVOKED_BY"] = "memory_flush"
 import asyncio
 import json
 import logging
+import subprocess
 import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from config import (
-    CLAUDE_DIR,
+from ocd.config import (
     DAILY_DIR,
     FLUSH_LOG_FILE,
     FLUSH_STATE_FILE,
     PROJECT_ROOT,
-    SCRIPTS_DIR,
     STATE_DIR,
 )
 
@@ -155,9 +153,7 @@ COMPILE_AFTER_HOUR = 18  # 6 PM local time
 
 
 def maybe_trigger_compilation() -> None:
-    """If it's past the compile hour and today's log hasn't been compiled, run compile.py."""
-    import subprocess as _sp
-
+    """If it's past the compile hour and today's log hasn't been compiled, run compile."""
     now = datetime.now(UTC).astimezone()
     if now.hour < COMPILE_AFTER_HOUR:
         return
@@ -181,32 +177,21 @@ def maybe_trigger_compilation() -> None:
         except (json.JSONDecodeError, OSError):
             pass
 
-    compile_script = SCRIPTS_DIR / "compile.py"
-    if not compile_script.exists():
-        return
-
     logging.info("End-of-day compilation triggered (after %d:00)", COMPILE_AFTER_HOUR)
 
-    cmd = [
-        "uv",
-        "--directory",
-        str(CLAUDE_DIR),
-        "run",
-        "python",
-        str(compile_script),
-    ]
+    cmd = [sys.executable, "-m", "ocd.compile"]
 
     kwargs: dict[str, Any] = {}
     if sys.platform == "win32":
-        kwargs["creationflags"] = _sp.CREATE_NEW_PROCESS_GROUP | _sp.DETACHED_PROCESS  # type: ignore[attr-defined]
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS  # type: ignore[attr-defined]
     else:
         kwargs["start_new_session"] = True
 
     try:
         with open(str(STATE_DIR / "compile.log"), "a") as log_handle:
-            _sp.Popen(cmd, stdout=log_handle, stderr=_sp.STDOUT, **kwargs)
+            subprocess.Popen(cmd, stdout=log_handle, stderr=subprocess.STDOUT, **kwargs)
     except Exception as e:
-        logging.error("Failed to spawn compile.py: %s", e)
+        logging.error("Failed to spawn compile: %s", e)
 
 
 def main() -> None:
@@ -217,7 +202,7 @@ def main() -> None:
     context_file = Path(sys.argv[1])
     session_id = sys.argv[2]
 
-    logging.info("flush.py started for session %s, context: %s", session_id, context_file)
+    logging.info("flush started for session %s, context: %s", session_id, context_file)
 
     if not context_file.exists():
         logging.error("Context file not found: %s", context_file)
@@ -260,7 +245,7 @@ def main() -> None:
     context_file.unlink(missing_ok=True)
 
     # End-of-day auto-compilation: if it's past the compile hour and today's
-    # log hasn't been compiled yet, trigger compile.py in the background.
+    # log hasn't been compiled yet, trigger compile in the background.
     maybe_trigger_compilation()
 
     logging.info("Flush complete for session %s", session_id)

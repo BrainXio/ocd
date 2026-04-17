@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/.venv/bin/python .claude/hooks/session-start.py",
+            "command": "ocd-session-start",
             "timeout": 15
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/.venv/bin/python .claude/hooks/pre-compact.py",
+            "command": "ocd-pre-compact",
             "timeout": 10
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/.venv/bin/python .claude/hooks/session-end.py",
+            "command": "ocd-session-end",
             "timeout": 10
           }
         ]
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/.venv/bin/python .claude/hooks/lint-work.py --edit",
+            "command": "ocd-lint-work --edit",
             "timeout": 10
           }
         ]
@@ -55,7 +55,7 @@
           {
             "type": "command",
             "if": "Bash(git commit*)",
-            "command": ".claude/.venv/bin/python .claude/hooks/lint-work.py --commit",
+            "command": "ocd-lint-work --commit",
             "timeout": 30
           }
         ]
@@ -64,37 +64,61 @@
   },
   "permissions": {
     "deny": [
-      "Edit(.claude/hooks/commit-msg)",
-      "Edit(.claude/hooks/hookslib.py)",
-      "Edit(.claude/hooks/pre-commit)",
-      "Edit(.claude/hooks/pre-compact.py)",
-      "Edit(.claude/hooks/session-end.py)",
-      "Edit(.claude/hooks/session-start.py)",
-      "Edit(.claude/scripts/compile.py)",
-      "Edit(.claude/scripts/setup-hooks.sh)",
-      "Edit(.claude/scripts/config.py)",
-      "Edit(.claude/scripts/flush.py)",
-      "Edit(.claude/scripts/lint.py)",
-      "Edit(.claude/scripts/query.py)",
-      "Edit(.claude/scripts/utils.py)",
-      "Edit(.claude/pyproject.toml)",
-      "Write(.claude/hooks/commit-msg)",
-      "Write(.claude/hooks/hookslib.py)",
-      "Write(.claude/hooks/pre-commit)",
-      "Write(.claude/hooks/pre-compact.py)",
-      "Write(.claude/hooks/session-end.py)",
-      "Write(.claude/hooks/session-start.py)",
-      "Write(.claude/scripts/compile.py)",
-      "Write(.claude/scripts/setup-hooks.sh)",
-      "Write(.claude/scripts/config.py)",
-      "Write(.claude/scripts/flush.py)",
-      "Write(.claude/scripts/lint.py)",
-      "Write(.claude/scripts/query.py)",
-      "Write(.claude/scripts/utils.py)",
-      "Write(.claude/pyproject.toml)",
-      "Bash(rm *:.claude/hooks/*)",
-      "Bash(rm *:.claude/scripts/*)",
-      "Bash(rm *:.claude/pyproject.toml)"
+      "Read(**/.env*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.crt)",
+      "Read(**/secrets/**)",
+      "Read(**/credentials/**)",
+      "Read(**/.aws/**)",
+      "Read(**/.ssh/**)",
+      "Read(**/.gnupg/**)",
+      "Read(**/id_rsa*)",
+      "Read(**/docker-compose*.yml)",
+      "Read(**/config/database*.yml)",
+      "Read(~/Library/Keychains/**)",
+      "Read(**/private/**)",
+      "Edit(src/ocd/hooks/lint_work.py)",
+      "Edit(src/ocd/hooks/hookslib.py)",
+      "Edit(src/ocd/hooks/pre_compact.py)",
+      "Edit(src/ocd/hooks/session_start.py)",
+      "Edit(src/ocd/hooks/session_end.py)",
+      "Edit(src/ocd/config.py)",
+      "Edit(src/ocd/compile.py)",
+      "Edit(src/ocd/flush.py)",
+      "Edit(src/ocd/lint.py)",
+      "Edit(src/ocd/query.py)",
+      "Edit(src/ocd/utils.py)",
+      "Edit(git_hooks/commit-msg)",
+      "Edit(git_hooks/pre-commit)",
+      "Edit(git_hooks/setup-hooks.sh)",
+      "Write(src/ocd/hooks/lint_work.py)",
+      "Write(src/ocd/hooks/hookslib.py)",
+      "Write(src/ocd/hooks/pre_compact.py)",
+      "Write(src/ocd/hooks/session_start.py)",
+      "Write(src/ocd/hooks/session_end.py)",
+      "Write(src/ocd/config.py)",
+      "Write(src/ocd/compile.py)",
+      "Write(src/ocd/flush.py)",
+      "Write(src/ocd/lint.py)",
+      "Write(src/ocd/query.py)",
+      "Write(src/ocd/utils.py)",
+      "Write(git_hooks/commit-msg)",
+      "Write(git_hooks/pre-commit)",
+      "Write(git_hooks/setup-hooks.sh)",
+      "Bash(rm *:src/ocd/*)",
+      "Bash(rm *:git_hooks/*)"
     ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowRead": [
+        "."
+      ],
+      "denyRead": [
+        "~/"
+      ]
+    }
   }
 }

@@ -30,7 +30,7 @@ Skills follow the existing pattern in `.claude/skills/<name>/SKILL.md` with mand
 | `trivy` | Container image and dependency vulnerability scanning in CI | Pending tool evaluation |
 | `hadolint` | Dockerfile linting commit gate for the `docker` skill | Pending tool evaluation |
 
-New linters will be added to `.claude/pyproject.toml`, the CI pipeline (`.github/workflows/ci.yml`), and the `lint-work.py` hook once available and configured.
+New linters will be added to `pyproject.toml`, the CI pipeline (`.github/workflows/ci.yml`), and the `ocd-lint-work` hook registry once available and configured.
 
 ## New Container Images
 
@@ -69,9 +69,9 @@ These role-aligned agents complement the existing task-driven agents (dead-code-
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| `pytest` infrastructure for `.claude/hooks/` and `.claude/scripts/` | Prevent broken hooks and scripts from reaching main | Done |
+| `pytest` infrastructure for `src/ocd/` and `tests/` | Prevent broken hooks and scripts from reaching main | Done |
 | `pre-push` hook | Run test suite before push (complements pre-commit's lint gate) | Planned |
-| `pytest` as commit gate | Require passing tests before merge, tracked in CI | Planned |
+| `pytest` as commit gate | Require passing tests before merge, tracked in CI | Done |
 
 ## IDE and Devcontainer
 
@@ -129,6 +129,6 @@ The current 8 agents are **task-driven** — each does one focused job (dead-cod
 
 To add an item from this list:
 
-1. Create the skill/agent/linter following existing patterns in [how-to](02-how-to.md) or [reference](03-reference.md)
-1. Update this file to change the status from `Planned`/`Pending` to `Done`
-1. Once all items in a category are done, remove that section
+- Create the skill/agent/linter following existing patterns in [how-to](02-how-to.md) or [reference](03-reference.md)
+- Update this file to change the status from `Planned`/`Pending` to `Done`
+- Once all items in a category are done, remove that section

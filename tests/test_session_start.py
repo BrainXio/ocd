@@ -1,24 +1,10 @@
-"""Tests for session-start.py — context injection hook."""
+"""Tests for session_start — context injection hook."""
 
-import importlib
 import json
-import os
-from pathlib import Path
 
 import pytest
 
-# Clear recursion guard before import
-os.environ.pop("CLAUDE_INVOKED_BY", None)
-
-# session-start.py uses a hyphenated filename — import via importlib
-_spec = importlib.util.spec_from_file_location(
-    "session_start",
-    str(Path(__file__).resolve().parent.parent / "hooks" / "session-start.py"),
-)
-assert _spec is not None, "Could not find session-start.py"
-session_start = importlib.util.module_from_spec(_spec)
-assert _spec.loader is not None, "Module spec has no loader"
-_spec.loader.exec_module(session_start)  # type: ignore[union-attr]
+from ocd.hooks import session_start
 
 
 @pytest.fixture

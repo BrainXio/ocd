@@ -1,13 +1,12 @@
-"""
-Query the knowledge base using index-guided retrieval (no RAG).
+"""Query the knowledge base using index-guided retrieval (no RAG).
 
 The LLM reads the index, picks relevant articles, and synthesizes an answer.
 No vector database, no embeddings, no chunking - just structured markdown
 and an index the LLM can reason over.
 
 Usage:
-    uv run python query.py "How should I handle auth redirects?"
-    uv run python query.py "What patterns do I use for API design?" --file-back
+    ocd-query "How should I handle auth redirects?"
+    ocd-query "What patterns do I use for API design?" --file-back
 """
 
 from __future__ import annotations
@@ -15,8 +14,8 @@ from __future__ import annotations
 import argparse
 import asyncio
 
-from config import KNOWLEDGE_DIR, PROJECT_ROOT, QA_DIR, now_iso
-from utils import load_state, read_all_wiki_content, save_state
+from ocd.config import KNOWLEDGE_DIR, PROJECT_ROOT, QA_DIR, now_iso
+from ocd.utils import load_state, read_all_wiki_content, save_state
 
 
 async def run_query(question: str, file_back: bool = False) -> str:

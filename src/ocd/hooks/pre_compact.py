@@ -1,9 +1,9 @@
-"""
-SessionEnd hook - captures conversation transcript for memory extraction.
+"""PreCompact hook - captures conversation transcript before auto-compaction.
 
-When a Claude Code session ends, this hook reads the transcript path from
-stdin, extracts conversation context, and spawns flush.py as a background
-process to extract knowledge into the daily log.
+When Claude Code's context window fills up, it auto-compacts (summarizes and
+discards detail). This hook fires BEFORE that happens, extracting conversation
+context and spawning flush to extract knowledge that would otherwise
+be lost to summarization.
 
 The hook itself does NO API calls - only local file I/O for speed (<10s).
 """
@@ -12,48 +12,44 @@ from __future__ import annotations
 
 import logging
 import os
-import sys
+from pathlib import Path
 
-from hookslib import (
-    MIN_TURNS_SESSION_END,
+from ocd.config import FLUSH_LOG_FILE, STATE_DIR
+from ocd.hooks.hookslib import (
+    MIN_TURNS_PRE_COMPACT,
     extract_conversation_context,
     read_stdin,
     spawn_flush,
     write_context_file,
 )
 
-# Recursion guard: if we were spawned by flush.py (which calls Agent SDK,
-# which runs Claude Code, which would fire this hook again), exit immediately.
-if os.environ.get("CLAUDE_INVOKED_BY"):
-    sys.exit(0)
-
-# Set up file-based logging so we can verify the background process ran.
-from config import FLUSH_LOG_FILE, STATE_DIR
+# Set up file-based logging
 
 STATE_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     filename=str(FLUSH_LOG_FILE),
     level=logging.INFO,
-    format="%(asctime)s %(levelname)s [hook] %(message)s",
+    format="%(asctime)s %(levelname)s [pre-compact] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 
 def main() -> None:
+    # Recursion guard: if spawned by flush (which calls Agent SDK → Claude Code → hooks)
+    if os.environ.get("CLAUDE_INVOKED_BY"):
+        return
+
     hook_input = read_stdin()
 
     session_id = hook_input.get("session_id", "unknown")
-    source = hook_input.get("source", "unknown")
     transcript_path_str = hook_input.get("transcript_path", "")
 
-    logging.info("SessionEnd fired: session=%s source=%s", session_id, source)
+    logging.info("PreCompact fired: session=%s", session_id)
 
     if not transcript_path_str or not isinstance(transcript_path_str, str):
         logging.info("SKIP: no transcript path")
         return
-
-    from pathlib import Path
 
     transcript_path = Path(transcript_path_str)
     if not transcript_path.exists():
@@ -70,14 +66,14 @@ def main() -> None:
         logging.info("SKIP: empty context")
         return
 
-    if turn_count < MIN_TURNS_SESSION_END:
-        logging.info("SKIP: only %d turns (min %d)", turn_count, MIN_TURNS_SESSION_END)
+    if turn_count < MIN_TURNS_PRE_COMPACT:
+        logging.info("SKIP: only %d turns (min %d)", turn_count, MIN_TURNS_PRE_COMPACT)
         return
 
-    context_file = write_context_file(session_id, context, prefix="session-flush")
+    context_file = write_context_file(session_id, context, prefix="flush-context")
     spawn_flush(context_file, session_id)
     logging.info(
-        "Spawned flush.py for session %s (%d turns, %d chars)",
+        "Spawned flush for session %s (%d turns, %d chars)",
         session_id,
         turn_count,
         len(context),

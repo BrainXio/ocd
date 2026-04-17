@@ -12,12 +12,32 @@ Why things are the way they are. This is not a guide for what to do — see [how
 
 O.C.D. has four layers of augmentation:
 
-1. **Context injection** — At session start, you receive the KB index and recent daily log. You do not start from nothing.
-1. **Enforcement** — Hooks lint edits and commits in real time. Skills define what "correct" means per language. Git hooks block violations before they enter history.
-1. **Persistence** — The knowledge pipeline captures insights at session end and before compaction, compiles them into articles, and feeds them back at the next session start.
-1. **Delegation** — Subagents handle bounded analysis tasks (dead code hunting, dependency auditing, lint checking) so you can focus on design and synthesis.
+- **Context injection** — At session start, you receive the KB index and recent daily log. You do not start from nothing.
+- **Enforcement** — Hooks lint edits and commits in real time. Skills define what "correct" means per language. Git hooks block violations before they enter history.
+- **Persistence** — The knowledge pipeline captures insights at session end and before compaction, compiles them into articles, and feeds them back at the next session start.
+- **Delegation** — Subagents handle bounded analysis tasks (dead code hunting, dependency auditing, lint checking) so you can focus on design and synthesis.
 
 These layers are independent and reinforce each other. Context injection makes enforcement smarter (you know the standards). Persistence makes context richer (previous sessions feed future ones). Delegation keeps enforcement scalable (agents run checks you'd forget to run). For the AI-facing perspective on these layers, see [usage](06-usage.md).
+
+## Directory Layout
+
+The project has four distinct areas:
+
+```
+(root)              Project source, tests, docs, pyproject.toml, .git
+src/ocd/            Installable Python package (hooks, scripts, config, utils)
+git_hooks/          Shell git hooks (commit-msg, pre-commit) + setup script
+.agent/             Data — daily logs, knowledge base, state (git-ignored)
+.claude/            LLM-Processor config — settings.json, skills/, agents/
+```
+
+- **Project root** — The code being developed. `pyproject.toml`, `src/ocd/`, `tests/`, and `docs/` live here.
+- **`src/ocd/`** — The installable Python package. Entry points (`ocd-compile`, `ocd-flush`, etc.) are defined in `pyproject.toml` and installed by `uv sync`. This replaces the old pattern of running scripts with `uv --directory .claude run python scripts/...`.
+- **`git_hooks/`** — Bash git hooks and their setup script. Symlinks from `.git/hooks/` point here, not to `.claude/hooks/`.
+- **`.agent/`** — Conversation data and compiled knowledge. Isolated from git via `.gitignore`. Each instance has its own `.agent/` data.
+- **`.claude/`** — Claude Code configuration only: `settings.json` (hooks, permissions), `skills/` (language standards), `agents/` (subagent definitions). No Python code lives here.
+
+This separation means you can share the project and source code without exposing conversation data, and you can reset `.agent/` without losing the automation infrastructure.
 
 ## The Eight Standards
 
@@ -30,13 +50,22 @@ These layers are independent and reinforce each other. Context injection makes e
 | No Dead Code | Every line must earn its existence | The `dead-code-hunter` agent finds unused functions, variables, and configs |
 | Progressive Simplification | Start strict, relax only when justified | Skills begin with hard prohibitions; exemptions require explicit justification |
 | Single Source of Truth | Each fact lives in exactly one place | AI patterns in `ai-patterns.txt` (shared by hook + CI); config in `pyproject.toml` |
-| Structural Honesty | The structure reflects the reality, not a facade | Root is the project, `.agent/` is data, `.claude/` is the LLM-processor |
+| Structural Honesty | The structure reflects the reality, not a facade | Root is the project, `.agent/` is data, `src/ocd/` is automation, `.claude/` is config |
+
+## Why an Installable Package
+
+The original structure embedded Python code in `.claude/scripts/` and `.claude/hooks/`, requiring `sys.path` hacks, `importlib` for hyphenated filenames, and `uv --directory .claude run` for every invocation. The installable package layout (`src/ocd/`) solves these problems:
+
+- **Entry points** — `ocd-compile`, `ocd-flush`, `ocd-lint-kb`, `ocd-query`, and hook commands are installed as shell commands by `uv sync`. No path manipulation needed.
+- **Clean imports** — `from ocd.config import ...` instead of `sys.path.insert(0, ...)`. No `importlib` hacks.
+- **Consistent invocation** — Hooks in `settings.json` use `ocd-session-start` instead of `.claude/.venv/bin/python .claude/hooks/session-start.py`.
+- **Standard tooling** — `ruff`, `mypy`, `pytest` all work from project root with no `--config-file` or `--directory` flags.
 
 ## Why Symlinks Not core.hooksPath
 
 Git's `core.hooksPath` redirects all hook lookups to a single directory. This would expose Claude Code's Python hooks (which expect Claude-specific JSON on stdin) to git, causing cryptic failures when git runs them as regular shell scripts.
 
-Symlinks provide selective exposure — only the bash hooks (`pre-commit`, `commit-msg`) are installed into `.git/hooks/`, while Python hooks remain in `.claude/hooks/` where they're invoked exclusively by the settings.json hook system. Each hook type runs in the environment it was designed for.
+Symlinks provide selective exposure — only the bash hooks (`pre-commit`, `commit-msg`) are installed into `.git/hooks/`, while Python hooks are invoked via installed entry points (`ocd-session-start`, `ocd-lint-work`, etc.) in the settings.json hook system. Each hook type runs in the environment it was designed for.
 
 ## Why Deny Rules and Protected Files
 
@@ -48,26 +77,16 @@ Deny rules in `settings.json` block three attack surfaces: direct edits (`Edit`)
 
 The `commit-msg` hook and CI `check-commit-messages` job reject AI-generated attribution patterns in commit messages. This is not about hiding AI involvement — it is about keeping the git log as a clean record of intent and change, not a billboard for tooling. Attribution lines add noise, drift as tools change, and provide no actionable information to a reader trying to understand why a change was made.
 
-The patterns are the single source of truth in `.claude/scripts/ai-patterns.txt`, shared between the local hook and CI. Add a pattern once, it takes effect everywhere.
+The patterns are the single source of truth in `git_hooks/ai-patterns.txt`, shared between the local hook and CI. Add a pattern once, it takes effect everywhere.
 
 ## The Feedback Loop
 
 The system is designed to improve itself:
 
-1. Work in a session — hooks enforce standards in real time
-1. Session ends — transcript is captured and knowledge is extracted
-1. Knowledge is compiled into articles and fed back at the next session start
-1. New sessions are smarter — they have the context of every previous session
-1. Gaps in the system (missing skills, needed agents, uncaught patterns) are recorded in [planning](05-planning.md) and filled
+- Work in a session — hooks enforce standards in real time
+- Session ends — transcript is captured and knowledge is extracted
+- Knowledge is compiled into articles and fed back at the next session start
+- New sessions are smarter — they have the context of every previous session
+- Gaps in the system (missing skills, needed agents, uncaught patterns) are recorded in [planning](05-planning.md) and filled
 
 This loop means the project accumulates institutional memory. Decisions, lessons, and rationale are not lost at session end — they become part of the context for every future session.
-
-## Data Isolation
-
-The project has three layers with distinct purposes:
-
-- **Project** (root) — The code being developed. In a real project this contains the application source, tests, and documentation. In O.C.D.'s own repo it is self-referential — the "code being developed" is O.C.D. itself.
-- `.agent/` — Data (daily logs, knowledge base, state). Isolated from git via a nested `.gitignore`. Conversation data and compiled knowledge stay local to each instance.
-- `.claude/` — LLM-Processor (scripts, hooks, skills, venv, `pyproject.toml`). Version-controlled. The automation layer that processes the data.
-
-This separation means you can share the project and LLM-processor code without exposing conversation data, and you can reset the `.agent/` data without losing the automation infrastructure.

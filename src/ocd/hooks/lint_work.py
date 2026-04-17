@@ -19,21 +19,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Recursion guard
-if os.environ.get("CLAUDE_INVOKED_BY"):
-    sys.exit(0)
-
-# Reuse path constants from config.py
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
-sys.path.insert(0, str(_SCRIPTS_DIR))
-
-# isort: off
-from config import PROJECT_ROOT, VENV_PYTHON  # noqa: E402
-from hookslib import read_stdin  # noqa: E402
-# isort: on
-
-# Venv bin directory — prefer linters installed here over system PATH
-VENV_BIN = VENV_PYTHON.parent
+from ocd.config import PROJECT_ROOT, VENV_BIN
+from ocd.hooks.hookslib import read_stdin
 
 # ── Linter registry ──────────────────────────────────────────────────
 # (extensions, command_template, config_files | None, is_blocking, timeout, scope,
@@ -53,7 +40,7 @@ LINTERS: list[tuple[Any, ...]] = [
     (("py",), "ruff check {file}", None, True, 8, "file", "pip:ruff"),
     (
         ("py",),
-        "mypy --config-file=.claude/pyproject.toml {file}",
+        "mypy {file}",
         None,
         True,
         10,
@@ -189,7 +176,7 @@ def _format_install_hint(entry: tuple[Any, ...]) -> str:
     binary = entry[1].split()[0]
     hint = entry[6] if len(entry) > 6 else ""
     if hint.startswith("pip:"):
-        return f"`uv --directory .claude add {hint[4:]}`"
+        return f"`uv add {hint[4:]}`"
     if hint.startswith(("apt:", "brew:", "npm:", "gem:", "composer:", "dotnet:")):
         manager = hint.split(":")[0]
         package = hint.split(":", 1)[1]
@@ -223,13 +210,6 @@ def run_linter(entry: tuple[Any, ...], file_path: str) -> tuple[bool, str]:
     venv_bin_str = str(VENV_BIN)
     if venv_bin_str not in existing_path:
         env["PATH"] = f"{venv_bin_str}:{existing_path}"
-
-    # Ensure mypy can find local modules (config, utils, hookslib)
-    scripts_dir = str(_SCRIPTS_DIR)
-    if "MYPYPATH" not in env:
-        env["MYPYPATH"] = scripts_dir
-    elif scripts_dir not in env["MYPYPATH"]:
-        env["MYPYPATH"] = f"{scripts_dir}{os.pathsep}{env['MYPYPATH']}"
 
     try:
         result = subprocess.run(
@@ -443,6 +423,10 @@ def commit_mode() -> None:
 
 
 def main() -> None:
+    # Recursion guard: if spawned by flush (which calls Agent SDK → Claude Code → hooks)
+    if os.environ.get("CLAUDE_INVOKED_BY"):
+        return
+
     if "--edit" in sys.argv:
         edit_mode()
     elif "--commit" in sys.argv:
