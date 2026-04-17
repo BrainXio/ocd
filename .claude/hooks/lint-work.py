@@ -51,7 +51,15 @@ LINTERS: list[tuple[Any, ...]] = [
     (("md",), "mdformat --check {file}", None, True, 5, "file", "pip:mdformat"),
     # Python
     (("py",), "ruff check {file}", None, True, 8, "file", "pip:ruff"),
-    (("py",), "mypy {file}", None, True, 10, "file", "pip:mypy"),
+    (
+        ("py",),
+        "mypy --config-file=.claude/pyproject.toml {file}",
+        None,
+        True,
+        10,
+        "file",
+        "pip:mypy",
+    ),
     # Shell
     (
         ("sh", "bash"),

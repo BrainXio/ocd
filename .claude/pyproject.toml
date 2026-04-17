@@ -12,6 +12,14 @@ dependencies = [
     "yamllint>=1.35",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts", "hooks"]
+asyncio_mode = "auto"
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
@@ -21,7 +29,18 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
 
 [tool.mypy]
 strict = true
+exclude = ["tests/"]
 
 [[tool.mypy.overrides]]
-module = ["config", "hookslib", "utils"]
+module = ["config", "hookslib", "utils", "flush", "lint_work", "session_start"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disable_error_code = ["no-untyped-def", "no-any-return", "unused-ignore"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.3.0",
+]

@@ -96,8 +96,22 @@ jobs:
       - name: Install linters and dependencies
         run: pip install "ruff>=0.8" "mypy>=1.13" "claude-agent-sdk>=0.1.29"
       - name: ruff check
-        run: ruff check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/
+        run: ruff check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/ .claude/tests/
       - name: ruff format --check
-        run: ruff format --check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/
+        run: ruff format --check --config .claude/pyproject.toml .claude/hooks/ .claude/scripts/ .claude/tests/
       - name: mypy (strict)
         run: mypy .claude/hooks/ .claude/scripts/ --strict --config-file=.claude/pyproject.toml
+
+  # ── Stage 4: Python tests ──────────────────────────────────────────────
+  test-python:
+    needs: [lint-python]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv --directory .claude sync
+      - name: Install test dependencies
+        run: uv --directory .claude add --dev pytest pytest-asyncio
+      - name: Run tests
+        run: uv --directory .claude run pytest -v

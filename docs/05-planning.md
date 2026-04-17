@@ -69,7 +69,7 @@ These role-aligned agents complement the existing task-driven agents (dead-code-
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| `pytest` infrastructure for `.claude/hooks/` and `.claude/scripts/` | Prevent broken hooks and scripts from reaching main | Planned |
+| `pytest` infrastructure for `.claude/hooks/` and `.claude/scripts/` | Prevent broken hooks and scripts from reaching main | Done |
 | `pre-push` hook | Run test suite before push (complements pre-commit's lint gate) | Planned |
 | `pytest` as commit gate | Require passing tests before merge, tracked in CI | Planned |
 
