@@ -89,6 +89,7 @@
       "Edit(src/ocd/lint.py)",
       "Edit(src/ocd/query.py)",
       "Edit(src/ocd/utils.py)",
+      "Edit(.gitleaks.toml)",
       "Edit(git_hooks/commit-msg)",
       "Edit(git_hooks/pre-commit)",
       "Edit(git_hooks/setup-hooks.sh)",
@@ -103,11 +104,13 @@
       "Write(src/ocd/lint.py)",
       "Write(src/ocd/query.py)",
       "Write(src/ocd/utils.py)",
+      "Write(.gitleaks.toml)",
       "Write(git_hooks/commit-msg)",
       "Write(git_hooks/pre-commit)",
       "Write(git_hooks/setup-hooks.sh)",
       "Bash(rm *:src/ocd/*)",
-      "Bash(rm *:git_hooks/*)"
+      "Bash(rm *:git_hooks/*)",
+      "Bash(rm *:.gitleaks.toml)"
     ]
   },
   "sandbox": {

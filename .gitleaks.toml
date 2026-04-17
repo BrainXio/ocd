@@ -1,0 +1,14 @@
+# Gitleaks configuration — single source of truth for local hook and CI.
+# See: https://github.com/gitleaks/gitleaks
+
+title = "OCD Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Example environment files and test fixtures with mock credentials"
+paths = [
+    '''\.env\.example$''',
+    '''tests/''',
+]

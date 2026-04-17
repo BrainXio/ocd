@@ -84,9 +84,24 @@ jobs:
       - name: mdformat --check
         run: mdformat --check README.md docs/*.md .claude/skills/*/SKILL.md
 
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          GITLEAKS_VERSION="8.24.3"
+          URL="https://github.com/gitleaks/gitleaks/releases/download"
+          URL="${URL}/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sL "$URL" | sudo tar xz -C /usr/local/bin gitleaks
+      - name: gitleaks detect
+        run: gitleaks detect --source . -c .gitleaks.toml
+
   # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
   lint-python:
-    needs: [lint-shell, lint-markdown, lint-yaml]
+    needs: [lint-shell, lint-markdown, lint-yaml, secret-scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

@@ -1,14 +1,31 @@
 #!/usr/bin/env bash
-# Git pre-commit hook: prevent commits on main branch.
+# Git pre-commit hook: prevent commits on main branch and scan for secrets.
 # Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
+# --- Branch protection ---
 branch=$(git symbolic-ref --short HEAD 2>/dev/null)
 if [ "$branch" = "main" ]; then
     echo "error: commits on main are prohibited. Create a feature branch first:" >&2
     echo "  git checkout -b feat/<description>" >&2
     exit 1
+fi
+
+# --- Secret scanning (gitleaks) ---
+resolved="$(readlink -f "$0")"
+hooks_dir="$(dirname "$resolved")"
+project_root="$(dirname "$hooks_dir")"
+
+if command -v gitleaks >/dev/null 2>&1; then
+    if ! gitleaks protect --staged -c "$project_root/.gitleaks.toml"; then
+        echo "error: gitleaks detected potential secrets in staged changes" >&2
+        echo "  If this is a false positive, add an allowlist entry to .gitleaks.toml" >&2
+        exit 1
+    fi
+else
+    echo "warning: gitleaks not installed, skipping secret scanning" >&2
+    echo "  Install: https://github.com/gitleaks/gitleaks#installing" >&2
 fi
 
 exit 0
