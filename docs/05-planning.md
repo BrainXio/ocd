@@ -12,8 +12,7 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 
 | Linter | Purpose | Status |
 |--------|---------|--------|
-| `actionlint` | GitHub Actions workflow linting for the `github` skill | Pending tool evaluation |
-| `sqlfluff` | SQL linting for the `sql` skill | Pending tool evaluation |
+| `sqlfluff` | SQL linting CI job for the `sql` skill | Pending tool evaluation |
 | `trivy` | Container image and dependency vulnerability scanning in CI | Pending tool evaluation |
 | `hadolint` | Dockerfile linting commit gate for the `docker` skill | Pending tool evaluation |
 
@@ -33,13 +32,13 @@ Images follow a layered architecture: hardened base → language toolchains → 
 
 | Agent | Model | Tools | Purpose | Status |
 |-------|-------|-------|---------|--------|
-| `frontend-dev` | haiku | Glob, Grep, Read | Frontend code review: HTML semantics, CSS architecture, accessibility, responsive patterns | Planned |
-| `backend-dev` | haiku | Glob, Grep, Read, Bash | Backend code review: API design, database queries, error handling, security patterns | Planned |
-| `devops-engineer` | haiku | Glob, Grep, Read, Bash | Infrastructure review: Dockerfile best practices, CI/CD pipeline health, deployment safety | Planned |
-| `security-auditor` | haiku | Glob, Grep, Read, Bash | Security review: secret scanning, dependency vulnerabilities, input validation, OWASP patterns | Planned |
+| `accessibility-auditor` | haiku | Glob, Grep, Read | A11y review: semantic HTML, ARIA attributes, keyboard navigation, screen reader compatibility | Planned |
+| `api-contract-auditor` | haiku | Glob, Grep, Read | API review: REST conventions, error response consistency, endpoint naming | Planned |
+| `dockerfile-auditor` | haiku | Glob, Grep, Read, Bash | Docker review: layer ordering, security best practices, multi-stage builds, pinned digests | Planned |
+| `owasp-scanner` | haiku | Glob, Grep, Read | Security review: OWASP Top 10 patterns (XSS, injection, CSRF, insecure deserialization) | Planned |
 | `test-writer` | haiku | Glob, Grep, Read, Bash | Test generation: identify uncovered code, generate test cases, enforce coverage gates | Planned |
 
-These role-aligned agents complement the existing task-driven agents (dead-code-hunter, exception-auditor, etc.) by providing domain-specific reviews that mirror traditional team responsibilities. See Open Design Decisions below for the investigation into how role-based and task-driven agents should coexist.
+All agents follow the task-driven model: single concern, composable, testable. See Resolved Decisions below for the rationale.
 
 ## Security
 
@@ -71,32 +70,13 @@ These role-aligned agents complement the existing task-driven agents (dead-code-
 | KB export/sync | Share compiled knowledge between instances | Planned |
 | Multi-project KB | Apply O.C.D. to another project without starting `.agent/` from scratch | Planned |
 
-## Open Design Decisions
+## Resolved Decisions
 
-Unresolved architectural questions. Each should be investigated before committing to implementation.
+### Agent Architecture: Task-Driven (Decided)
 
-### Agent Architecture: Role-Based vs Task-Driven
+Agents are **task-driven** — each does one focused job. Role-based agents were rejected because they conflate concerns, have broader surface area, and are harder to test. The task-driven model aligns with Minimal Surface Area and keeps each agent composable and precise.
 
-The current 8 agents are **task-driven** — each does one focused job (dead-code-hunter, exception-auditor, lint-status). The planned agents are **role-based** (backend-dev, security-auditor). Which model should O.C.D. standardize on?
-
-**Task-driven (current)**
-
-- Pros: composable, single concern, easy to test, aligns with Minimal Surface Area
-- Cons: user must know which agent to invoke, running 4 agents for one review is tedious
-
-**Role-based (proposed)**
-
-- Pros: intuitive ("run backend-dev" vs "run 4 agents"), mirrors how teams think about responsibilities
-- Cons: broader surface area, harder to test, conflates concerns, output may be less focused
-
-**Hybrid (under investigation)**
-
-- Role-based agents as a routing layer that composes task-driven agents internally
-- User invokes `backend-dev`, it runs dead-code-hunter + exception-auditor + dependency-auditor + docstring-enforcer and synthesizes the results
-- Task-driven agents stay focused and testable; role-based agents compose them into domain-specific reviews
-- This preserves both models: task-driven for precision, role-based for convenience
-
-**Investigation needed:** Can Claude Code subagents invoke other subagents? If not, the hybrid approach requires the role-based agent's prompt to include the task-driven agent's logic inline, which defeats composable reuse. This determines whether the hybrid is architecturally feasible or just role-based in disguise.
+The original role-based proposals (frontend-dev, backend-dev, devops-engineer, security-auditor) were replaced with task-driven equivalents: accessibility-auditor, api-contract-auditor, dockerfile-auditor, and owasp-scanner.
 
 ## Process
 

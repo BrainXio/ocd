@@ -51,6 +51,18 @@ All skills live in `.claude/skills/<name>/SKILL.md`.
 | `hook-coverage` | haiku | Bash, Read, Glob | Verify hook coverage: symlinks, executables, CI parity |
 | `hook-integrity` | haiku | Bash, Read, Glob | Verify hook chain integrity: symlinks, scripts, patterns |
 | `lint-status` | haiku | Bash, Glob | Run linters, report triad: errors, clean, missing |
+| `test-coverage-auditor` | haiku | Glob, Grep, Read | Audit test coverage: missing test files, untested public functions |
+| `kb-health-checker` | haiku | Glob, Grep, Read | Verify KB structural health: broken wikilinks, orphan pages, stale articles |
+| `single-source-auditor` | haiku | Glob, Grep, Read | Find duplicated constants, config, patterns violating Single Source of Truth |
+| `perf-opportunist` | haiku | Glob, Grep, Read | Find low-effort performance wins: unnecessary loops, redundant computations, caching |
+| `deps-upgrader` | haiku | Bash, Read, Glob, Grep | Scan for outdated dependencies with safe upgrade paths |
+| `dry-enforcer` | haiku | Glob, Grep, Read | Find duplicated logic blocks that could be extracted into shared utilities |
+| `complexity-reducer` | haiku | Glob, Grep, Read | Flag high-cyclomatic-complexity functions and suggest simplifications |
+| `readability-scorer` | haiku | Glob, Grep, Read | Flag unclear variable names, missing type hints, dense one-liners |
+| `yagni-auditor` | haiku | Glob, Grep, Read | Find over-engineered code: unused abstractions, premature generalizations |
+| `kiss-auditor` | haiku | Glob, Grep, Read | Find unnecessarily complex implementations that could be simpler |
+| `solid-auditor` | haiku | Glob, Grep, Read | Find SOLID principle violations: SRP, OCP, LSP, ISP, DIP |
+| `oop-auditor` | haiku | Glob, Grep, Read | Find OOP design issues: god classes, improper inheritance, leaked internals |
 
 All agents live in `.claude/agents/<name>.md`.
 
