@@ -3,7 +3,7 @@ title: 'Planning: Future Expansions'
 aliases: [planning, future, roadmap]
 tags: [planning]
 created: 2026-04-17
-updated: 2026-04-17
+updated: 2026-04-18
 ---
 
 Planned additions and improvements to the O.C.D. project. Items are organized by category and tracked with status.
@@ -28,17 +28,7 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 
 Images follow a layered architecture: hardened base → language toolchains → application runtimes → integrated dev environments. Each image adds only what the layer above needs, following the Minimal Surface Area standard.
 
-## New Subagents
-
-| Agent | Model | Tools | Purpose | Status |
-|-------|-------|-------|---------|--------|
-| `accessibility-auditor` | haiku | Glob, Grep, Read | A11y review: semantic HTML, ARIA attributes, keyboard navigation, screen reader compatibility | Planned |
-| `api-contract-auditor` | haiku | Glob, Grep, Read | API review: REST conventions, error response consistency, endpoint naming | Planned |
-| `dockerfile-auditor` | haiku | Glob, Grep, Read, Bash | Docker review: layer ordering, security best practices, multi-stage builds, pinned digests | Planned |
-| `owasp-scanner` | haiku | Glob, Grep, Read | Security review: OWASP Top 10 patterns (XSS, injection, CSRF, insecure deserialization) | Planned |
-| `test-writer` | haiku | Glob, Grep, Read, Bash | Test generation: identify uncovered code, generate test cases, enforce coverage gates | Planned |
-
-All agents follow the task-driven model: single concern, composable, testable. See Resolved Decisions below for the rationale.
+All subagents follow the task-driven model: single concern, composable, testable. See Resolved Decisions below for the rationale.
 
 ## Security
 

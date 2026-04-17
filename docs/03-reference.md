@@ -63,6 +63,11 @@ All skills live in `.claude/skills/<name>/SKILL.md`.
 | `kiss-auditor` | haiku | Glob, Grep, Read | Find unnecessarily complex implementations that could be simpler |
 | `solid-auditor` | haiku | Glob, Grep, Read | Find SOLID principle violations: SRP, OCP, LSP, ISP, DIP |
 | `oop-auditor` | haiku | Glob, Grep, Read | Find OOP design issues: god classes, improper inheritance, leaked internals |
+| `accessibility-auditor` | haiku | Glob, Grep, Read | A11y review: semantic HTML, ARIA attributes, keyboard navigation, screen reader compatibility |
+| `api-contract-auditor` | haiku | Glob, Grep, Read | API review: REST conventions, error response consistency, endpoint naming, HTTP semantics |
+| `dockerfile-auditor` | haiku | Glob, Grep, Read, Bash | Docker review: layer ordering, security best practices, multi-stage builds, pinned digests |
+| `owasp-scanner` | haiku | Glob, Grep, Read | Security review: OWASP Top 10 patterns (XSS, injection, CSRF, insecure deserialization) |
+| `test-writer` | haiku | Glob, Grep, Read, Bash | Test generation: identify uncovered code, generate test cases, enforce coverage gates |
 
 All agents live in `.claude/agents/<name>.md`.
 
