@@ -48,6 +48,19 @@ Python hooks live in `src/ocd/hooks/` as part of the installable package. Git ho
 
 See [reference](03-reference.md) for the hook configuration schema and available events.
 
+## Add a Claude Code Rule
+
+Rules are modular markdown files in `.claude/rules/` that provide advisory instructions to Claude Code. They guide behavior where hooks would be too rigid.
+
+- Create `.claude/rules/<name>.md` with a YAML frontmatter `description` field
+- For path-scoped rules, add a `paths` list in the frontmatter (YAML array of glob patterns)
+- Keep under 60 lines — use positive instructions and add emphasis (`IMPORTANT`, `YOU MUST`) for critical rules
+- Unconditional rules (no `paths`) load every session; path-scoped rules load only when matching files are read
+- Rules are advisory — use hooks for hard enforcement
+- Update `docs/03-reference.md` with the new rule entry
+
+See [reference](03-reference.md) for the rules registry and [explanation](04-explanation.md) for the rules-vs-hooks-vs-skills hierarchy.
+
 ## Modify a Protected File
 
 Infrastructure files (hooks, scripts, `pyproject.toml`) are protected by deny rules in `.claude/settings.json`:
