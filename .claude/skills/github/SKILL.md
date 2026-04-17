@@ -61,7 +61,9 @@ You are a GitHub expert who writes secure, efficient, well-organized repository 
 ### Branch Protection
 
 - Require passing CI checks before merge — never allow direct pushes to `main`
-- Require signed commits — use local fast-forward merge to preserve GPG signatures (GitHub rebase/squash merge creates unsigned commits)
+- Require signed commits — use `gh pr merge --squash` with GPG configured in GitHub
+  settings (branch protection prevents direct push; squash merge preserves linear
+  history)
 - Require resolved conversations before merge — never merge with unresolved review threads
 - Require signed commits for public repositories — never accept unverified pushes
 - Allow force pushes only on feature branches — never on `main` or release branches
@@ -126,6 +128,6 @@ gh api repos/{owner}/{repo}/contents/.github
 - Giant monolithic jobs — split into focused, independently fail-fast stages
 - `continue-on-error: true` without explicit comment explaining why
 - Direct pushes to `main` — always use PRs with CI checks
-- GitHub-side merge (rebase or squash) — creates unsigned commits; merge locally instead
+- GitHub rebase merge — creates unsigned commits; use squash merge with GPG configured
 - curl to the GitHub API — use `gh` CLI instead
 - Missing PR/issue templates — provide structured input for contributors

@@ -71,7 +71,8 @@ feat/token-refresh   ●───●───●───╱
 
 - Branch from `main` for every change — no long-lived branches
 - Rebase onto `main` before merging to keep history linear
-- Merge locally with fast-forward to preserve GPG signatures — never use GitHub-side rebase or squash merge (they create unsigned commits)
+- Merge via `gh pr merge --squash --delete-branch` — branch protection prevents
+  direct push to main; configure GPG in GitHub for signed squash merges
 - Delete branches after merge
 
 ## Commands
@@ -117,18 +118,15 @@ If `n` is not specified, squash all commits on the current branch that are not o
 
 ### `/git merge`
 
-Merge a PR locally to preserve GPG signatures (GitHub rebase and squash merge
-create unsigned commits):
+Merge a PR using GitHub squash merge (branch protection prevents direct push to
+main):
 
-1. Ensure feature branch is up to date: `git rebase origin/main`
-1. Switch to main: `git checkout main && git pull`
-1. Fast-forward merge: `git merge --ff-only feat/branch`
-1. Push: `git push origin main`
-1. Close the PR: `gh pr close <number> --comment "Merged locally via fast-forward"`
-1. Delete the branch: `git branch -d feat/branch`
+1. Ensure CI passes: `gh pr checks <number>`
+1. Merge: `gh pr merge <number> --squash --delete-branch`
+1. Pull the result: `git checkout main && git pull`
 
-If fast-forward fails (branch diverged), rebase the feature branch onto main
-first, then retry from step 2.
+GitHub squash merge creates a single commit on main. Configure GPG signing in
+GitHub settings so squash merges are signed.
 
 ### `/git log [n]`
 
@@ -178,7 +176,7 @@ Create a fixup commit for a specific earlier commit:
 - **Write the commit message last** — after seeing the full diff, not before
 - **Separate concerns** — a commit that fixes a bug and also reformats whitespace is two commits
 - **Keep branches short-lived** — merge within days, not weeks
-- **Merge locally with fast-forward** — preserves GPG signatures; GitHub rebase/squash merge creates unsigned commits
+- **Merge via `gh pr merge --squash`** — branch protection prevents direct push to main; configure GPG in GitHub for signed squash merges
 
 ## What NOT To Do
 
@@ -191,4 +189,4 @@ Create a fixup commit for a specific earlier commit:
 - Never write vague subjects like "update stuff" or "misc changes"
 - Never mix refactoring and feature changes in one commit
 - Never leave merge commits from `git pull` — use `git pull --rebase`
-- Never use GitHub rebase merge or squash merge — they create unsigned commits
+- Never use GitHub rebase merge — creates unsigned commits; use squash merge with GPG configured in GitHub
