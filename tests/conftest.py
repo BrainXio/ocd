@@ -1,9 +1,27 @@
 """Shared test fixtures for O.C.D. test suite."""
 
 import json
+import os
 from pathlib import Path
 
 import pytest
+
+# flush.py sets CLAUDE_INVOKED_BY at import time — clear before importing
+# so the recursion guard in main() doesn't skip hook logic during tests.
+os.environ.pop("CLAUDE_INVOKED_BY", None)
+
+import ocd.config
+import ocd.flush
+import ocd.hooks.hookslib
+import ocd.hooks.lint_work
+import ocd.hooks.pre_compact
+import ocd.hooks.session_end
+import ocd.hooks.session_start
+import ocd.utils
+
+# flush.py sets CLAUDE_INVOKED_BY at import time — clear again so
+# tests don't see a stale value.
+os.environ.pop("CLAUDE_INVOKED_BY", None)
 
 # ── Path fixtures ──────────────────────────────────────────────────────
 
@@ -50,16 +68,13 @@ def flush_state_file(tmp_agent_dir):
 
 @pytest.fixture
 def mock_config_paths(tmp_agent_dir, monkeypatch):
-    """Patch config.py path constants to point at tmp_agent_dir.
+    """Patch ocd.config path constants to point at tmp_agent_dir.
 
     Also patches the same names in modules that imported them directly
-    (utils, hookslib, session_start, flush) so that monkeypatch
-    actually affects the code under test.
+    so that monkeypatch actually affects the code under test.
     """
     knowledge_dir = tmp_agent_dir / "knowledge"
     state_dir = tmp_agent_dir / ".state"
-
-    import config
 
     patches = {
         "AGENT_DIR": tmp_agent_dir,
@@ -77,19 +92,23 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "LOG_FILE": knowledge_dir / "log.md",
     }
 
-    # Patch config module
+    # Patch the canonical source
     for name, value in patches.items():
-        monkeypatch.setattr(config, name, value)
+        monkeypatch.setattr(ocd.config, name, value)
 
     # Patch modules that imported these names directly
-    for module_name in ("utils", "hookslib"):
-        try:
-            mod = __import__(module_name)
-        except ImportError:
-            continue
+    for module in (
+        ocd.utils,
+        ocd.hooks.hookslib,
+        ocd.flush,
+        ocd.hooks.session_start,
+        ocd.hooks.session_end,
+        ocd.hooks.pre_compact,
+        ocd.hooks.lint_work,
+    ):
         for name, value in patches.items():
-            if hasattr(mod, name):
-                monkeypatch.setattr(mod, name, value)
+            if hasattr(module, name):
+                monkeypatch.setattr(module, name, value)
 
     return tmp_agent_dir
 
@@ -157,6 +176,6 @@ def sample_transcript(tmp_path):
 def clear_recursion_guard(monkeypatch):
     """Ensure CLAUDE_INVOKED_BY is not set during tests.
 
-    Several hooks check this env var at import time and sys.exit(0) if set.
+    Hooks check this env var in main() and return early if set.
     """
     monkeypatch.delenv("CLAUDE_INVOKED_BY", raising=False)

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Git pre-commit hook: prevent commits on main branch.
-# Installed by: bash .claude/scripts/setup-hooks.sh
+# Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 

@@ -12,10 +12,10 @@ You are an intelligence operating within the O.C.D. framework. This is your deci
 
 O.C.D. augments you with four layers:
 
-1. **Context injection** — KB index and recent daily log at session start
-1. **Enforcement** — Hooks lint in real time; skills define per-language correctness
-1. **Persistence** — Knowledge pipeline captures insights and feeds them back
-1. **Delegation** — Subagents handle bounded analysis (dead code, deps, lint checks)
+- **Context injection** — KB index and recent daily log at session start
+- **Enforcement** — Hooks lint in real time; skills define per-language correctness
+- **Persistence** — Knowledge pipeline captures insights and feeds them back
+- **Delegation** — Subagents handle bounded analysis (dead code, deps, lint checks)
 
 See [explanation](04-explanation.md) for the architecture and design rationale.
 
@@ -38,7 +38,7 @@ Run the hook-integrity agent, then based on its findings, update the CI workflow
 ```
 
 ```
-Run dead-code-hunter on .claude/scripts/ and .claude/hooks/. Report what it finds, then clean up anything that's truly unused.
+Run dead-code-hunter on src/ocd/ and git_hooks/. Report what it finds, then clean up anything that's truly unused.
 ```
 
 ### Knowledge Capture
@@ -78,24 +78,24 @@ Add a css skill following the same structure as the python skill. Mandatory: mod
 ### Troubleshooting
 
 ```
-The lint-work hook is failing on commit. Run lint-status to see which linters are failing and on which files.
+The ocd-lint-work hook is failing on commit. Run lint-status to see which linters are failing and on which files.
 ```
 
 ```
-CI is failing on the check-commit-messages job. Show me the ai-patterns.txt file so I can see what pattern my commit message matched.
+CI is failing on the check-commit-messages job. Show me the git_hooks/ai-patterns.txt file so I can see what pattern my commit message matched.
 ```
 
 ## Adding External Knowledge
 
-The pipeline is content-agnostic — anything you can get into a markdown file can be fed to flush.py or compile.py.
+The pipeline is content-agnostic — anything you can get into a markdown file can be fed to `ocd-flush` or `ocd-compile`.
 
 ### Daily Log Entry
 
 Create `.agent/daily/YYYY-MM-DD.md` with structured content and compile it. See [how-to](02-how-to.md#add-external-knowledge) for the full format.
 
-### flush.py Ingestion
+### flush Ingestion
 
-Pass any markdown file directly to flush.py:
+Pass any markdown file directly to `ocd-flush`:
 
 ```bash
 cat > /tmp/external.md << 'EOF'
@@ -104,7 +104,7 @@ Key findings from the Go concurrency docs:
 - Channels are the primary synchronization primitive
 EOF
 
-uv --directory .claude run python scripts/flush.py /tmp/external.md external-ingest
+ocd-flush /tmp/external.md external-ingest
 ```
 
 ### URL-Based Knowledge
@@ -116,7 +116,7 @@ Fetch the Rust ownership documentation from doc.rust-lang.org and summarize the 
 ```
 
 ```
-Read https://docs.docker.com/build/cache/ and extract the key caching strategies. Write them to a temp file, then run flush.py to ingest them.
+Read https://docs.docker.com/build/cache/ and extract the key caching strategies. Write them to a temp file, then run ocd-flush to ingest them.
 ```
 
 ## Navigation
@@ -126,3 +126,4 @@ Read https://docs.docker.com/build/cache/ and extract the key caching strategies
 - [Reference](03-reference.md) — all tables, schemas, and specs
 - [Explanation](04-explanation.md) — architecture, standards, design rationale
 - [Planning](05-planning.md) — record gaps and planned improvements
+- [Development Setup](07-development.md) — venv activation and local development workflow

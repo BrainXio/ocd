@@ -10,21 +10,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-# Reuse path constants from config.py (scripts/ is sibling of hooks/)
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
-sys.path.insert(0, str(_SCRIPTS_DIR))
-
-from config import (  # noqa: E402
+from ocd.config import (
     MAX_FLUSH_CONTEXT_CHARS,
     MAX_FLUSH_TURNS,
     MIN_TURNS_PRE_COMPACT,
     MIN_TURNS_SESSION_END,
-    SCRIPTS_DIR,
     STATE_DIR,
-    VENV_PYTHON,
 )
 
-# Re-export for callers
 __all__ = [
     "MAX_FLUSH_CONTEXT_CHARS",
     "MAX_FLUSH_TURNS",
@@ -100,11 +93,11 @@ def extract_conversation_context(transcript_path: Path) -> tuple[str, int]:
 
 
 def spawn_flush(context_file: Path, session_id: str) -> None:
-    """Spawn flush.py as a background process to extract knowledge."""
-    flush_script = SCRIPTS_DIR / "flush.py"
+    """Spawn flush as a background process to extract knowledge."""
     cmd = [
-        str(VENV_PYTHON),
-        str(flush_script),
+        sys.executable,
+        "-m",
+        "ocd.flush",
         str(context_file),
         session_id,
     ]
@@ -123,7 +116,7 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
     except Exception as e:
         import logging
 
-        logging.error("Failed to spawn flush.py: %s", e)
+        logging.error("Failed to spawn flush: %s", e)
 
 
 def write_context_file(session_id: str, context: str, prefix: str = "flush-context") -> Path:

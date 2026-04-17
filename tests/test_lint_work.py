@@ -1,25 +1,12 @@
-"""Tests for lint-work.py — linter registry, extension detection, and install hints."""
+"""Tests for lint_work — linter registry, extension detection, and install hints."""
 
-import importlib
 import json
-import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
-# Clear recursion guard before import
-os.environ.pop("CLAUDE_INVOKED_BY", None)
-
-# lint-work.py uses a hyphenated filename — import via importlib
-_spec = importlib.util.spec_from_file_location(
-    "lint_work",
-    str(Path(__file__).resolve().parent.parent / "hooks" / "lint-work.py"),
-)
-assert _spec is not None, "Could not find lint-work.py"
-lint_work = importlib.util.module_from_spec(_spec)
-assert _spec.loader is not None, "Module spec has no loader"
-_spec.loader.exec_module(lint_work)  # type: ignore[union-attr]
+from ocd.hooks import lint_work
 
 
 class TestExtFromPath:
@@ -113,7 +100,7 @@ class TestConfigPresent:
 
     def test_existing_config(self):
         """When the config file exists in PROJECT_ROOT, should return True."""
-        assert lint_work._config_present([".claude/pyproject.toml"]) is True
+        assert lint_work._config_present(["pyproject.toml"]) is True
 
     def test_missing_config(self):
         assert lint_work._config_present(["nonexistent_config_file_xyz.yml"]) is False

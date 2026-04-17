@@ -1,5 +1,4 @@
-"""
-SessionStart hook - injects knowledge base context into every conversation.
+"""SessionStart hook - injects knowledge base context into every conversation.
 
 This is the "context injection" layer. When Claude Code starts a session,
 this hook reads the knowledge base index and recent daily log, then injects
@@ -9,16 +8,9 @@ them as additional context so Claude always "remembers" what it has learned.
 from __future__ import annotations
 
 import json
-import sys
 from datetime import UTC, datetime, timedelta
 
-# Reuse path constants from config.py (scripts/ is sibling of hooks/)
-from pathlib import Path
-
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
-sys.path.insert(0, str(_SCRIPTS_DIR))
-
-from config import DAILY_DIR, INDEX_FILE  # noqa: E402
+from ocd.config import DAILY_DIR, INDEX_FILE
 
 MAX_CONTEXT_CHARS = 20_000
 MAX_LOG_LINES = 30

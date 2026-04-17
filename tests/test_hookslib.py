@@ -4,8 +4,10 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import hookslib
 import pytest
+
+import ocd.config
+import ocd.hooks.hookslib as hookslib
 
 
 class TestReadStdin:
@@ -95,10 +97,8 @@ class TestWriteContextFile:
         assert path.suffix == ".md"
 
     def test_creates_state_dir_if_missing(self, mock_config_paths, tmp_path, monkeypatch):
-        import config
-
         new_state = tmp_path / "new_state"
-        monkeypatch.setattr(config, "STATE_DIR", new_state)
+        monkeypatch.setattr(ocd.config, "STATE_DIR", new_state)
         monkeypatch.setattr(hookslib, "STATE_DIR", new_state)
         path = hookslib.write_context_file("test", "content")
         assert new_state.exists()
@@ -106,7 +106,8 @@ class TestWriteContextFile:
 
 
 class TestSpawnFlush:
-    def test_calls_popen_with_correct_args(self, mock_config_paths, monkeypatch):
+    def test_calls_popen_with_module_flag(self, mock_config_paths, monkeypatch):
+        """spawn_flush now uses sys.executable -m ocd.flush instead of a script path."""
         import subprocess
 
         popen_mock = MagicMock()
@@ -117,8 +118,9 @@ class TestSpawnFlush:
 
         popen_mock.assert_called_once()
         cmd = popen_mock.call_args[0][0]
-        assert "flush.py" in cmd[1]
-        assert str(context_file) in cmd[2]
+        assert "-m" in cmd
+        assert "ocd.flush" in cmd
+        assert str(context_file) in cmd
         assert "sess-123" in cmd
 
     def test_popen_uses_devnull(self, mock_config_paths, monkeypatch):

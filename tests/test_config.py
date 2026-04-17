@@ -1,24 +1,26 @@
-"""Tests for config.py — path constants and date functions."""
+"""Tests for ocd.config — path constants and date functions."""
 
 import re
+import sys
+from pathlib import Path
 
-import config
+from ocd import config
 
 
 class TestPathConstants:
-    """Path constants derive from Path(__file__) and must be internally consistent."""
+    """Path constants derive from _find_project_root() and must be internally consistent."""
+
+    def test_project_root_contains_git(self):
+        assert (config.PROJECT_ROOT / ".git").is_dir()
 
     def test_claude_dir_name(self):
         assert config.CLAUDE_DIR.name == ".claude"
 
-    def test_claude_dir_is_directory(self):
-        assert config.CLAUDE_DIR.is_dir()
-
-    def test_project_root_is_parent(self):
-        assert config.CLAUDE_DIR.parent == config.PROJECT_ROOT
+    def test_claude_dir_under_project_root(self):
+        assert config.CLAUDE_DIR == config.PROJECT_ROOT / ".claude"
 
     def test_agent_dir_under_project_root(self):
-        assert config.AGENT_DIR.parent == config.PROJECT_ROOT
+        assert config.AGENT_DIR == config.PROJECT_ROOT / ".agent"
 
     def test_state_dir_under_agent_dir(self):
         assert config.STATE_DIR.parent == config.AGENT_DIR
@@ -31,8 +33,8 @@ class TestPathConstants:
         assert config.CONNECTIONS_DIR.parent == config.KNOWLEDGE_DIR
         assert config.QA_DIR.parent == config.KNOWLEDGE_DIR
 
-    def test_venv_python_exists(self):
-        assert config.VENV_PYTHON.exists()
+    def test_venv_bin_is_executable_parent(self):
+        assert Path(sys.executable).parent == config.VENV_BIN
 
 
 class TestNowIso:

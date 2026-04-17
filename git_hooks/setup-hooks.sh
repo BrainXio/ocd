@@ -2,15 +2,14 @@
 # Install git hooks from the repository into .git/hooks/ via symlinks.
 # Run this once after cloning the repository.
 #
-# Usage: bash .claude/scripts/setup-hooks.sh
+# Usage: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
-claude_dir="$(dirname "$script_dir")"
-project_root="$(dirname "$claude_dir")"
+project_root="$(dirname "$script_dir")"
 git_hooks_dir="$project_root/.git/hooks"
-hooks_src="$claude_dir/hooks"
+hooks_src="$script_dir"
 
 hooks_to_install=(
     pre-commit
