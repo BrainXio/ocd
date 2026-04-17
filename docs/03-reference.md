@@ -119,6 +119,22 @@ Hooks receive a JSON object on stdin:
 | `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
 | `write_context_file(session_id, context, prefix)` | Write context to `.agent/.state/{prefix}-{session_id}-{timestamp}.md` |
 
+## Claude Code Rules
+
+Rules in `.claude/rules/` provide advisory instructions to Claude Code sessions.
+Rules are distinct from hooks: hooks enforce deterministically, rules guide behavior.
+
+| Rule File | Scope | Purpose |
+|-----------|-------|---------|
+| `commit-hygiene.md` | Unconditional | Conventional commits, branch naming, no AI attribution |
+| `pr-workflow.md` | Unconditional | PR labels, body template, merge requirements |
+| `doc-sync.md` | Unconditional | Update reference/planning docs when shipping features |
+| `markdown.md` | `**/*.md` | mdformat, frontmatter plugin, ordered list normalization |
+| `infrastructure.md` | Infrastructure paths | Deny rule modification procedure for protected files |
+
+All rule files live in `.claude/rules/`. The root `CLAUDE.md` serves as the rules index.
+Path-scoped rules load only when matching files are read; unconditional rules load every session.
+
 ## Git Hooks
 
 | Hook | Purpose |
@@ -219,7 +235,6 @@ Deny rules in `.claude/settings.json` block Claude from reading secrets or modif
 | `Read(**/config/database*.yml)` | Database configuration |
 | `Read(~/Library/Keychains/**)` | macOS keychains |
 | `Read(**/private/**)` | Private directories |
-| `Read(~/)` | Home directory access |
 
 **Edit/Write deny** (block modification of infrastructure):
 
