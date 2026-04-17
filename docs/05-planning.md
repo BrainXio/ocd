@@ -26,7 +26,7 @@ Skills follow the existing pattern in `.claude/skills/<name>/SKILL.md` with mand
 |--------|---------|--------|
 | `htmlhint` | HTML linting commit gate for the `html` skill | Pending tool evaluation |
 | `stylelint` | CSS linting commit gate for the `css` skill | Pending tool evaluation |
-| `gitleaks` | Secret scanning in pre-commit hook and CI | Pending tool evaluation |
+| `gitleaks` | Secret scanning in pre-commit hook and CI | Done |
 | `trivy` | Container image and dependency vulnerability scanning in CI | Pending tool evaluation |
 | `hadolint` | Dockerfile linting commit gate for the `docker` skill | Pending tool evaluation |
 
@@ -60,7 +60,7 @@ These role-aligned agents complement the existing task-driven agents (dead-code-
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| `gitleaks` pre-commit hook | Block secrets (API keys, tokens, credentials) from entering git history | Planned |
+| `gitleaks` pre-commit hook | Block secrets (API keys, tokens, credentials) from entering git history | Done |
 | `trivy` CI job | Scan container images and Python dependencies for known vulnerabilities | Planned |
 | `semgrep` CI job | Static analysis for OWASP Top 10 patterns | Planned |
 | `.env` in `.gitignore` enforcement | Ensure environment files are never committed | Done |

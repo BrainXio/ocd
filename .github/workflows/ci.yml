@@ -84,9 +84,19 @@ jobs:
       - name: mdformat --check
         run: mdformat --check README.md docs/*.md .claude/skills/*/SKILL.md
 
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
   lint-python:
-    needs: [lint-shell, lint-markdown, lint-yaml]
+    needs: [lint-shell, lint-markdown, lint-yaml, secret-scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

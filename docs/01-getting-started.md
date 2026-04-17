@@ -16,8 +16,13 @@ git clone <repo-url> && cd ocd
 # Install Python package and dependencies
 uv sync
 
-# Install git hooks (branch protection + AI attribution blocking)
+# Install git hooks (branch protection + AI attribution blocking + secret scanning)
 bash git_hooks/setup-hooks.sh
+
+# Install gitleaks for local secret scanning (optional but recommended)
+# See: https://github.com/gitleaks/gitleaks#installing
+# On macOS: brew install gitleaks
+# On Ubuntu: download from https://github.com/gitleaks/gitleaks/releases
 ```
 
 Verify the entry points and hooks are installed:
@@ -77,10 +82,12 @@ git commit -m "feat: describe what changed"
 
 Two hooks fire:
 
-- **pre-commit** — confirms you're not on `main`
+- **pre-commit** — confirms you're not on `main` and scans staged changes for secrets (gitleaks)
 - **ocd-lint-work --commit** — lints all staged files
 
 If the commit message contains AI attribution (`Co-Authored-By:`, `Generated with`, `[AI]`), the `commit-msg` hook rejects it.
+
+If gitleaks detects a potential secret, the pre-commit hook rejects the commit. Add an allowlist entry to `.gitleaks.toml` if it's a false positive.
 
 ## 5. End the Session
 
