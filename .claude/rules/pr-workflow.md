@@ -60,16 +60,7 @@ Link related issues with `Closes #N` or `Relates to #N` in the body.
 
 - CI must pass
 - All conversations must be resolved
-- Merge locally with fast-forward to preserve GPG signatures (GitHub rebase/squash
-  merge creates unsigned commits)
+- Use `gh pr merge --squash --delete-branch` (branch protection prevents direct
+  push to main; GitHub squash merge creates a single signed commit if GPG is
+  configured in GitHub)
 - Delete the branch after merge
-
-## Local Merge Procedure
-
-1. `git checkout main && git pull`
-1. `git merge --ff-only feat/branch`
-1. `git push origin main`
-1. `gh pr close <number> --comment "Merged locally via fast-forward"`
-
-If fast-forward is not possible (branch diverged), rebase the feature branch onto
-main first, then retry.
