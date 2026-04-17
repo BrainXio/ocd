@@ -142,6 +142,20 @@ If gitleaks is not installed locally, the pre-commit hook prints a warning to st
 
 To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.toml`.
 
+## IDE Configuration
+
+The `ocd.code-workspace` file provides shared workspace settings:
+
+- **Format on save** enabled globally
+- **Ruler at 100 characters** (matches `ruff` line-length)
+- **Python**: organize imports on save, strict type checking
+- **Markdown**: word wrap enabled
+- **Files**: insert final newline, trim trailing whitespace, exclude `__pycache__`, `.venv`, `.mypy_cache`, `.ruff_cache` from file tree and search
+
+The workspace also adds `.agent/` subdirectories (daily logs, knowledge, state) as folder entries for quick navigation.
+
+Extension recommendations live in `.vscode/extensions.json` (gitignored — each developer chooses their own).
+
 ## Package Entry Points
 
 | Command | Module | Purpose |

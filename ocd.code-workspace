@@ -48,15 +48,5 @@
 		"python.analysis.diagnosticSeverityOverrides": {
 			"reportUnusedImport": "warning"
 		}
-	},
-	"extensions": {
-		"recommendations": [
-			"charliermarsh.ruff",
-			"ms-python.mypy-type-checker",
-			"DavidAnson.vscode-markdownlint",
-			"timonwong.shellcheck",
-			"editorconfig.editorconfig",
-			"Anthropic.claude-code"
-		]
 	}
 }
