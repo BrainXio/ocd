@@ -12,12 +12,10 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 
 | Linter | Purpose | Status |
 |--------|---------|--------|
-| `htmlhint` | HTML linting commit gate for the `html` skill | Pending tool evaluation |
-| `stylelint` | CSS linting commit gate for the `css` skill | Pending tool evaluation |
+| `actionlint` | GitHub Actions workflow linting for the `github` skill | Pending tool evaluation |
+| `sqlfluff` | SQL linting for the `sql` skill | Pending tool evaluation |
 | `trivy` | Container image and dependency vulnerability scanning in CI | Pending tool evaluation |
 | `hadolint` | Dockerfile linting commit gate for the `docker` skill | Pending tool evaluation |
-
-New linters will be added to `pyproject.toml`, the CI pipeline (`.github/workflows/ci.yml`), and the `ocd-lint-work` hook registry once available and configured.
 
 ## New Container Images
 
