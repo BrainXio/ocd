@@ -73,8 +73,6 @@ These role-aligned agents complement the existing task-driven agents (dead-code-
 | Item | Purpose | Status |
 |------|---------|--------|
 | `.devcontainer/` definition | Instant onboarding using planned container images | Planned |
-| VS Code recommended extensions | Auto-prompt for linters, Python, Docker extensions on repo open | Planned |
-| Workspace settings for linters on save | Run mdformat/ruff on save instead of waiting for commit gate | Planned |
 
 ## CI/CD Beyond Lint
 

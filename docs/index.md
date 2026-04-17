@@ -15,3 +15,4 @@ Documentation organized by the [Diataxis framework](https://diataxis.fr/) — fo
 - [Planning](05-planning.md) — future expansions and roadmap
 - [Usage](06-usage.md) — an intelligence's guide to using O.C.D.
 - [Development Setup](07-development.md) — venv activation and local development workflow
+- [Code Workspace](08-code-workspace.md) — how the workspace file configures VS Code
