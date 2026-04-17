@@ -15,13 +15,13 @@ _SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
 sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from config import (  # noqa: E402
-    CLAUDE_DIR,
     MAX_FLUSH_CONTEXT_CHARS,
     MAX_FLUSH_TURNS,
     MIN_TURNS_PRE_COMPACT,
     MIN_TURNS_SESSION_END,
     SCRIPTS_DIR,
     STATE_DIR,
+    VENV_PYTHON,
 )
 
 # Re-export for callers
@@ -103,11 +103,7 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
     """Spawn flush.py as a background process to extract knowledge."""
     flush_script = SCRIPTS_DIR / "flush.py"
     cmd = [
-        "uv",
-        "--directory",
-        str(CLAUDE_DIR),
-        "run",
-        "python",
+        str(VENV_PYTHON),
         str(flush_script),
         str(context_file),
         session_id,

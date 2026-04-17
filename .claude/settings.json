@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv --directory .claude run python hooks/session-start.py",
+            "command": ".claude/.venv/bin/python .claude/hooks/session-start.py",
             "timeout": 15
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv --directory .claude run python hooks/pre-compact.py",
+            "command": ".claude/.venv/bin/python .claude/hooks/pre-compact.py",
             "timeout": 10
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv --directory .claude run python hooks/session-end.py",
+            "command": ".claude/.venv/bin/python .claude/hooks/session-end.py",
             "timeout": 10
           }
         ]
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv --directory .claude run python hooks/lint-work.py --edit",
+            "command": ".claude/.venv/bin/python .claude/hooks/lint-work.py --edit",
             "timeout": 10
           }
         ]
@@ -55,7 +55,7 @@
           {
             "type": "command",
             "if": "Bash(git commit*)",
-            "command": "uv --directory .claude run python hooks/lint-work.py --commit",
+            "command": ".claude/.venv/bin/python .claude/hooks/lint-work.py --commit",
             "timeout": 30
           }
         ]
