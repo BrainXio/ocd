@@ -114,6 +114,7 @@ Hooks receive a JSON object on stdin:
 | Hook | Purpose |
 |------|---------|
 | `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks) |
+| `pre-push` | Run `pytest` before push; abort if tests fail |
 | `commit-msg` | Reject AI attribution in commit messages |
 
 ### AI Attribution Patterns
@@ -206,7 +207,7 @@ Protected files (project-root-relative paths):
 
 - `src/ocd/hooks/lint_work.py`, `src/ocd/hooks/hookslib.py`, `src/ocd/hooks/pre_compact.py`, `src/ocd/hooks/session_start.py`, `src/ocd/hooks/session_end.py`
 - `src/ocd/config.py`, `src/ocd/compile.py`, `src/ocd/flush.py`, `src/ocd/lint.py`, `src/ocd/query.py`, `src/ocd/utils.py`
-- `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/setup-hooks.sh`
+- `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/pre-push`, `git_hooks/setup-hooks.sh`
 - `.gitleaks.toml`
 
 **Bash deny** (block shell deletion of infrastructure):

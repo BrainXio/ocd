@@ -89,7 +89,15 @@ If the commit message contains AI attribution (`Co-Authored-By:`, `Generated wit
 
 If gitleaks detects a potential secret, the pre-commit hook rejects the commit. Add an allowlist entry to `.gitleaks.toml` if it's a false positive.
 
-## 5. End the Session
+## 5. Push the Change
+
+```bash
+git push
+```
+
+The `pre-push` hook runs `pytest -q` before allowing the push. If tests fail, the push is aborted. This ensures broken tests never reach the remote repository.
+
+## 6. End the Session
 
 When the session ends, `ocd-session-end` captures the transcript and spawns `ocd-flush` as a background process. Flush extracts structured knowledge and appends it to `.agent/daily/YYYY-MM-DD.md`.
 
