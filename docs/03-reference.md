@@ -137,7 +137,7 @@ Gitleaks runs in two contexts:
 - **Local pre-commit hook**: `gitleaks protect --staged` scans staged changes before each commit
 - **CI `secret-scan` job**: `gitleaks detect` scans the full diff on push and PR
 
-If gitleaks is not installed locally, the pre-commit hook prints a warning to stderr and continues. CI always runs gitleaks (installed via the `gitleaks/gitleaks-action` GitHub Action).
+If gitleaks is not installed locally, the pre-commit hook prints a warning to stderr and continues. CI always runs gitleaks (binary installed directly in the `secret-scan` job).
 
 To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.toml`.
 
@@ -164,7 +164,7 @@ All entry points are defined in `pyproject.toml` `[project.scripts]` and install
 | 2 (parallel) | `lint-yaml` | yamllint | all |
 | 2 (parallel) | `lint-shell` | shellcheck | all |
 | 2 (parallel) | `lint-markdown` | mdformat | all |
-| 2 (parallel) | `secret-scan` | gitleaks (reads `.gitleaks.toml`) | all |
+| 2 (parallel) | `secret-scan` | gitleaks (binary install, reads `.gitleaks.toml`) | all |
 | 3 (after 1+2) | `lint-python` | ruff + mypy | all |
 | 4 (after 3) | `test-python` | pytest | all |
 
