@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-## name: git description: "Conventional git workflow: commits, branches, rebases, and hygiene. Use when the user asks to commit, branch, merge, rebase, squash, or manage git history. Invoked for /git or when the user wants version control operations." argument-hint: "[commit|branch|rebase|squash|log|diff|status|fixup] [args]"
+## name: git description: "Conventional git workflow: commits, branches, rebases, and hygiene. Use when the user asks to commit, branch, merge, rebase, squash, or manage git history. Invoked for /git or when the user wants version control operations." argument-hint: "[commit|branch|rebase|squash|merge|log|diff|status|fixup] [args]"
 
 # Git Skill
 
@@ -71,7 +71,7 @@ feat/token-refresh   ●───●───●───╱
 
 - Branch from `main` for every change — no long-lived branches
 - Rebase onto `main` before merging to keep history linear
-- Squash feature branches into a single commit when merging if the branch has noisy intermediate commits
+- Merge locally with fast-forward to preserve GPG signatures — never use GitHub-side rebase or squash merge (they create unsigned commits)
 - Delete branches after merge
 
 ## Commands
@@ -114,6 +114,21 @@ Squash the last `n` commits into one:
 1. Write a clean conventional commit message for the result
 
 If `n` is not specified, squash all commits on the current branch that are not on `main`.
+
+### `/git merge`
+
+Merge a PR locally to preserve GPG signatures (GitHub rebase and squash merge
+create unsigned commits):
+
+1. Ensure feature branch is up to date: `git rebase origin/main`
+1. Switch to main: `git checkout main && git pull`
+1. Fast-forward merge: `git merge --ff-only feat/branch`
+1. Push: `git push origin main`
+1. Close the PR: `gh pr close <number> --comment "Merged locally via fast-forward"`
+1. Delete the branch: `git branch -d feat/branch`
+
+If fast-forward fails (branch diverged), rebase the feature branch onto main
+first, then retry from step 2.
 
 ### `/git log [n]`
 
@@ -163,7 +178,7 @@ Create a fixup commit for a specific earlier commit:
 - **Write the commit message last** — after seeing the full diff, not before
 - **Separate concerns** — a commit that fixes a bug and also reformats whitespace is two commits
 - **Keep branches short-lived** — merge within days, not weeks
-- **Squash before merge** — feature branches should become one clean commit on main
+- **Merge locally with fast-forward** — preserves GPG signatures; GitHub rebase/squash merge creates unsigned commits
 
 ## What NOT To Do
 
@@ -176,3 +191,4 @@ Create a fixup commit for a specific earlier commit:
 - Never write vague subjects like "update stuff" or "misc changes"
 - Never mix refactoring and feature changes in one commit
 - Never leave merge commits from `git pull` — use `git pull --rebase`
+- Never use GitHub rebase merge or squash merge — they create unsigned commits

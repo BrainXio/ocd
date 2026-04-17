@@ -17,7 +17,7 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 | `csharp` | C# 10+ / .NET 8+, nullable reference types, file-scoped namespaces. No legacy collections. |
 | `css` | CSS Grid/Flexbox layouts, Custom Properties for tokens, BEM or utility-first. No `!important` except utilities. |
 | `docker` | Multi-stage builds, pinned base image digests. No `latest` tags in production. |
-| `git` | Conventional Commits, linear rebase history. Every branch has a purpose. |
+| `git` | Conventional Commits, local fast-forward merge to preserve GPG signatures. Every branch has a purpose. |
 | `github` | Actions workflows pinned to SHA, least-privilege permissions, branch protection, `gh` CLI. No unpinned actions. |
 | `go` | Go 1.22+, `gofmt` commit gate, doc comments on all exports. No `panic` in library code. |
 | `html` | HTML5 semantic elements, accessibility attributes, keyboard navigation. No `<div>` soup. |
@@ -248,7 +248,7 @@ All entry points are defined in `pyproject.toml` `[project.scripts]` and install
 | 3 (after 1+2) | `lint-python` | ruff + mypy | all |
 | 4 (after 3) | `test-python` | pytest | all |
 
-Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` only. Branch protection on `main` requires passing CI, linear history, and resolved conversations.
+Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` only. Branch protection on `main` requires passing CI, signed commits, and resolved conversations.
 
 ## Permissions and Sandbox
 
