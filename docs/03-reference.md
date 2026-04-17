@@ -15,16 +15,24 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 | `bash` | `set -euo pipefail` mandatory, `shellcheck` zero-warnings gate. No unquoted expansions. |
 | `cpp` | C++17 minimum, smart pointers only, `#pragma once` headers, CMake. No raw `new`/`delete`. |
 | `csharp` | C# 10+ / .NET 8+, nullable reference types, file-scoped namespaces. No legacy collections. |
+| `css` | CSS Grid/Flexbox layouts, Custom Properties for tokens, BEM or utility-first. No `!important` except utilities. |
 | `docker` | Multi-stage builds, pinned base image digests. No `latest` tags in production. |
 | `git` | Conventional Commits, linear rebase history. Every branch has a purpose. |
 | `go` | Go 1.22+, `gofmt` commit gate, doc comments on all exports. No `panic` in library code. |
+| `html` | HTML5 semantic elements, accessibility attributes, keyboard navigation. No `<div>` soup. |
 | `java` | Java 17+, `final` by default, records, sealed classes, Javadoc on publics. No `System.out` in production. |
+| `js` | ES2022+, strict equality, `const`/`let`, ESLint zero-warnings gate. No `var`, no `==`. |
+| `json` | RFC 8259 compliance, 2-space indent, schema validation. No trailing commas, no comments in `.json`. |
 | `kubernetes` | Resource limits, liveness/readiness probes, `runAsNonRoot`, `readOnlyRootFilesystem`. No unbounded pods. |
+| `markdown` | CommonMark spec, `mdformat` gate, frontmatter preservation. No inline HTML for layout. |
 | `ocd` | Meta-standard: reviews, refactors, creates code against the Eight Standards. Every line must earn its existence. |
 | `php` | PHP 8.1+, `declare(strict_types=1)`, Composer, PSR-12. No legacy patterns. |
 | `python` | Python 3.12+, strict type hints, `uv` packaging, `ruff` commit gate. No bare `except`, no `Any`. |
 | `ruby` | Ruby 3.1+, `frozen_string_literal: true`, Bundler, `rubocop` zero-offense gate. No unfrozen strings. |
 | `rust` | Edition 2021+, `cargo fmt` + `cargo clippy -- -D warnings` commit gates. No `unsafe` without safety comment. |
+| `sql` | Parameterized queries, explicit JOINs, `NOT NULL` constraints. No `SELECT *`, no comma joins. |
+| `swift` | Swift 5.9+, strict concurrency, `async`/`await`, SwiftLint zero-warnings gate. No force-unwrap outside tests. |
+| `terraform` | HCL2, remote state with locking, `sensitive = true` for secrets, module composition. No hardcoded secrets. |
 | `typescript` | TypeScript 5.x, `strict: true`, `pnpm`, explicit return types. No `any` — use `unknown`. |
 
 All skills live in `.claude/skills/<name>/SKILL.md`.

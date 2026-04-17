@@ -8,18 +8,6 @@ updated: 2026-04-17
 
 Planned additions and improvements to the O.C.D. project. Items are organized by category and tracked with status.
 
-## New Skills
-
-| Skill | Description | Status |
-|-------|-------------|--------|
-| `html` | Modern HTML5 standards, semantic markup, accessibility attributes, no deprecated elements | Planned |
-| `css` | Modern CSS (Grid, Flexbox, Custom Properties), BEM or utility-first methodology, no `!important` except utilities | Planned |
-| `sql` | SQL standards, query analysis, no SELECT \*, explicit JOINs, parameterized queries only | Planned |
-| `terraform` | IaC standards, state hygiene, no hardcoded secrets, module composition | Planned |
-| `swift` | Swift 5.9+, strict concurrency, SwiftLint commit gate | Planned |
-
-Skills follow the existing pattern in `.claude/skills/<name>/SKILL.md` with mandatory practices, hard prohibitions, and commit gates.
-
 ## New Linters
 
 | Linter | Purpose | Status |
@@ -61,12 +49,6 @@ These role-aligned agents complement the existing task-driven agents (dead-code-
 |------|---------|--------|
 | `trivy` CI job | Scan container images and Python dependencies for known vulnerabilities | Planned |
 | `semgrep` CI job | Static analysis for OWASP Top 10 patterns | Planned |
-
-## Testing
-
-| Item | Purpose | Status |
-|------|---------|--------|
-| `pytest` as commit gate | Require passing tests before merge, tracked in CI | Done |
 
 ## IDE and Devcontainer
 
