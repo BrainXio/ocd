@@ -70,7 +70,7 @@ jobs:
       - name: Install shellcheck
         run: command -v shellcheck || (sudo apt-get update && sudo apt-get install -y shellcheck)
       - name: Run shellcheck
-        run: shellcheck git_hooks/commit-msg git_hooks/pre-commit git_hooks/setup-hooks.sh
+        run: shellcheck git_hooks/commit-msg git_hooks/pre-commit git_hooks/pre-push git_hooks/setup-hooks.sh
 
   lint-markdown:
     runs-on: ubuntu-latest

@@ -13,6 +13,7 @@ hooks_src="$script_dir"
 
 hooks_to_install=(
     pre-commit
+    pre-push
     commit-msg
 )
 
