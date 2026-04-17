@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "claude-agent-sdk>=0.1.29",
     "mdformat>=0.7",
+    "mdformat-frontmatter>=2.0.10",
     "mypy>=1.13",
     "ruff>=0.8",
     "yamllint>=1.35",
