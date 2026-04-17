@@ -82,7 +82,7 @@ jobs:
       - name: Install mdformat
         run: pip install mdformat
       - name: mdformat --check
-        run: mdformat --check README.md .claude/skills/*/SKILL.md
+        run: mdformat --check README.md index.md docs/*.md .claude/skills/*/SKILL.md
 
   # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
   lint-python:
