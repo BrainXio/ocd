@@ -25,6 +25,15 @@ bash git_hooks/setup-hooks.sh
 # On Ubuntu: download from https://github.com/gitleaks/gitleaks/releases
 ```
 
+Or use the devcontainer (requires Docker and VS Code with the Remote Containers extension):
+
+```bash
+# Open in VS Code and select "Reopen in Container"
+code .
+```
+
+The devcontainer includes all dependencies (Python, Node.js, linters, Ollama, Claude Code) — no manual setup required. It uses the pre-built `ghcr.io/brainxio/ocd` image and runs `ocd init` on creation.
+
 Verify the entry points and hooks are installed:
 
 ```bash
@@ -49,8 +58,9 @@ claude
 Or, if using the Ollama devcontainer:
 
 ```bash
-source .venv/bin/activate
-ollama launch claude
+# Ollama runs automatically inside the devcontainer
+# Start Claude Code from the devcontainer terminal
+claude
 ```
 
 The venv must be active before starting Claude — otherwise the hook commands won't be on PATH and sessions will start without knowledge injection or lint checks. See [development setup](07-development.md) for details.

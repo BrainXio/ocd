@@ -7,7 +7,14 @@ from pathlib import Path
 
 
 def _find_project_root() -> Path:
-    """Find project root by walking up from package location or CWD."""
+    """Find project root by walking up from package location or CWD.
+
+    Strategy order:
+    1. OCD_PROJECT_ROOT env var (set in devcontainer)
+    2. Walk up from __file__ looking for .git/ (works in dev; fails silently
+       when package is installed in /opt/ocd/venv/ since no .git/ above site-packages)
+    3. Walk up from CWD looking for .git/ (works when CWD is inside the project)
+    """
     env_root = os.environ.get("OCD_PROJECT_ROOT")
     if env_root:
         return Path(env_root).resolve()

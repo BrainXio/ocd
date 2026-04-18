@@ -8,7 +8,13 @@ updated: 2026-04-17
 
 How to set up your local environment so that O.C.D. hooks are available when you start a Claude Code session.
 
-## Why This Matters
+## Devcontainer Setup
+
+The devcontainer includes all dependencies — Python, Node.js, linters, Ollama, and Claude Code. Open the project in VS Code and select "Reopen in Container" to use it. No manual setup is required.
+
+The devcontainer uses the pre-built `ghcr.io/brainxio/ocd` image and runs `ocd init` on creation, which installs the project entry points, Node dependencies, and git hooks.
+
+## Local Setup
 
 O.C.D. hooks (`ocd-session-start`, `ocd-lint-work`, `ocd-pre-compact`, etc.) are Python entry points installed by `uv sync`. They live in `.venv/bin/`. Claude Code runs these hooks as subprocesses — if the virtual environment isn't on `PATH`, the hooks won't be found and every session will start without knowledge injection, linting, or flush.
 

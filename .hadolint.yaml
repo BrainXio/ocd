@@ -1,0 +1,6 @@
+---
+ignored:
+  - DL3008  # Pin versions in apt-get install; we pin via digest in FROM instead
+trustedRegistries:
+  - ghcr.io
+  - docker.io

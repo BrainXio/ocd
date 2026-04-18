@@ -170,3 +170,24 @@ There is no automated URL fetching. Fetch web content yourself and route it thro
 curl -s https://example.com/docs | pandoc -f html -t markdown > /tmp/fetched.md
 ocd-flush /tmp/fetched.md url-ingest
 ```
+
+## Build and Test a Container Image
+
+Container images live in `containers/<name>/Dockerfile`. Each image has its own `.dockerignore`.
+
+```bash
+# Build an image (simple images build from their directory)
+docker build -t ocd-base:0.1.0 containers/ocd-base/
+
+# Build an image that needs dependency specs (ocd product image)
+docker build --build-arg BASE_TAG=0.1.0 -t ocd:0.1.0 -f containers/ocd/Dockerfile .
+
+# Smoke test — verify tools are installed and non-root user is set
+docker run --rm ocd-base:0.1.0 uv --version
+docker run --rm ocd-base:0.1.0 whoami  # should output: ocd
+
+# Lint a Dockerfile
+hadolint containers/ocd-base/Dockerfile
+```
+
+The pre-commit hook runs hadolint on staged Dockerfiles if hadolint is installed. If hadolint is not installed, it prints a warning and continues — install it from <https://github.com/hadolint/hadolint#installing>.

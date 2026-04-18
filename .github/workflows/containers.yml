@@ -1,0 +1,118 @@
+name: Containers
+
+on:
+  push:
+    branches: [main]
+    paths: ["containers/**", ".hadolint.yaml"]
+  pull_request:
+    branches: [main]
+    paths: ["containers/**", ".hadolint.yaml"]
+
+concurrency:
+  group: containers-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install hadolint
+        run: |
+          HADOLINT_VERSION="2.14.0"
+          URL="https://github.com/hadolint/hadolint/releases/download"
+          URL="${URL}/v${HADOLINT_VERSION}/hadolint-Linux-x86_64"
+          curl -sL "$URL" | sudo install -m 755 /dev/stdin /usr/local/bin/hadolint
+      - name: Run hadolint
+        run: hadolint containers/*/Dockerfile
+
+  build-base:
+    needs: [lint-dockerfile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build ocd-base
+        run: docker build -t ocd-base:0.1.0 containers/ocd-base/
+      - name: Smoke test
+        run: |
+          docker run --rm ocd-base:0.1.0 uv --version
+          docker run --rm ocd-base:0.1.0 git --version
+          docker run --rm ocd-base:0.1.0 shellcheck --version
+          docker run --rm ocd-base:0.1.0 whoami | grep -q ocd
+
+  build-python:
+    needs: [lint-dockerfile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build ocd-base
+        run: docker build -t ocd-base:0.1.0 containers/ocd-base/
+      - name: Build ocd-python
+        run: docker build --build-arg BASE_TAG=0.1.0 -t ocd-python:0.1.0 containers/ocd-python/
+      - name: Smoke test
+        run: |
+          docker run --rm ocd-python:0.1.0 python3 --version
+          docker run --rm ocd-python:0.1.0 ruff --version
+          docker run --rm ocd-python:0.1.0 mypy --version
+          docker run --rm ocd-python:0.1.0 mdformat --version
+          docker run --rm ocd-python:0.1.0 whoami | grep -q ocd
+
+  build-node:
+    needs: [lint-dockerfile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build ocd-base
+        run: docker build -t ocd-base:0.1.0 containers/ocd-base/
+      - name: Build ocd-node
+        run: docker build --build-arg BASE_TAG=0.1.0 -t ocd-node:0.1.0 containers/ocd-node/
+      - name: Smoke test
+        run: |
+          docker run --rm ocd-node:0.1.0 node --version
+          docker run --rm ocd-node:0.1.0 pnpm --version
+          docker run --rm ocd-node:0.1.0 prettier --version
+          docker run --rm ocd-node:0.1.0 whoami | grep -q ocd
+
+  build-ollama:
+    needs: [lint-dockerfile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build ocd-base
+        run: docker build -t ocd-base:0.1.0 containers/ocd-base/
+      - name: Build ocd-ollama
+        run: docker build --build-arg BASE_TAG=0.1.0 -t ocd-ollama:0.1.0 containers/ocd-ollama/
+      - name: Smoke test
+        run: |
+          docker run -d --name ollama-test ocd-ollama:0.1.0
+          sleep 3
+          docker exec ollama-test ollama --version
+          docker rm -f ollama-test
+
+  build-ocd:
+    needs: [lint-dockerfile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build ocd-base
+        run: docker build -t ocd-base:0.1.0 containers/ocd-base/
+      - name: Build ocd-python
+        run: docker build --build-arg BASE_TAG=0.1.0 -t ocd-python:0.1.0 containers/ocd-python/
+      - name: Build ocd
+        run: >
+          docker build
+          --build-arg BASE_TAG=0.1.0
+          -t ocd:0.1.0
+          -f containers/ocd/Dockerfile
+          .
+      - name: Smoke test
+        run: |
+          docker run --rm ocd:0.1.0 python3 --version
+          docker run --rm ocd:0.1.0 node --version
+          docker run --rm ocd:0.1.0 ruff --version
+          docker run --rm ocd:0.1.0 claude --version
+          docker run --rm ocd:0.1.0 ollama --version
+          docker run --rm ocd:0.1.0 whoami | grep -q ocd
