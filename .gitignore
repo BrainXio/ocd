@@ -102,3 +102,4 @@ archive/
 # === act (nektos) ===
 .secrets
 .actrc.local
+CLAUDE.md
