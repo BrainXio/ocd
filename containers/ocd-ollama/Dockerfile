@@ -18,7 +18,7 @@ RUN apt-get update \
         curl \
         zstd \
     && mkdir -p /tmp/ollama-install \
-    && curl -fsSL "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst" \
+    && curl --retry 3 --retry-delay 5 -fsSL "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst" \
         | zstd -d \
         | tar -xC /tmp/ollama-install \
     && mv /tmp/ollama-install/bin/ollama /usr/local/bin/ollama \
