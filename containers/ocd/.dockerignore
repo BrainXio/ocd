@@ -1,0 +1,21 @@
+# Deny everything by default, then whitelist what the build needs.
+# Project source is mounted at runtime via devcontainer workspace mount.
+
+*
+
+# Dependency specs (Docker layer cache)
+!pyproject.toml
+!uv.lock
+!package.json
+!package-lock.json
+
+# OCD package source (installed into /opt/ocd/venv/)
+!src/ocd/
+
+# Template assets (copied to /opt/ocd/templates/ and /home/ocd/.claude/)
+!.claude/
+!.gitleaks.toml
+!git_hooks/
+
+# Exclude local-only config (project-specific, not for distribution)
+.claude/settings.local.json

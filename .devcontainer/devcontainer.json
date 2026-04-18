@@ -1,0 +1,29 @@
+{
+  "name": "OCD Devcontainer",
+  "image": "ghcr.io/brainxio/ocd:latest",
+  "workspaceFolder": "/home/ocd/project",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/ocd/project,type=bind,consistency=cached",
+  "runArgs": ["--gpus=all"],
+  "postCreateCommand": "ocd init",
+  "remoteEnv": {
+    "OCD_PROJECT_ROOT": "/home/ocd/project"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+        "timonwong.shellcheck",
+        "DavidAnson.vscode-markdownlint",
+        "redhat.vscode-yaml",
+        "ms-vscode-remote.remote-containers"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "python.analysis.typeCheckingMode": "strict"
+      }
+    }
+  }
+}

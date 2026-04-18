@@ -28,4 +28,18 @@ else
     echo "  Install: https://github.com/gitleaks/gitleaks#installing" >&2
 fi
 
+# --- Dockerfile linting (hadolint) ---
+if command -v hadolint >/dev/null 2>&1; then
+    changed_dockerfiles="$(git diff --cached --name-only --diff-filter=ACM -- 'containers/*/Dockerfile')"
+    if [ -n "$changed_dockerfiles" ]; then
+        if ! echo "$changed_dockerfiles" | xargs hadolint; then
+            echo "error: hadolint found Dockerfile issues" >&2
+            exit 1
+        fi
+    fi
+else
+    echo "warning: hadolint not installed, skipping Dockerfile linting" >&2
+    echo "  Install: https://github.com/hadolint/hadolint#installing" >&2
+fi
+
 exit 0

@@ -156,7 +156,7 @@ Path-scoped rules load only when matching files are read; unconditional rules lo
 
 | Hook | Purpose |
 |------|---------|
-| `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks) |
+| `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks); lint Dockerfiles (hadolint) |
 | `pre-push` | Run `pytest` before push; abort if tests fail |
 | `commit-msg` | Reject AI attribution in commit messages |
 
@@ -200,6 +200,7 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | htmlhint | `.htmlhintrc` | HTML | `npm ci` |
 | prettier | `.prettierrc` | JSON | `npm ci` |
 | sqlfluff | `.sqlfluff` | SQL | `uv sync --extra sql` |
+| hadolint | `.hadolint.yaml` | Dockerfile | binary install |
 
 Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd-lint-work` hook reports missing linters gracefully — it does not block edits when a linter is unavailable.
 
@@ -221,6 +222,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 
 | Command | Module | Purpose |
 |---------|--------|---------|
+| `ocd` | `ocd.cli:main` | Container init (`ocd init`) and shell (`ocd shell`) |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
 | `ocd-lint-kb` | `ocd.lint:main` | Structural + LLM contradiction checks on knowledge base |
@@ -249,6 +251,61 @@ All entry points are defined in `pyproject.toml` `[project.scripts]` and install
 | 4 (after 3) | `test-python` | pytest | all |
 
 Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` only. Branch protection on `main` requires passing CI, signed commits, and resolved conversations.
+
+## Container CI Pipeline
+
+| Stage | Job | Tool | Trigger |
+|-------|-----|------|---------|
+| 1 (lint) | `lint-dockerfile` | hadolint (binary install, reads `.hadolint.yaml`) | paths: `containers/**`, `.hadolint.yaml` |
+| 2 (build) | `build-base` | Docker | after lint |
+| 2 (build) | `build-python` | Docker | after lint |
+| 2 (build) | `build-node` | Docker | after lint |
+| 2 (build) | `build-ollama` | Docker | after lint |
+| 2 (build) | `build-ocd` | Docker | after lint |
+
+Runs on push to `main` and on PRs touching `containers/**` or `.hadolint.yaml`. Separate from the main CI pipeline to avoid gating code quality checks on slow container builds.
+
+### Container Images
+
+| Image | Base | Purpose |
+|-------|------|---------|
+| `ocd-base` | `debian:bookworm-slim` | Hardened foundational image with `uv`, `git`, `shellcheck` |
+| `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` with frontmatter plugin |
+| `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint`, `stylelint`, `htmlhint` |
+| `ocd` | `ocd-python` | Product image: Python + Node + Ollama + Claude Code + OCD package + dep cache |
+| `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference |
+
+Images live in `containers/<name>/Dockerfile`. Build commands:
+
+```bash
+docker build -t ocd-base:0.1.0 containers/ocd-base/
+docker build --build-arg BASE_TAG=0.1.0 -t ocd-python:0.1.0 containers/ocd-python/
+docker build --build-arg BASE_TAG=0.1.0 -t ocd-node:0.1.0 containers/ocd-node/
+docker build --build-arg BASE_TAG=0.1.0 -t ocd-ollama:0.1.0 containers/ocd-ollama/
+docker build --build-arg BASE_TAG=0.1.0 -t ocd:0.1.0 -f containers/ocd/Dockerfile .
+```
+
+Published images will be available at `ghcr.io/brainxio/ocd-<name>:<version>` (e.g., `ghcr.io/brainxio/ocd:0.1.0` for the product image).
+
+## Devcontainer
+
+The `.devcontainer/devcontainer.json` provides instant onboarding with VS Code:
+
+- References pre-built image `ghcr.io/brainxio/ocd:0.1.0`
+- Includes Python 3.12, Node.js 22, all linters, Ollama, and Claude Code
+- OCD package and `.claude/` config (skills, agents, rules) pre-installed at `/opt/ocd/venv/` and `/home/ocd/.claude/`
+- Runs `ocd init` on creation (seeds project-level templates, installs deps and git hooks)
+- Recommended extensions: Python, ruff, mypy, shellcheck, markdownlint, YAML, remote-containers
+
+### Inceptive Container
+
+The `ocd` container image is "inceptive" — it embeds the OCD tooling itself so any project using it immediately benefits from OCD features:
+
+- **OCD package** installed in `/opt/ocd/venv/` (entry points on PATH regardless of workspace mount)
+- **`.claude/` config** at `/home/ocd/.claude/` (skills, agents, rules, settings available to all projects via user-level config)
+- **Templates** at `/opt/ocd/templates/` (git hooks, gitleaks config — copied to project by `ocd init`)
+- **`ocd init`** seeds project-level files, installs dependencies, sets up git hooks
+- **`ocd shell`** starts an interactive bash session with the OCD environment
 
 ## Permissions and Sandbox
 

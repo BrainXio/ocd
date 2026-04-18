@@ -1,0 +1,7 @@
+---
+ignored:
+  - DL3008  # Pin versions in apt-get install; we pin via digest in FROM instead
+  - DL3006  # Pin image tags in FROM; we use ARG BASE_TAG which hadolint can't resolve
+trustedRegistries:
+  - ghcr.io
+  - docker.io

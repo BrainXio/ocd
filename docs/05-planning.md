@@ -14,17 +14,17 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 |--------|---------|--------|
 | `sqlfluff` | SQL linting CI job for the `sql` skill | Pending tool evaluation |
 | `trivy` | Container image and dependency vulnerability scanning in CI | Pending tool evaluation |
-| `hadolint` | Dockerfile linting commit gate for the `docker` skill | Pending tool evaluation |
+| `hadolint` | Dockerfile linting commit gate for the `docker` skill | Done
 
 ## New Container Images
 
 | Image | Base | Purpose | Status |
 |-------|------|---------|--------|
-| `ocd-base` | Debian Bookworm Slim | Hardened foundational image with `uv`, `git`, `shellcheck` | Planned |
-| `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` | Planned |
-| `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint` | Planned |
-| `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference | Planned |
-| `ocd-devcontainer` | `ocd-python` + `ocd-node` | Full devcontainer with Claude Code, all linters, and Ollama | Planned |
+| `ocd-base` | Debian Bookworm Slim | Hardened foundational image with `uv`, `git`, `shellcheck` | Done |
+| `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` | Done |
+| `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint` | Done |
+| `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference | Done |
+| `ocd` | `ocd-python` + `ocd-node` | Product image with Claude Code, all linters, and Ollama (installs project via `ocd init`) | Done |
 
 Images follow a layered architecture: hardened base → language toolchains → application runtimes → integrated dev environments. Each image adds only what the layer above needs, following the Minimal Surface Area standard.
 
@@ -41,7 +41,13 @@ All subagents follow the task-driven model: single concern, composable, testable
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| `.devcontainer/` definition | Instant onboarding using planned container images | Planned |
+| `.devcontainer/` definition | Instant onboarding using planned container images | Done |
+
+## New Commands
+
+| Command | Purpose | Status |
+|---------|---------|--------|
+| `ocd format` | Run all formatters with auto-fix (ruff, mdformat, etc.) | Planned |
 
 ## CI/CD Beyond Lint
 

@@ -17,6 +17,7 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.24"]
 sql = ["sqlfluff>=3.0"]
 
 [project.scripts]
+ocd = "ocd.cli:main"
 ocd-compile = "ocd.compile:main"
 ocd-flush = "ocd.flush:main"
 ocd-query = "ocd.query:main"

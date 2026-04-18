@@ -1,0 +1,13 @@
+.git
+.venv
+node_modules
+.agent
+.claude
+__pycache__
+dist
+build
+.docker
+*.egg-info
+.mypy_cache
+.ruff_cache
+.pytest_cache
