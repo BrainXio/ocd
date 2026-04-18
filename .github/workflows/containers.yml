@@ -163,21 +163,27 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: containers/ocd-python
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base,BASE_TAG=latest
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-python:latest
       - name: Build and push ocd-node
         uses: docker/build-push-action@v6
         with:
           context: containers/ocd-node
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base,BASE_TAG=latest
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-node:latest
       - name: Build and push ocd-ollama
         uses: docker/build-push-action@v6
         with:
           context: containers/ocd-ollama
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base,BASE_TAG=latest
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-ollama:latest
       - name: Build and push ocd
@@ -185,7 +191,9 @@ jobs:
         with:
           context: .
           file: containers/ocd/Dockerfile
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-python,BASE_TAG=latest
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-python
+            BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd:latest
 
@@ -216,7 +224,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: containers/ocd-python
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base,BASE_TAG=${{ steps.version.outputs.VERSION }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=${{ steps.version.outputs.VERSION }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd-python:${{ steps.version.outputs.VERSION }}
@@ -225,7 +235,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: containers/ocd-node
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base,BASE_TAG=${{ steps.version.outputs.VERSION }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=${{ steps.version.outputs.VERSION }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd-node:${{ steps.version.outputs.VERSION }}
@@ -234,7 +246,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: containers/ocd-ollama
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base,BASE_TAG=${{ steps.version.outputs.VERSION }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=${{ steps.version.outputs.VERSION }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd-ollama:${{ steps.version.outputs.VERSION }}
@@ -244,7 +258,9 @@ jobs:
         with:
           context: .
           file: containers/ocd/Dockerfile
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-python,BASE_TAG=${{ steps.version.outputs.VERSION }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-python
+            BASE_TAG=${{ steps.version.outputs.VERSION }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd:${{ steps.version.outputs.VERSION }}
