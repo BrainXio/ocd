@@ -13,7 +13,7 @@ RUN apt-get update \
     && apt-get install --no-install-recommends -y \
         ca-certificates \
         curl \
-    && curl --retry 3 --retry-delay 5 -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && curl --retry 6 --retry-delay 10 -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install --no-install-recommends -y \
         nodejs \
     && corepack enable \

@@ -15,8 +15,8 @@ RUN apt-get update \
         ca-certificates \
         curl \
         git \
-    && curl --retry 3 --retry-delay 5 -LsSf "https://astral.sh/uv/${UV_VERSION}/install.sh" | UV_INSTALL_DIR=/usr/local/bin sh \
-    && curl --retry 3 --retry-delay 5 -LsSf "https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.gz" \
+    && curl --retry 6 --retry-delay 10 -LsSf "https://astral.sh/uv/${UV_VERSION}/install.sh" | UV_INSTALL_DIR=/usr/local/bin sh \
+    && curl --retry 6 --retry-delay 10 -LsSf "https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.gz" \
         | tar -xz --strip-components=1 -C /usr/local/bin "shellcheck-v${SHELLCHECK_VERSION}/shellcheck" \
     && apt-get purge -y curl \
     && apt-get autoremove -y \
