@@ -43,6 +43,12 @@ All subagents follow the task-driven model: single concern, composable, testable
 |------|---------|--------|
 | `.devcontainer/` definition | Instant onboarding using planned container images | Done |
 
+## New Commands
+
+| Command | Purpose | Status |
+|---------|---------|--------|
+| `ocd format` | Run all formatters with auto-fix (ruff, mdformat, etc.) | Planned |
+
 ## CI/CD Beyond Lint
 
 | Item | Purpose | Status |
