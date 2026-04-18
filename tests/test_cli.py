@@ -56,16 +56,17 @@ class TestMainDispatch:
     """main() dispatches to subcommands correctly."""
 
     def test_init_runs_without_templates(self, tmp_path, capsys):
-        with patch.object(sys, "argv", ["ocd", "init"]), \
-             patch.dict(os.environ, {"PWD": str(tmp_path)}), \
-             patch("ocd.cli.Path.cwd", return_value=tmp_path):
+        with (
+            patch.object(sys, "argv", ["ocd", "init"]),
+            patch.dict(os.environ, {"PWD": str(tmp_path)}),
+            patch("ocd.cli.Path.cwd", return_value=tmp_path),
+        ):
             os.chdir(tmp_path)
             main()
         output = capsys.readouterr().out
         assert "OCD environment initialized" in output
 
     def test_unknown_command_exits(self):
-        with patch.object(sys, "argv", ["ocd", "bogus"]), \
-             pytest.raises(SystemExit) as exc_info:
+        with patch.object(sys, "argv", ["ocd", "bogus"]), pytest.raises(SystemExit) as exc_info:
             main()
         assert exc_info.value.code == 1
