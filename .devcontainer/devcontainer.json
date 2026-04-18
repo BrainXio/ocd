@@ -3,6 +3,7 @@
   "image": "ghcr.io/brainxio/ocd:latest",
   "workspaceFolder": "/home/ocd/project",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/ocd/project,type=bind,consistency=cached",
+  "runArgs": ["--gpus=all"],
   "postCreateCommand": "ocd init",
   "remoteEnv": {
     "OCD_PROJECT_ROOT": "/home/ocd/project"
