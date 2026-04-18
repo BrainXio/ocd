@@ -1,9 +1,11 @@
 REGISTRY := ghcr.io/brainxio
 TAG := latest
+GPU_FLAG := $(shell docker info 2>/dev/null | grep -q 'nvidia' && echo '--gpus=all' || true)
 
 # Short tags for Dockerfile FROM resolution, GHCR tags for devcontainer compatibility.
 # Docker prefers local images over registry pulls, so devcontainer.json works locally
 # without pushing anything.
+# GPU_FLAG is set to --gpus=all when an NVIDIA runtime is available (harmless no-op otherwise).
 
 .PHONY: all base python node ollama ocd test clean
 
@@ -34,12 +36,16 @@ ocd: python
 
 test: ocd
 	@echo "=== Smoke testing ocd:$(TAG) ==="
-	docker run --rm --entrypoint="" ocd:$(TAG) python3 --version
-	docker run --rm --entrypoint="" ocd:$(TAG) node --version
-	docker run --rm --entrypoint="" ocd:$(TAG) ruff --version
-	docker run --rm --entrypoint="" ocd:$(TAG) which ocd
-	docker run --rm --entrypoint="" ocd:$(TAG) ls /home/ocd/.claude/
-	docker run --rm --entrypoint="" ocd:$(TAG) ls /opt/ocd/templates/
+	docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) python3 --version
+	docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) node --version
+	docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) ruff --version
+	docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) which ocd
+	docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) ls /home/ocd/.claude/
+	docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) ls /opt/ocd/templates/
+	@echo "=== GPU passthrough ==="
+	@docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) nvidia-smi -L > /dev/null 2>&1 && \
+		docker run --rm $(GPU_FLAG) --entrypoint="" ocd:$(TAG) nvidia-smi -L || \
+		echo "  (no GPU detected — skipped)"
 	@echo "=== All smoke tests passed ==="
 
 clean:
