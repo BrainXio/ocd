@@ -11,9 +11,9 @@ on:
       - "package.json"
       - "package-lock.json"
       - ".claude/**"
+      - ".github/workflows/containers.yml"
     tags: ["v*"]
   pull_request:
-    branches: [main]
     paths:
       - "containers/**"
       - ".hadolint.yaml"
@@ -22,6 +22,8 @@ on:
       - "package.json"
       - "package-lock.json"
       - ".claude/**"
+      - ".github/workflows/containers.yml"
+  workflow_dispatch:
 
 concurrency:
   group: containers-${{ github.ref }}
