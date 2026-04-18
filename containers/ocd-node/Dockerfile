@@ -1,7 +1,7 @@
-# Build: docker build --build-arg BASE_TAG=0.1.0 -t ocd-node:0.1.0 containers/ocd-node/
+# Build: docker build -t ocd-node:latest containers/ocd-node/
 
 ARG BASE_IMAGE=ocd-base
-ARG BASE_TAG=0.1.0
+ARG BASE_TAG=latest
 
 FROM ${BASE_IMAGE}:${BASE_TAG}
 

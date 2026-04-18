@@ -1,6 +1,6 @@
 {
   "name": "OCD Devcontainer",
-  "image": "ghcr.io/brainxio/ocd:0.1.0",
+  "image": "ghcr.io/brainxio/ocd:latest",
   "workspaceFolder": "/home/ocd/project",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/ocd/project,type=bind,consistency=cached",
   "postCreateCommand": "ocd init",

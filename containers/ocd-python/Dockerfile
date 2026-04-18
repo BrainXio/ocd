@@ -1,7 +1,7 @@
-# Build: docker build --build-arg BASE_TAG=0.1.0 -t ocd-python:0.1.0 containers/ocd-python/
+# Build: docker build -t ocd-python:latest containers/ocd-python/
 
 ARG BASE_IMAGE=ocd-base
-ARG BASE_TAG=0.1.0
+ARG BASE_TAG=latest
 
 FROM ${BASE_IMAGE}:${BASE_TAG}
 

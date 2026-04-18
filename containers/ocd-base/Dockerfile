@@ -1,4 +1,4 @@
-# Build: docker build -t ocd-base:0.1.0 containers/ocd-base/
+# Build: docker build -t ocd-base:latest containers/ocd-base/
 
 FROM debian:bookworm-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d
 
@@ -22,9 +22,11 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN groupadd --system ocd \
-    && useradd --system --create-home --gid ocd --shell /bin/bash ocd
+# Create non-root user with UID 1000 to match typical host user
+ARG UID=1000
+ARG GID=1000
+RUN groupadd --gid "${GID}" ocd \
+    && useradd --uid "${UID}" --gid ocd --create-home --shell /bin/bash ocd
 
 USER ocd
 WORKDIR /home/ocd

@@ -1,7 +1,7 @@
-# Build: docker build --build-arg BASE_TAG=0.1.0 -t ocd-ollama:0.1.0 containers/ocd-ollama/
+# Build: docker build -t ocd-ollama:latest containers/ocd-ollama/
 
 ARG BASE_IMAGE=ocd-base
-ARG BASE_TAG=0.1.0
+ARG BASE_TAG=latest
 ARG OLLAMA_VERSION=0.21.0
 
 FROM ${BASE_IMAGE}:${BASE_TAG}
