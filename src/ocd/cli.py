@@ -8,6 +8,32 @@ from pathlib import Path
 
 TEMPLATES_DIR = Path("/opt/ocd/templates")
 
+AGENT_DIRS = [
+    ".agent/daily",
+    ".agent/knowledge/concepts",
+    ".agent/knowledge/connections",
+    ".agent/knowledge/qa",
+    ".agent/reports",
+]
+
+AGENT_GITIGNORE = """\
+# Ignore everything in .agent (runtime data)
+*
+# Except .gitkeep files (preserve directory structure)
+!.gitkeep
+# Except this .gitignore itself
+!.gitignore
+# And subdirectories (so git can traverse into them)
+!*/
+"""
+
+AGENT_INDEX = """\
+# Knowledge Base Index
+
+| Article | Summary | Compiled From | Updated |
+|---------|---------|---------------|---------|
+"""
+
 
 def main() -> None:
     """OCD umbrella command — dispatch subcommands."""
@@ -35,10 +61,49 @@ def _detect_project(project_dir: Path) -> dict[str, bool]:
     }
 
 
+def _init_agent_dir(project_dir: Path) -> None:
+    """Scaffold .agent/ directory structure for the knowledge pipeline."""
+    agent_dir = project_dir / ".agent"
+    gitignore = agent_dir / ".gitignore"
+
+    if gitignore.exists():
+        return
+
+    created = False
+    for dir_path in AGENT_DIRS:
+        full = project_dir / dir_path
+        if not full.exists():
+            full.mkdir(parents=True, exist_ok=True)
+            (full / ".gitkeep").touch()
+            created = True
+
+    # Knowledge index
+    knowledge_dir = agent_dir / "knowledge"
+    knowledge_dir.mkdir(parents=True, exist_ok=True)
+    if not (knowledge_dir / ".gitkeep").exists():
+        (knowledge_dir / ".gitkeep").touch()
+
+    index_file = knowledge_dir / "index.md"
+    if not index_file.exists():
+        index_file.write_text(AGENT_INDEX)
+        created = True
+
+    # .gitignore
+    if not gitignore.exists():
+        gitignore.write_text(AGENT_GITIGNORE)
+        created = True
+
+    if created:
+        print("Created .agent/ knowledge pipeline structure.")
+
+
 def _init() -> None:
     """Initialize the OCD environment in a container."""
     project_dir = Path.cwd()
     project = _detect_project(project_dir)
+
+    # Scaffold .agent/ for knowledge pipeline
+    _init_agent_dir(project_dir)
 
     # Seed templates from /opt/ocd/templates/
     copied = _copy_templates(project_dir)
