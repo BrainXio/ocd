@@ -17,7 +17,7 @@ RUN apt-get update \
     && apt-get install --no-install-recommends -y \
         ca-certificates \
         curl \
-    && curl --retry 3 --retry-delay 5 -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && curl --retry 6 --retry-delay 10 -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install --no-install-recommends -y \
         nodejs \
     && corepack enable \
@@ -38,7 +38,7 @@ RUN apt-get update \
         curl \
         zstd \
     && mkdir -p /tmp/ollama-install \
-    && curl --retry 3 --retry-delay 5 -fsSL "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst" \
+    && curl --retry 6 --retry-delay 10 -fsSL "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst" \
         | zstd -d \
         | tar -xC /tmp/ollama-install \
     && mv /tmp/ollama-install/bin/ollama /usr/local/bin/ollama \
@@ -53,7 +53,7 @@ RUN apt-get update \
     && apt-get install --no-install-recommends -y \
         ca-certificates \
         curl \
-    && curl --retry 3 --retry-delay 5 -fsSL https://claude.ai/install.sh | bash \
+    && curl --retry 6 --retry-delay 10 -fsSL https://claude.ai/install.sh | bash \
     && cp -L /root/.local/bin/claude /usr/local/bin/claude \
     && chmod +x /usr/local/bin/claude \
     && apt-get purge -y curl \
