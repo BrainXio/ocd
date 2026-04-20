@@ -14,67 +14,50 @@ from typing import Any
 
 from ocd.config import PROJECT_ROOT, VENV_BIN
 
-# ── Formatter registry ───────────────────────────────────────────────
-# (name, command, extensions | None, config_files | None, timeout, install_hint)
-#   name:          display name
-#   command:       shell command (auto-fix mode, runs from project root)
-#   extensions:    file extensions this formatter handles (no dot), or None if
-#                  the formatter discovers files itself (e.g. prettier --write .)
-#   config_files:  required project config paths, or None
-#   timeout:       seconds before killing subprocess
-#   install_hint:  package install instruction
-
-FORMATTERS: list[tuple[Any, ...]] = [
-    # Python
-    ("ruff-format", "ruff format src/ tests/", None, None, 30, "pip:ruff"),
-    ("ruff-fix", "ruff check --fix src/ tests/", None, None, 30, "pip:ruff"),
-    # Markdown
-    ("mdformat", "mdformat README.md docs/ .claude/skills/", None, None, 15, "pip:mdformat"),
-    # JSON / CSS / HTML — prettier discovers files via its config
-    (
-        "prettier",
-        "npx prettier --write .",
-        None,
-        (
-            ".prettierrc",
-            ".prettierrc.js",
-            ".prettierrc.json",
-            ".prettierrc.yml",
-            "prettier.config.js",
-        ),
-        30,
-        "npm:prettier",
-    ),
-    # CSS — only runs when .css files exist
-    (
-        "stylelint",
-        'npx stylelint --fix "**/*.css"',
-        ("css", "scss", "sass"),
-        (
-            ".stylelintrc",
-            ".stylelintrc.js",
-            ".stylelintrc.json",
-            ".stylelintrc.yml",
-            "stylelint.config.js",
-        ),
-        30,
-        "npm:stylelint",
-    ),
-    # SQL (optional — requires sql extra) — only runs when .sql files exist
-    (
-        "sqlfluff-fix",
-        "sqlfluff fix --force",
-        ("sql",),
-        (".sqlfluff", ".sqlfluff.ini", "pyproject.toml"),
-        30,
-        "pip:sqlfluff",
-    ),
-]
+_IGNORED_DIRS = {
+    ".git",
+    ".venv",
+    "node_modules",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+}
 
 
-def _tool_available(command: str) -> bool:
+def _find_files(root: str, extensions: tuple[str, ...]) -> list[str]:
+    """Find files matching extensions, excluding dependency directories.
+
+    Returns paths relative to root.
+    """
+    project = PROJECT_ROOT
+    matches: list[str] = []
+    for ext in extensions:
+        for path in project.rglob(f"*.{ext}"):
+            if not any(part in _IGNORED_DIRS for part in path.parts):
+                matches.append(str(path.relative_to(project)))
+    return sorted(matches)
+
+
+def _stylelint_cmd(root: str) -> list[str]:
+    """Build stylelint command with CSS file paths found in the project."""
+    css_files = _find_files(root, ("css", "scss", "sass"))
+    if not css_files:
+        return []
+    return ["npx", "stylelint", "--fix", *css_files]
+
+
+def _tool_available(command: list[str] | Any) -> bool:
     """Check if a tool binary is available in venv or on PATH."""
-    binary = command.split()[0]
+    if callable(command):
+        # Resolve callable to get the binary name
+        args = command(str(PROJECT_ROOT))
+        if not args:
+            return False
+        binary = args[0]
+    elif isinstance(command, list):
+        binary = command[0]
+    else:
+        binary = command.split()[0]
     if binary == "npx":
         return shutil.which("npx") is not None
     return (VENV_BIN / binary).exists() or shutil.which(binary) is not None
@@ -85,9 +68,6 @@ def _config_present(config_files: list[str] | None) -> bool:
     if config_files is None:
         return True
     return any((PROJECT_ROOT / cfg).exists() for cfg in config_files)
-
-
-_IGNORED_DIRS = {".git", ".venv", "node_modules", "__pycache__", ".mypy_cache", ".ruff_cache"}
 
 
 def _has_matching_files(extensions: tuple[str, ...] | None) -> bool:
@@ -110,7 +90,82 @@ def _format_install_hint(entry: tuple[Any, ...]) -> str:
         manager = hint.split(":")[0]
         package = hint.split(":", 1)[1]
         return f"`{manager} install {package}`"
-    return f"install {entry[1].split()[0]}"
+    cmd = entry[1]
+    binary = cmd[0] if isinstance(cmd, list) else cmd.split()[0]
+    return f"install {binary}"
+
+
+# ── Formatter registry ───────────────────────────────────────────────
+# (name, command, extensions | None, config_files | None, timeout, install_hint)
+#   name:          display name
+#   command:       list of arguments (no shell=True), or a callable that
+#                  returns a list given the project root path
+#   extensions:    file extensions this formatter handles (no dot), or None if
+#                  the formatter discovers files itself (e.g. prettier --write .)
+#   config_files:  required project config paths, or None
+#   timeout:       seconds before killing subprocess
+#   install_hint:  package install instruction
+
+FORMATTERS: list[tuple[Any, ...]] = [
+    # Python
+    ("ruff-format", ["ruff", "format", "src/", "tests/"], None, None, 30, "pip:ruff"),
+    (
+        "ruff-fix",
+        ["ruff", "check", "--fix", "src/", "tests/"],
+        None,
+        None,
+        30,
+        "pip:ruff",
+    ),
+    # Markdown
+    (
+        "mdformat",
+        ["mdformat", "README.md", "docs/", ".claude/skills/"],
+        None,
+        None,
+        15,
+        "pip:mdformat",
+    ),
+    # JSON / CSS / HTML — prettier discovers files via its config
+    (
+        "prettier",
+        ["npx", "prettier", "--write", "."],
+        None,
+        (
+            ".prettierrc",
+            ".prettierrc.js",
+            ".prettierrc.json",
+            ".prettierrc.yml",
+            "prettier.config.js",
+        ),
+        30,
+        "npm:prettier",
+    ),
+    # CSS — only runs when .css files exist
+    (
+        "stylelint",
+        _stylelint_cmd,
+        ("css", "scss", "sass"),
+        (
+            ".stylelintrc",
+            ".stylelintrc.js",
+            ".stylelintrc.json",
+            ".stylelintrc.yml",
+            "stylelint.config.js",
+        ),
+        30,
+        "npm:stylelint",
+    ),
+    # SQL (optional — requires sql extra) — only runs when .sql files exist
+    (
+        "sqlfluff-fix",
+        ["sqlfluff", "fix", "--force"],
+        ("sql",),
+        (".sqlfluff", ".sqlfluff.ini", "pyproject.toml"),
+        30,
+        "pip:sqlfluff",
+    ),
+]
 
 
 def run_formatters() -> int:
@@ -147,10 +202,21 @@ def run_formatters() -> int:
             results.append({"name": name, "status": "skip", "reason": "no_files"})
             continue
 
+        # Resolve callable commands (e.g. stylelint with dynamic file list)
+        if callable(command):
+            args = command(str(PROJECT_ROOT))
+            if not args:
+                results.append({"name": name, "status": "skip", "reason": "no_files"})
+                continue
+        elif isinstance(command, list):
+            args = command
+        else:
+            results.append({"name": name, "status": "error", "output": "invalid command type"})
+            continue
+
         try:
             result = subprocess.run(
-                command,
-                shell=True,  # nosemgrep
+                args,
                 capture_output=True,
                 text=True,
                 timeout=timeout,

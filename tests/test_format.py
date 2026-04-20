@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 from ocd.format import (
     FORMATTERS,
     _config_present,
+    _find_files,
     _format_install_hint,
     _has_matching_files,
     _tool_available,
@@ -33,29 +34,70 @@ class TestFormattersRegistry:
         names = {e[0] for e in FORMATTERS}
         assert "mdformat" in names
 
+    def test_commands_are_lists_or_callables(self):
+        for entry in FORMATTERS:
+            name, command = entry[0], entry[1]
+            assert isinstance(command, list) or callable(command), (
+                f"{name} command should be list or callable, got {type(command)}"
+            )
+
+    def test_stylelint_command_is_callable(self):
+        names = {e[0]: e[1] for e in FORMATTERS}
+        assert callable(names["stylelint"])
+
+
+class TestFindFiles:
+    def test_finds_python_files(self, monkeypatch, tmp_path):
+        monkeypatch.setattr("ocd.format.PROJECT_ROOT", tmp_path)
+        (tmp_path / "src.py").write_text("pass")
+        result = _find_files(str(tmp_path), ("py",))
+        assert "src.py" in result
+
+    def test_ignores_venv(self, monkeypatch, tmp_path):
+        monkeypatch.setattr("ocd.format.PROJECT_ROOT", tmp_path)
+        venv = tmp_path / ".venv" / "lib"
+        venv.mkdir(parents=True)
+        (venv / "site.py").write_text("pass")
+        result = _find_files(str(tmp_path), ("py",))
+        assert "site.py" not in result
+
+    def test_no_matching_files(self, monkeypatch, tmp_path):
+        monkeypatch.setattr("ocd.format.PROJECT_ROOT", tmp_path)
+        result = _find_files(str(tmp_path), ("xyz",))
+        assert result == []
+
 
 class TestToolAvailable:
     def test_npx_available(self, monkeypatch):
         monkeypatch.setattr("shutil.which", lambda cmd: "/usr/bin/npx" if cmd == "npx" else None)
-        assert _tool_available("npx prettier --write .") is True
+        assert _tool_available(["npx", "prettier", "--write", "."]) is True
 
     def test_npx_unavailable(self, monkeypatch):
         monkeypatch.setattr("shutil.which", lambda _: None)
-        assert _tool_available("npx prettier --write .") is False
+        assert _tool_available(["npx", "prettier", "--write", "."]) is False
 
     def test_venv_tool(self, monkeypatch, tmp_path):
         """A binary in VENV_BIN should be found."""
         fake_bin = tmp_path / "ruff"
         fake_bin.write_text("")
         monkeypatch.setattr("ocd.format.VENV_BIN", tmp_path)
-        assert _tool_available("ruff format") is True
+        assert _tool_available(["ruff", "format", "src/"]) is True
 
     def test_missing_tool(self, monkeypatch):
         monkeypatch.setattr("shutil.which", lambda _: None)
         fake_dir = MagicMock()
         fake_dir.__truediv__ = lambda s, o: MagicMock(exists=lambda: False)
         monkeypatch.setattr("ocd.format.VENV_BIN", fake_dir)
-        assert _tool_available("nonexistent_tool_xyz") is False
+        assert _tool_available(["nonexistent_tool_xyz"]) is False
+
+    def test_callable_command_extracts_binary(self, monkeypatch):
+        monkeypatch.setattr("shutil.which", lambda _: None)
+
+        # A callable command — _tool_available should extract the binary name
+        def fake_cmd(root: str) -> list[str]:
+            return ["npx", "stylelint", "--fix"]
+
+        assert _tool_available(fake_cmd) is False  # npx not available
 
 
 class TestConfigPresent:
@@ -86,13 +128,20 @@ class TestHasMatchingFiles:
 
 class TestFormatInstallHint:
     def test_pip_hint(self):
-        entry = ("ruff-format", "ruff format src/ tests/", None, None, 30, "pip:ruff")
+        entry = ("ruff-format", ["ruff", "format", "src/", "tests/"], None, None, 30, "pip:ruff")
         result = _format_install_hint(entry)
         assert "uv" in result
         assert "ruff" in result
 
     def test_npm_hint(self):
-        entry = ("prettier", "npx prettier --write .", None, (".prettierrc",), 30, "npm:prettier")
+        entry = (
+            "prettier",
+            ["npx", "prettier", "--write", "."],
+            None,
+            (".prettierrc",),
+            30,
+            "npm:prettier",
+        )
         result = _format_install_hint(entry)
         assert "npm" in result
         assert "prettier" in result
