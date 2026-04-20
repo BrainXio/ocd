@@ -34,7 +34,7 @@ All commit messages follow the [Conventional Commits](https://www.conventionalco
 **Rules:**
 
 - Subject line: lowercase, imperative mood, no period, under 72 characters
-- Body: explain *why*, not *what* — the diff shows what
+- Body: explain _why_, not _what_ — the diff shows what
 - No Co-Authored-By lines, no AI attribution tags
 - No emoji prefixes (the type prefix is the signal)
 - One logical change per commit — if you fixed a bug and refactored a function, that's two commits

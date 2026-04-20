@@ -57,35 +57,35 @@ Report findings in this structure:
 
 ### Over-Indirected Logic
 
-| File | From | Through | To | Suggestion |
-|------|------|---------|----|-----------|
+| File       | From              | Through                 | To               | Suggestion                     |
+| ---------- | ----------------- | ----------------------- | ---------------- | ------------------------------ |
 | `flush.py` | `maybe_compile()` | `trigger_compilation()` | `run_compiler()` | Call `run_compiler()` directly |
 
 ### Unnecessary Conditionals
 
-| File | Line | Pattern | Suggestion |
-|------|------|---------|------------|
-| `config.py` | 45 | `if x: return True; else: return False` | `return x` |
-| `hookslib.py` | 22 | Nested if/else for validation | Guard clause: `if not valid: return` |
+| File          | Line | Pattern                                 | Suggestion                           |
+| ------------- | ---- | --------------------------------------- | ------------------------------------ |
+| `config.py`   | 45   | `if x: return True; else: return False` | `return x`                           |
+| `hookslib.py` | 22   | Nested if/else for validation           | Guard clause: `if not valid: return` |
 
 ### Over-Engineered Patterns
 
-| File | Pattern | Simpler Alternative |
-|------|---------|---------------------|
-| `compile.py` | `class LogEntry` with one method | `NamedTuple` or `dict` |
-| `utils.py` | `CustomFileNotFound` exception | Use built-in `FileNotFoundError` |
+| File         | Pattern                          | Simpler Alternative              |
+| ------------ | -------------------------------- | -------------------------------- |
+| `compile.py` | `class LogEntry` with one method | `NamedTuple` or `dict`           |
+| `utils.py`   | `CustomFileNotFound` exception   | Use built-in `FileNotFoundError` |
 
 ### Verbose Alternatives
 
-| File | Line | Current | Simpler |
-|------|------|---------|---------|
-| `lint_work.py` | 78 | Manual loop + append | List comprehension |
-| `query.py` | 33 | String concatenation loop | `"\n".join(lines)` |
+| File           | Line | Current                   | Simpler            |
+| -------------- | ---- | ------------------------- | ------------------ |
+| `lint_work.py` | 78   | Manual loop + append      | List comprehension |
+| `query.py`     | 33   | String concatenation loop | `"\n".join(lines)` |
 
 ### Premature Decomposition
 
-| File | Function | Helper | Suggestion |
-|------|----------|--------|------------|
+| File               | Function           | Helper             | Suggestion           |
+| ------------------ | ------------------ | ------------------ | -------------------- |
 | `session_start.py` | `inject_context()` | `_format_header()` | Inline 2-line helper |
 
 ### Summary
@@ -100,7 +100,7 @@ Report findings in this structure:
 ## Rules
 
 - Only report violations — do not simplify them
-- Distinguish from YAGNI: KISS flags things that *exist* and are too complex; YAGNI flags things that *shouldn't exist*
+- Distinguish from YAGNI: KISS flags things that _exist_ and are too complex; YAGNI flags things that _shouldn't exist_
 - Be conservative: a wrapper function that adds logging, validation, or error handling is not over-indirection
 - Do not flag functions that are called from 2+ places — they are reused, not over-decomposed
 - Do not flag defensive checks (e.g., `if not data: return`) — these are safety, not unnecessary conditionals

@@ -12,7 +12,7 @@ Every PR MUST have at least one label. Apply labels based on the conventional
 commit prefix of the PR title:
 
 | Prefix | Primary label | Additional labels |
-|--------|---------------|-------------------|
+| --------- | ------------- | ---------------------------------------------- |
 | feat: | enhancement | + documentation if docs/ changed |
 | fix: | bug | |
 | docs: | documentation | |

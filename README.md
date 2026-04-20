@@ -4,7 +4,7 @@ A Claude Code environment with a personal knowledge base compiled from AI conver
 
 Inspired by [Karpathy's LLM KB](https://github.com/karpathy/llm-knowledge-base) architecture: daily conversation logs are the source, compiled knowledge articles are the executable.
 
-> **Note:** This README documents O.C.D. itself because this project *is* O.C.D. When applied to another project, the root README would describe that project's code — O.C.D.'s documentation lives in `docs/`.
+> **Note:** This README documents O.C.D. itself because this project _is_ O.C.D. When applied to another project, the root README would describe that project's code — O.C.D.'s documentation lives in `docs/`.
 
 ## Structure
 

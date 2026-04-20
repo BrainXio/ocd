@@ -65,40 +65,40 @@ Report findings in this structure:
 
 ### Broken Wikilinks
 
-| Source Article | Broken Link | Target Does Not Exist |
-|---------------|-------------|----------------------|
-| `concepts/flush-pipeline.md` | `[[concepts/nonexistent]]` | YES |
+| Source Article               | Broken Link                | Target Does Not Exist |
+| ---------------------------- | -------------------------- | --------------------- |
+| `concepts/flush-pipeline.md` | `[[concepts/nonexistent]]` | YES                   |
 
 ### Orphan Pages
 
-| Article | Inbound Links |
-|---------|--------------|
-| `concepts/isolated-topic.md` | 0 |
+| Article                      | Inbound Links |
+| ---------------------------- | ------------- |
+| `concepts/isolated-topic.md` | 0             |
 
 ### Stale Articles
 
-| Article | Last Updated | Days Since Update |
-|---------|-------------|-------------------|
-| `concepts/old-concept.md` | 2026-01-15 | 92 |
+| Article                   | Last Updated | Days Since Update |
+| ------------------------- | ------------ | ----------------- |
+| `concepts/old-concept.md` | 2026-01-15   | 92                |
 
 ### Sparse Articles
 
-| Article | Word Count | Threshold |
-|---------|-----------|-----------|
-| `concepts/placeholder.md` | 12 | < 50 |
+| Article                   | Word Count | Threshold |
+| ------------------------- | ---------- | --------- |
+| `concepts/placeholder.md` | 12         | < 50      |
 
 ### Missing Backlinks
 
-| Source | Target | Reciprocal Link |
-|--------|--------|----------------|
-| `concepts/A.md` | `concepts/B.md` | MISSING |
+| Source          | Target          | Reciprocal Link |
+| --------------- | --------------- | --------------- |
+| `concepts/A.md` | `concepts/B.md` | MISSING         |
 
 ### Index Consistency
 
-| Check | Status |
-|-------|--------|
+| Check                   | Status |
+| ----------------------- | ------ |
 | All index entries exist | YES/NO |
-| All articles in index | YES/NO |
+| All articles in index   | YES/NO |
 
 ### Summary
 

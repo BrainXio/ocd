@@ -59,39 +59,46 @@ Report findings in this structure:
 ## Docstring Coverage Report
 
 ### Missing Module Docstrings
-| File | Type | Notes |
-|------|------|-------|
-| `utils.py` | library module | No module docstring |
-| `process.py` | entry point script | No docstring |
+
+| File         | Type               | Notes               |
+| ------------ | ------------------ | ------------------- |
+| `utils.py`   | library module     | No module docstring |
+| `process.py` | entry point script | No docstring        |
 
 ### Missing Function Docstrings
-| File | Function | Line |
-|------|----------|------|
-| `utils.py` | `slugify()` | 12 |
-| `utils.py` | `build_index_entry()` | 34 |
+
+| File       | Function              | Line |
+| ---------- | --------------------- | ---- |
+| `utils.py` | `slugify()`           | 12   |
+| `utils.py` | `build_index_entry()` | 34   |
 
 ### Missing Class Docstrings
-| File | Class | Line |
-|------|-------|------|
-| `models.py` | `User` | 8 |
+
+| File        | Class  | Line |
+| ----------- | ------ | ---- |
+| `models.py` | `User` | 8    |
 
 ### Format Inconsistencies
-| File | Issue |
-|------|-------|
+
+| File          | Issue                              |
+| ------------- | ---------------------------------- |
 | `handlers.py` | Mixed `"""` and `'''` quote styles |
-| `main.py` | Google style mixed with reST |
+| `main.py`     | Google style mixed with reST       |
 
 ### TODOs Without Context
-| File | Line | TODO | Has Docstring? |
-|------|------|-----|----------------|
-| `parser.py` | 56 | `# FIXME: handle edge case` | NO |
+
+| File        | Line | TODO                        | Has Docstring? |
+| ----------- | ---- | --------------------------- | -------------- |
+| `parser.py` | 56   | `# FIXME: handle edge case` | NO             |
 
 ### Undocumented Parameters/Returns
-| File | Function | Missing |
-|------|----------|---------|
+
+| File     | Function     | Missing                |
+| -------- | ------------ | ---------------------- |
 | `api.py` | `get_user()` | Returns not documented |
 
 ### Summary
+
 - Missing module docstrings: N
 - Missing function docstrings: N
 - Missing class docstrings: N

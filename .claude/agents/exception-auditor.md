@@ -68,36 +68,43 @@ Report findings in this structure:
 ## Exception Audit Report
 
 ### Bare Excepts
-| File | Line | Context |
-|------|------|---------|
-| `utils.py` | 45 | `except:` with no re-raise |
+
+| File       | Line | Context                    |
+| ---------- | ---- | -------------------------- |
+| `utils.py` | 45   | `except:` with no re-raise |
 
 ### Broad Exception Catches
-| File | Line | Exception Type |
-|------|------|----------------|
-| `main.py` | 23 | `except Exception:` |
+
+| File      | Line | Exception Type      |
+| --------- | ---- | ------------------- |
+| `main.py` | 23   | `except Exception:` |
 
 ### Empty Handlers
-| File | Line | Exception | Handler |
-|------|------|-----------|---------|
-| `config.py` | 12 | `ValueError` | `pass` |
+
+| File        | Line | Exception    | Handler |
+| ----------- | ---- | ------------ | ------- |
+| `config.py` | 12   | `ValueError` | `pass`  |
 
 ### Multi-Catch All (>5 types)
-| File | Line | Count | Types |
-|------|------|-------|-------|
-| `handlers.py` | 67 | 8 | `IOError, OSError, ...` |
+
+| File          | Line | Count | Types                   |
+| ------------- | ---- | ----- | ----------------------- |
+| `handlers.py` | 67   | 8     | `IOError, OSError, ...` |
 
 ### Exception Swallowing
-| File | Line | Pattern |
-|------|------|---------|
-| `processor.py` | 34 | `except: continue` in loop |
+
+| File           | Line | Pattern                    |
+| -------------- | ---- | -------------------------- |
+| `processor.py` | 34   | `except: continue` in loop |
 
 ### Hierarchy Violations
-| File | Line | Exception | Issue |
-|------|------|-----------|-------|
-| `errors.py` | 8 | `class Foo(Exception)` | Should inherit from specific base |
+
+| File        | Line | Exception              | Issue                             |
+| ----------- | ---- | ---------------------- | --------------------------------- |
+| `errors.py` | 8    | `class Foo(Exception)` | Should inherit from specific base |
 
 ### Summary
+
 - Bare excepts: N
 - Broad catches: N
 - Empty handlers: N

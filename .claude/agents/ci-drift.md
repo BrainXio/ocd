@@ -55,35 +55,41 @@ Report findings in this structure:
 ## CI Drift Report
 
 ### Linter Config Drift
-| Linter | Local Config | CI Config | Drift? |
-|--------|--------------|-----------|--------|
-| ruff | `--select E,F` | `--select E,W` | YES |
-| mypy | `--strict` | default | YES |
+
+| Linter | Local Config   | CI Config      | Drift? |
+| ------ | -------------- | -------------- | ------ |
+| ruff   | `--select E,F` | `--select E,W` | YES    |
+| mypy   | `--strict`     | default        | YES    |
 
 ### Python Version
-| Source | Version |
-|--------|---------|
-| `pyproject.toml` | `3.11` |
-| CI workflow | `3.10` |
-| **Drift** | YES |
+
+| Source           | Version |
+| ---------------- | ------- |
+| `pyproject.toml` | `3.11`  |
+| CI workflow      | `3.10`  |
+| **Drift**        | YES     |
 
 ### Hook vs CI
-| Check | Local | CI | Match? |
-|-------|-------|----|--------|
-| Commit patterns | `.claude/scripts/ai-patterns.txt` | Same file | YES |
+
+| Check           | Local                             | CI        | Match? |
+| --------------- | --------------------------------- | --------- | ------ |
+| Commit patterns | `.claude/scripts/ai-patterns.txt` | Same file | YES    |
 
 ### Dependency Drift
-| Package | Local | CI | Drift? |
-|---------|-------|----|--------|
-| `ruff` | `0.1.6` | `0.1.4` | YES |
+
+| Package | Local   | CI      | Drift? |
+| ------- | ------- | ------- | ------ |
+| `ruff`  | `0.1.6` | `0.1.4` | YES    |
 
 ### Missing CI Enforcement
-| Local Check | CI Equivalent | Status |
-|-------------|---------------|--------|
-| Hook: commit-msg | `check-commit-messages` | COVERED |
-| Script: validate-xyz | None | MISSING |
+
+| Local Check          | CI Equivalent           | Status  |
+| -------------------- | ----------------------- | ------- |
+| Hook: commit-msg     | `check-commit-messages` | COVERED |
+| Script: validate-xyz | None                    | MISSING |
 
 ### Summary
+
 - Config drift: N issues
 - Version drift: N issues
 - Missing enforcement: N checks

@@ -66,34 +66,34 @@ Report findings in this structure:
 
 ### SRP Violations
 
-| File | Class/Module | Mixed Responsibilities | Suggestion |
-|------|-------------|----------------------|------------|
+| File           | Class/Module  | Mixed Responsibilities      | Suggestion               |
+| -------------- | ------------- | --------------------------- | ------------------------ |
 | `lint_work.py` | `lint_file()` | Linting + result formatting | Extract result formatter |
 
 ### OCP Violations
 
-| File | Function | Rigid Dispatch | Extension Point |
-|------|----------|---------------|----------------|
+| File           | Function           | Rigid Dispatch              | Extension Point  |
+| -------------- | ------------------ | --------------------------- | ---------------- |
 | `lint_work.py` | `_ext_from_path()` | Hardcoded extension mapping | Registry pattern |
 
 ### LSP Violations
 
-| File | Class | Method | Violation |
-|------|-------|--------|-----------|
-| (none found) | — | — | — |
+| File         | Class | Method | Violation |
+| ------------ | ----- | ------ | --------- |
+| (none found) | —     | —      | —         |
 
 ### ISP Violations
 
-| File | Interface | Unused Methods | Client |
-|------|-----------|---------------|--------|
-| (none found) | — | — | — |
+| File         | Interface | Unused Methods | Client |
+| ------------ | --------- | -------------- | ------ |
+| (none found) | —         | —              | —      |
 
 ### DIP Violations
 
-| File | High-Level | Low-Level Dependency | Suggestion |
-|------|-----------|---------------------|------------|
-| `lint_work.py` | `run_linter()` | `subprocess.run` direct call | Abstract process runner |
-| `flush.py` | `maybe_compile()` | Hardcoded `ocd-compile` path | Use config constant |
+| File           | High-Level        | Low-Level Dependency         | Suggestion              |
+| -------------- | ----------------- | ---------------------------- | ----------------------- |
+| `lint_work.py` | `run_linter()`    | `subprocess.run` direct call | Abstract process runner |
+| `flush.py`     | `maybe_compile()` | Hardcoded `ocd-compile` path | Use config constant     |
 
 ### Summary
 

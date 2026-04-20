@@ -57,37 +57,37 @@ Report findings in this structure:
 
 ### Unused Abstractions
 
-| File | Abstraction | Concrete Implementations | Suggestion |
-|------|-------------|--------------------------|------------|
-| `utils.py` | `StateLoader` protocol | 1 (`JsonStateLoader`) | Merge into concrete class |
-| `config.py` | `Backend` enum | 1 entry (`LOCAL`) | Remove enum, use constant |
+| File        | Abstraction            | Concrete Implementations | Suggestion                |
+| ----------- | ---------------------- | ------------------------ | ------------------------- |
+| `utils.py`  | `StateLoader` protocol | 1 (`JsonStateLoader`)    | Merge into concrete class |
+| `config.py` | `Backend` enum         | 1 entry (`LOCAL`)        | Remove enum, use constant |
 
 ### Premature Generalizations
 
-| File | Generalization | Always-Used Value | Suggestion |
-|------|---------------|-------------------|------------|
-| `flush.py` | `output_format` parameter | `"json"` at all call sites | Remove parameter |
-| `compile.py` | `Strategy` dispatch table | 1 entry | Replace with direct call |
+| File         | Generalization            | Always-Used Value          | Suggestion               |
+| ------------ | ------------------------- | -------------------------- | ------------------------ |
+| `flush.py`   | `output_format` parameter | `"json"` at all call sites | Remove parameter         |
+| `compile.py` | `Strategy` dispatch table | 1 entry                    | Replace with direct call |
 
 ### Speculative Features
 
-| File | Feature | Evidence | Suggestion |
-|------|---------|----------|------------|
-| `query.py` | `--remote` flag | Never True in codebase | Remove dead path |
-| `config.py` | `REMOTE_BACKEND` constant | Never referenced | Remove |
+| File        | Feature                   | Evidence               | Suggestion       |
+| ----------- | ------------------------- | ---------------------- | ---------------- |
+| `query.py`  | `--remote` flag           | Never True in codebase | Remove dead path |
+| `config.py` | `REMOTE_BACKEND` constant | Never referenced       | Remove           |
 
 ### Over-Parameterized Functions
 
-| File | Function | Unused Parameter | Call Sites |
-|------|----------|-----------------|-----------|
-| `compile.py` | `compile_logs()` | `include_metadata` | Always `True` |
-| `flush.py` | `save_state()` | `compress` | Never provided |
+| File         | Function         | Unused Parameter   | Call Sites     |
+| ------------ | ---------------- | ------------------ | -------------- |
+| `compile.py` | `compile_logs()` | `include_metadata` | Always `True`  |
+| `flush.py`   | `save_state()`   | `compress`         | Never provided |
 
 ### Premature Optimization
 
-| File | Optimization | Evidence | Suggestion |
-|------|--------------|----------|------------|
-| (none found) | — | — | — |
+| File         | Optimization | Evidence | Suggestion |
+| ------------ | ------------ | -------- | ---------- |
+| (none found) | —            | —        | —          |
 
 ### Summary
 

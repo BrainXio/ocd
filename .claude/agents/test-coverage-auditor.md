@@ -53,21 +53,21 @@ Report findings in this structure:
 
 ### Missing Test Files
 
-| Source Module | Expected Test File | Status |
-|-------------|-------------------|--------|
+| Source Module        | Expected Test File      | Status  |
+| -------------------- | ----------------------- | ------- |
 | `src/ocd/compile.py` | `tests/test_compile.py` | MISSING |
-| `src/ocd/query.py` | `tests/test_query.py` | MISSING |
-| `src/ocd/lint.py` | `tests/test_lint.py` | MISSING |
-| `src/ocd/flush.py` | `tests/test_flush.py` | COVERED |
-| ... | ... | ... |
+| `src/ocd/query.py`   | `tests/test_query.py`   | MISSING |
+| `src/ocd/lint.py`    | `tests/test_lint.py`    | MISSING |
+| `src/ocd/flush.py`   | `tests/test_flush.py`   | COVERED |
+| ...                  | ...                     | ...     |
 
 ### Untested Public Functions
 
-| Module | Function | Tested |
-|--------|----------|--------|
-| `flush.py` | `save_flush_state()` | YES |
-| `flush.py` | `maybe_trigger_compilation()` | NO |
-| ... | ... | ... |
+| Module     | Function                      | Tested |
+| ---------- | ----------------------------- | ------ |
+| `flush.py` | `save_flush_state()`          | YES    |
+| `flush.py` | `maybe_trigger_compilation()` | NO     |
+| ...        | ...                           | ...    |
 
 ### Summary
 

@@ -51,35 +51,35 @@ Report findings in this structure:
 
 ### Safe Upgrades (Patch/Minor)
 
-| Package | Current | Latest | Type | Change |
-|---------|---------|--------|------|--------|
-| `ruff` | 0.8.0 | 0.8.4 | patch | Bug fixes, no API changes |
-| `mypy` | 1.10.0 | 1.11.0 | minor | New checks, backward compatible |
+| Package | Current | Latest | Type  | Change                          |
+| ------- | ------- | ------ | ----- | ------------------------------- |
+| `ruff`  | 0.8.0   | 0.8.4  | patch | Bug fixes, no API changes       |
+| `mypy`  | 1.10.0  | 1.11.0 | minor | New checks, backward compatible |
 
 ### Risky Upgrades (Major)
 
-| Package | Current | Latest | Breaking Change |
-|---------|---------|--------|----------------|
-| `pydantic` | 1.10 | 2.0 | V1 → V2 migration required |
+| Package    | Current | Latest | Breaking Change            |
+| ---------- | ------- | ------ | -------------------------- |
+| `pydantic` | 1.10    | 2.0    | V1 → V2 migration required |
 
 ### Version Constraint Issues
 
-| Package | Constraint | Issue | Suggestion |
-|---------|-----------|-------|------------|
+| Package    | Constraint | Issue                    | Suggestion  |
+| ---------- | ---------- | ------------------------ | ----------- |
 | `requests` | `==2.31.0` | Exact pin blocks patches | `>=2.31,<3` |
-| `click` | `*` | No version constraint | `>=8.0,<9` |
+| `click`    | `*`        | No version constraint    | `>=8.0,<9`  |
 
 ### Unused Dependencies
 
-| Package | Declared In | Used |
-|---------|-------------|------|
+| Package | Declared In      | Used                  |
+| ------- | ---------------- | --------------------- |
 | `tomli` | `pyproject.toml` | NO — no imports found |
 
 ### Security Advisories
 
-| Package | Advisory | Severity | Fixed In |
-|---------|----------|----------|----------|
-| (none found) | — | — | — |
+| Package      | Advisory | Severity | Fixed In |
+| ------------ | -------- | -------- | -------- |
+| (none found) | —        | —        | —        |
 
 ### Summary
 

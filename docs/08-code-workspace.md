@@ -17,7 +17,7 @@ How the `ocd.code-workspace` file configures VS Code for this project, what each
 The workspace exposes five root folders:
 
 | Folder | Purpose |
-|--------|---------|
+| ------------------ | ----------------------------------------- |
 | `.` | Project root: source, tests, docs, config |
 | `.agent/daily` | Daily session logs |
 | `.agent/knowledge` | Compiled knowledge articles |
@@ -31,7 +31,7 @@ The `.agent/` folders give quick access to the knowledge pipeline's data without
 Each setting is a single-source-of-truth decision that matches a project standard:
 
 | Setting | Value | Why |
-|---------|-------|-----|
+| ---------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------- |
 | `editor.formatOnSave` | `true` | Catches formatting issues before the lint hook does |
 | `editor.insertSpaces` | `true` | Python convention (PEP 8) |
 | `editor.rulers` | `[100]` | Matches `ruff` line-length in `pyproject.toml` |
@@ -52,7 +52,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored). Each d
 Suggested extensions:
 
 | Extension | Purpose |
-|-----------|---------|
+| -------------------------------- | --------------------------------------- |
 | `ms-python.python` | Python language support |
 | `charliermarsh.ruff` | Linting, formatting, and import sorting |
 | `ms-python.mypy-type-checker` | Strict type checking |

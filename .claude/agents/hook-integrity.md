@@ -24,20 +24,25 @@ Report findings in this structure:
 ## Hook Integrity Report
 
 ### Symlinks
+
 - [ ] `.git/hooks/commit-msg` → [target or MISSING]
 - [ ] `.git/hooks/pre-commit` → [target or MISSING]
 
 ### Scripts
+
 - [ ] `.claude/hooks/commit-msg` - [EXISTS/MISSING] [executable/not]
 - [ ] `.claude/hooks/pre-commit` - [EXISTS/MISSING] [executable/not]
 
 ### Patterns
+
 - [ ] `.claude/scripts/ai-patterns.txt` - [EXISTS/MISSING] [N lines / EMPTY]
 
 ### CI Parity
+
 - [ ] CI job reads from `.claude/scripts/ai-patterns.txt` - [YES/NO]
 
 ### Issues Found
+
 [List any failures above]
 ```
 

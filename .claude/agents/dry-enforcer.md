@@ -55,36 +55,36 @@ Report findings in this structure:
 
 ### Duplicated Function Logic
 
-| Pattern | Module A | Module B | Shared Utility? |
-|---------|----------|----------|----------------|
-| load/save state | `flush.py:load_flush_state()` | `utils.py:load_state()` | Could use `utils.py` |
-| JSON parsing + error handling | `compile.py:parse_log()` | `query.py:parse_entry()` | Extract `parse_json_file()` |
+| Pattern                       | Module A                      | Module B                 | Shared Utility?             |
+| ----------------------------- | ----------------------------- | ------------------------ | --------------------------- |
+| load/save state               | `flush.py:load_flush_state()` | `utils.py:load_state()`  | Could use `utils.py`        |
+| JSON parsing + error handling | `compile.py:parse_log()`      | `query.py:parse_entry()` | Extract `parse_json_file()` |
 
 ### Duplicated Error Handling
 
-| Pattern | Locations | Occurrences |
-|---------|-----------|-------------|
-| `except Exception as e: print(e)` | `hooks/session_start.py`, `hooks/session_end.py` | 4 |
-| `FileNotFoundError → return {}` | `flush.py`, `config.py`, `utils.py` | 3 |
+| Pattern                           | Locations                                        | Occurrences |
+| --------------------------------- | ------------------------------------------------ | ----------- |
+| `except Exception as e: print(e)` | `hooks/session_start.py`, `hooks/session_end.py` | 4           |
+| `FileNotFoundError → return {}`   | `flush.py`, `config.py`, `utils.py`              | 3           |
 
 ### Duplicated Validation
 
-| Pattern | Locations | Suggestion |
-|---------|-----------|-------------|
+| Pattern                        | Locations   | Suggestion                     |
+| ------------------------------ | ----------- | ------------------------------ |
 | `Path(p).exists()` before read | 5 functions | Extract `ensure_path()` helper |
-| `isinstance(x, dict)` check | 3 functions | Use shared type guard |
+| `isinstance(x, dict)` check    | 3 functions | Use shared type guard          |
 
 ### Duplicated String Formatting
 
-| Pattern | Locations | Suggestion |
-|---------|-----------|-------------|
-| Error message template | `lint_work.py`, `hooks/hookslib.py` | Extract to `config.py` |
-| JSON output structure | 4 hook modules | Extract `format_hook_output()` |
+| Pattern                | Locations                           | Suggestion                     |
+| ---------------------- | ----------------------------------- | ------------------------------ |
+| Error message template | `lint_work.py`, `hooks/hookslib.py` | Extract to `config.py`         |
+| JSON output structure  | 4 hook modules                      | Extract `format_hook_output()` |
 
 ### Duplicated Test Patterns
 
-| Pattern | Test Files | Suggestion |
-|---------|-----------|------------|
+| Pattern                     | Test Files                                   | Suggestion                        |
+| --------------------------- | -------------------------------------------- | --------------------------------- |
 | Mock `subprocess.run` setup | `test_lint_work.py`, `test_session_start.py` | Extract `mock_subprocess` fixture |
 
 ### Summary

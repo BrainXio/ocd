@@ -108,28 +108,28 @@ Report findings in this structure:
 
 ### A01: Broken Access Control
 
-| File | Line | Pattern | Severity | Suggestion |
-|------|------|---------|----------|------------|
-| `routes.py` | 45 | Missing auth decorator | High | Add `@login_required` |
+| File        | Line | Pattern                | Severity | Suggestion            |
+| ----------- | ---- | ---------------------- | -------- | --------------------- |
+| `routes.py` | 45   | Missing auth decorator | High     | Add `@login_required` |
 
 ### A02: Cryptographic Failures
 
-| File | Line | Pattern | Severity | Suggestion |
-|------|------|---------|----------|------------|
-| `config.py` | 12 | `ALLOWED_HOSTS = ["*"]` | Medium | Restrict to known hosts |
+| File        | Line | Pattern                 | Severity | Suggestion              |
+| ----------- | ---- | ----------------------- | -------- | ----------------------- |
+| `config.py` | 12   | `ALLOWED_HOSTS = ["*"]` | Medium   | Restrict to known hosts |
 
 ### A03: Injection
 
-| File | Line | Pattern | Severity | Suggestion |
-|------|------|---------|----------|------------|
-| `queries.py` | 23 | `f"SELECT ... {user_id}"` | Critical | Use parameterized queries |
+| File         | Line | Pattern                   | Severity | Suggestion                |
+| ------------ | ---- | ------------------------- | -------- | ------------------------- |
+| `queries.py` | 23   | `f"SELECT ... {user_id}"` | Critical | Use parameterized queries |
 
 ### A04-A10: Other Categories
 
-| Category | File | Line | Pattern | Severity | Suggestion |
-|----------|------|------|---------|----------|------------|
-| A04 | `api.py` | 67 | No rate limit on auth | High | Add rate limiting |
-| A05 | `settings.py` | 5 | `DEBUG = True` | High | Set `DEBUG = False` in production |
+| Category | File          | Line | Pattern               | Severity | Suggestion                        |
+| -------- | ------------- | ---- | --------------------- | -------- | --------------------------------- |
+| A04      | `api.py`      | 67   | No rate limit on auth | High     | Add rate limiting                 |
+| A05      | `settings.py` | 5    | `DEBUG = True`        | High     | Set `DEBUG = False` in production |
 
 ### Summary
 

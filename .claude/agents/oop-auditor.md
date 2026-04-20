@@ -64,35 +64,35 @@ Report findings in this structure:
 
 ### God Classes
 
-| File | Class | Public Methods | Responsibilities | Suggestion |
-|------|-------|---------------|------------------|------------|
-| (none found) | — | — | — | — |
+| File         | Class | Public Methods | Responsibilities | Suggestion |
+| ------------ | ----- | -------------- | ---------------- | ---------- |
+| (none found) | —     | —              | —                | —          |
 
 ### Improper Inheritance
 
-| File | Class | Parent | Override % | Suggestion |
-|------|-------|--------|-----------|------------|
-| (none found) | — | — | — | — |
+| File         | Class | Parent | Override % | Suggestion |
+| ------------ | ----- | ------ | ---------- | ---------- |
+| (none found) | —     | —      | —          | —          |
 
 ### Leaked Internals
 
-| File | Class | Leaked Attribute | Suggestion |
-|------|-------|-----------------|------------|
-| `config.py` | module-level | `PROJECT_ROOT` (Path, mutable) | Read-only property |
-| `hooks/hookslib.py` | module-level | Global `_cache` dict | Encapsulate in class |
+| File                | Class        | Leaked Attribute               | Suggestion           |
+| ------------------- | ------------ | ------------------------------ | -------------------- |
+| `config.py`         | module-level | `PROJECT_ROOT` (Path, mutable) | Read-only property   |
+| `hooks/hookslib.py` | module-level | Global `_cache` dict           | Encapsulate in class |
 
 ### Missing Encapsulation
 
-| File | Class | Issue | Suggestion |
-|------|-------|-------|------------|
+| File         | Class        | Issue                         | Suggestion                  |
+| ------------ | ------------ | ----------------------------- | --------------------------- |
 | `compile.py` | module-level | All public, no class boundary | Group into `Compiler` class |
 
 ### Tight Coupling
 
-| File | Class | Coupled To | Suggestion |
-|------|-------|-----------|------------|
+| File           | Class        | Coupled To                   | Suggestion            |
+| -------------- | ------------ | ---------------------------- | --------------------- |
 | `lint_work.py` | module-level | `subprocess.run` direct call | Inject process runner |
-| `flush.py` | `Flusher` | Hardcoded `ocd-compile` path | Config-driven command |
+| `flush.py`     | `Flusher`    | Hardcoded `ocd-compile` path | Config-driven command |
 
 ### Summary
 
@@ -111,4 +111,4 @@ Report findings in this structure:
 - A module-level `Path` constant is acceptable if it's truly constant (created once, never mutated)
 - Inheritance depth > 2 is a violation only if the intermediate class adds no value
 - Do not flag test mock classes or test helper classes
-- Distinguish from SOLID auditor: this agent focuses on class *structure* (shape, size, relationships); SOLID focuses on *principles* (responsibility, extensibility)
+- Distinguish from SOLID auditor: this agent focuses on class _structure_ (shape, size, relationships); SOLID focuses on _principles_ (responsibility, extensibility)

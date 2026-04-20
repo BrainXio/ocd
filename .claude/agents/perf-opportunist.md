@@ -51,34 +51,34 @@ Report findings in this structure:
 
 ### Unnecessary Loops
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `hooks/lint_work.py` | 234 | `for ext in entry[0]:` — iterating tuple every call | Pre-build extension set |
-| `compile.py` | 89 | Loop recomputes `len(items)` each iteration | Cache before loop |
+| File                 | Line | Issue                                               | Suggestion              |
+| -------------------- | ---- | --------------------------------------------------- | ----------------------- |
+| `hooks/lint_work.py` | 234  | `for ext in entry[0]:` — iterating tuple every call | Pre-build extension set |
+| `compile.py`         | 89   | Loop recomputes `len(items)` each iteration         | Cache before loop       |
 
 ### Redundant Computations
 
-| File | Line | Expression | Occurrences |
-|------|------|------------|-------------|
-| `flush.py` | 45-52 | `Path(log_dir).exists()` | 3 |
+| File       | Line  | Expression               | Occurrences |
+| ---------- | ----- | ------------------------ | ----------- |
+| `flush.py` | 45-52 | `Path(log_dir).exists()` | 3           |
 
 ### Caching Opportunities
 
-| File | Function | Candidate | Reason |
-|------|----------|-----------|--------|
+| File       | Function   | Candidate             | Reason                |
+| ---------- | ---------- | --------------------- | --------------------- |
 | `query.py` | `search()` | `load_index()` result | Called on every query |
 
 ### String Building
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `utils.py` | 67 | `result += line` in loop | Use `"\n".join(lines)` |
+| File       | Line | Issue                    | Suggestion             |
+| ---------- | ---- | ------------------------ | ---------------------- |
+| `utils.py` | 67   | `result += line` in loop | Use `"\n".join(lines)` |
 
 ### Data Structure Mismatches
 
-| File | Line | Current | Should Be |
-|------|------|---------|-----------|
-| `lint_work.py` | 233 | `_EXT_MAP` built from loop | Already correct — skip |
+| File           | Line | Current                    | Should Be              |
+| -------------- | ---- | -------------------------- | ---------------------- |
+| `lint_work.py` | 233  | `_EXT_MAP` built from loop | Already correct — skip |
 
 ### Summary
 

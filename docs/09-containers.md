@@ -12,7 +12,7 @@ security scanning that gates releases.
 ## Images
 
 | Image | Base | Purpose |
-|-------|------|---------|
+| ------------ | ---------------------- | ----------------------------------------------------------------------------- |
 | `ocd-base` | `debian:bookworm-slim` | Hardened foundation: `uv`, `git`, `shellcheck` |
 | `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` with frontmatter plugin |
 | `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint`, `stylelint`, `htmlhint` |
@@ -65,7 +65,7 @@ installed. If hadolint is missing, it prints a warning and continues.
 Each CI build job runs smoke tests to verify the image is functional:
 
 | Image | Checks |
-|-------|--------|
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ocd-base` | `uv --version`, `git --version`, `shellcheck --version`, `whoami` = `ocd` |
 | `ocd-python` | `python3 --version`, `ruff --version`, `mypy --version`, `mdformat --version`, `whoami` = `ocd` |
 | `ocd-node` | `node --version`, `pnpm --version`, `prettier --version`, `whoami` = `ocd` |
@@ -89,7 +89,7 @@ builds.
 ### Triggers
 
 | Event | Condition |
-|-------|-----------|
+| ------------------- | --------------------------------------- |
 | Push to `main` | Path filters match |
 | Pull request | Path filters match |
 | `workflow_dispatch` | Manual trigger from GitHub Actions UI |
@@ -109,7 +109,7 @@ Path filters:
 ### Stages
 
 | Stage | Job | Tool | Details |
-|-------|-----|------|---------|
+| ----------- | ----------------- | ------------------------ | ------------------------------------------------------------------------- |
 | 1 (lint) | `lint-dockerfile` | hadolint | Scans all `containers/*/Dockerfile` |
 | 2 (build) | `build-base` | build-push-action → GHCR | Builds `ocd-base`, pushes `:sha-<commit>` tag, runs smoke tests |
 | 2 (build) | `build-python` | build-push-action → GHCR | Builds `ocd-python` from registry base, pushes `:sha-<commit>` tag |
@@ -145,7 +145,7 @@ images use `BASE_IMAGE` set to the GHCR registry path so they pull cached base
 layers instead of building from scratch.
 
 | Job | When | Tags pushed |
-|-----|------|-------------|
+| ----------------- | -------------- | ----------------------------------------- |
 | `publish-latest` | Push to `main` | `:latest` for all 5 images |
 | `publish-release` | `v*` tag push | `:<version>` + `:latest` for all 5 images |
 
