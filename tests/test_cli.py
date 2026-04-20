@@ -66,6 +66,15 @@ class TestMainDispatch:
         output = capsys.readouterr().out
         assert "OCD environment initialized" in output
 
+    def test_format_dispatches(self):
+        with (
+            patch.object(sys, "argv", ["ocd", "format"]),
+            patch("ocd.cli.run_formatters", return_value=0),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            main()
+        assert exc_info.value.code == 0
+
     def test_unknown_command_exits(self):
         with patch.object(sys, "argv", ["ocd", "bogus"]), pytest.raises(SystemExit) as exc_info:
             main()

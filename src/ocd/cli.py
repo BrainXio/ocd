@@ -19,6 +19,7 @@ from ocd.config import (
     QA_DIR,
     REPORTS_DIR,
 )
+from ocd.format import run_formatters
 
 TEMPLATES_DIR = Path("/opt/ocd/templates")
 
@@ -45,6 +46,8 @@ def main() -> None:
         _init()
     elif sys.argv[1] == "shell":
         _shell()
+    elif sys.argv[1] == "format":
+        sys.exit(run_formatters())
     else:
         print(f"Unknown command: {sys.argv[1]}", file=sys.stderr)
         sys.exit(1)
