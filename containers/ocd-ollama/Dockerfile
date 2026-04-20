@@ -8,6 +8,9 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+LABEL org.opencontainers.image.source=https://github.com/BrainXio/ocd
+LABEL org.opencontainers.image.description="Ollama runtime image for local LLM inference in the OCD project"
+
 ARG OLLAMA_VERSION
 
 USER root

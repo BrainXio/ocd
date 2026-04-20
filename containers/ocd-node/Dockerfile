@@ -7,6 +7,9 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+LABEL org.opencontainers.image.source=https://github.com/BrainXio/ocd
+LABEL org.opencontainers.image.description="Node.js 22+ toolchain image with pnpm, prettier, eslint, stylelint, and htmlhint for the OCD project"
+
 USER root
 
 RUN apt-get update \

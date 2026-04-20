@@ -7,6 +7,9 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+LABEL org.opencontainers.image.source=https://github.com/BrainXio/ocd
+LABEL org.opencontainers.image.description="Python 3.12+ toolchain image with ruff, mypy, and mdformat for the OCD project"
+
 ARG PYTHON_VERSION=3.12
 
 ENV PATH="/home/ocd/.local/bin:${PATH}"
