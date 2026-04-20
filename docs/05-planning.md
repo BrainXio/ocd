@@ -14,11 +14,27 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 |--------|---------|--------|
 | `sqlfluff` | SQL linting CI job for the `sql` skill | Pending tool evaluation |
 
+### SQL Skill Stack Investigation
+
+Before adding `sqlfluff`, determine what additional tools and dependencies the `sql` skill requires in the stack:
+
+- Evaluate `sqlfluff` dialect support against project SQL targets
+- Identify SQL formatter companion (e.g., `sqlfmt` or `sqlfluff format`)
+- Determine if a SQL type checker or linter beyond `sqlfluff` is needed
+- Assess CI job requirements: extra dependencies, database fixtures for linting
+
 ## New Commands
 
 | Command | Purpose | Status |
 |---------|---------|--------|
 | `ocd format` | Run all formatters with auto-fix (ruff, mdformat, etc.) | Planned |
+
+## Packaging and Distribution
+
+| Item | Purpose | Status |
+|------|---------|--------|
+| GitHub Release packaging | Build and attach the `obsessive-claude-developer` sdist/wheel to GitHub Releases alongside container images | Planned |
+| Internal CI library | Python library for agent-based CI workflows, driven by `.github/workflows/` definitions | Planned |
 
 ## CI/CD Beyond Lint
 
@@ -27,6 +43,12 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 | Semantic versioning | Automated version bumps from conventional commits | Planned |
 | Changelog generation | Auto-generate CHANGELOG.md from commit history | Planned |
 | Deployment pipelines | Staging → production deployment workflows | Planned |
+
+## Developer Experience
+
+| Item | Purpose | Status |
+|------|---------|--------|
+| Local dev requirements | Document all prerequisites and setup steps for a local dev environment (system packages, tools, versions) | Planned |
 
 ## Knowledge Pipeline
 
