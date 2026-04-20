@@ -3,7 +3,7 @@ title: Reference
 aliases: [reference, api, specs, tables]
 tags: [reference]
 created: 2026-04-17
-updated: 2026-04-20
+updated: 2026-04-18
 ---
 
 All lookup tables, schemas, and specifications in one place. Dry, authoritative, complete.
@@ -131,7 +131,7 @@ Hooks receive a JSON object on stdin:
 
 | Function | Purpose |
 |----------|---------|
-| `read_stdin()` | Parse JSON from stdin (includes Windows backslash fix) |
+| `parse_stdin_json()` | Parse JSON from stdin (includes Windows backslash fix) |
 | `extract_conversation_context(path)` | Read JSONL transcript, extract last 30 turns as markdown, capped at 15,000 chars |
 | `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
 | `write_context_file(session_id, context, prefix)` | Write context to `.agent/.state/{prefix}-{session_id}-{timestamp}.md` |
@@ -374,13 +374,14 @@ The sandbox restricts Claude's filesystem access at the process level:
 
 | Constant | Value | Where |
 |----------|-------|-------|
-| Max context chars (session start) | 20,000 | `ocd.hooks.session_start` |
+| Max context chars (session start) | 20,000 | `ocd.config` |
+| Max log lines (session start) | 30 | `ocd.config` |
 | Max flush turns | 30 | `ocd.config` |
 | Max flush context chars | 15,000 | `ocd.config` |
 | Min turns (session end) | 1 | `ocd.config` |
 | Min turns (pre-compact) | 5 | `ocd.config` |
 | Flush dedup window | 60 seconds | `ocd.flush` |
-| Auto-compile trigger time | 18:00+ local | `ocd.flush` |
+| Auto-compile trigger time | 18:00+ local | `ocd.config` |
 
 ## Pipeline Commands
 
