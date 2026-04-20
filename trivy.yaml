@@ -19,4 +19,7 @@ skip-dirs:
 
 # Add CVE IDs to ignored-cves when triaged as false positives or accepted risk.
 # Example: ignored-cves: [CVE-2025-12345]
-ignored-cves: []
+ignored-cves:
+  - CVE-2025-7458   # libsqlite3-0: Debian bookworm, no fix available yet
+  - CVE-2023-45853  # zlib1g: Debian bookworm, marked will_not_fix
+  - CVE-2025-68121  # ollama Go stdlib TLS: fixed in Go 1.24.13+, needs ollama rebuild
