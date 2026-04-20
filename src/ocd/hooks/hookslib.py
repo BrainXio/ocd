@@ -86,6 +86,7 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
     """Spawn flush as a background process to extract knowledge."""
     if "/" in session_id or "\\" in session_id or ".." in session_id:
         import logging
+
         logging.error("Invalid session_id in spawn_flush: %s", session_id)
         return
     cmd = [

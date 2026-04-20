@@ -61,8 +61,13 @@ def _shell() -> None:
 def _is_valid_shell(shell: str) -> bool:
     """Check if a shell is in /etc/shells or is a known safe default."""
     safe_defaults = {
-        "/bin/bash", "/bin/sh", "/bin/zsh", "/bin/fish",
-        "/usr/bin/bash", "/usr/bin/zsh", "/usr/bin/fish",
+        "/bin/bash",
+        "/bin/sh",
+        "/bin/zsh",
+        "/bin/fish",
+        "/usr/bin/bash",
+        "/usr/bin/zsh",
+        "/usr/bin/fish",
     }
     if shell in safe_defaults:
         return True

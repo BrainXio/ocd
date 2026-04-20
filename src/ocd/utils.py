@@ -123,5 +123,3 @@ def get_article_word_count(path: Path) -> int:
         if end != -1:
             content = content[end + 3 :]
     return len(content.split())
-
-
