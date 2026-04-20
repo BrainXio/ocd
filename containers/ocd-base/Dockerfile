@@ -6,6 +6,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 LABEL org.opencontainers.image.source=https://github.com/BrainXio/ocd
 LABEL org.opencontainers.image.description="Hardened Debian base image with uv, git, and shellcheck for the OCD project"
+LABEL org.opencontainers.image.licenses=MIT
 
 ARG UV_VERSION=0.11.7
 ARG SHELLCHECK_VERSION=0.11.0

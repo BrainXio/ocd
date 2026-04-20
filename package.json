@@ -1,6 +1,7 @@
 {
   "name": "obsessive-claude-developer-linters",
   "private": true,
+  "license": "MIT",
   "description": "Frontend linters for the OCD project (stylelint, htmlhint, prettier)",
   "devDependencies": {
     "stylelint": "^16.0",

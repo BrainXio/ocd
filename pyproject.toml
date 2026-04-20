@@ -2,6 +2,7 @@
 name = "obsessive-claude-developer"
 version = "0.1.0"
 description = "O.C.D. environment with a personal knowledge base compiled from AI conversations - inspired by Karpathy's LLM KB architecture"
+license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
     "claude-agent-sdk>=0.1.29",

@@ -10,6 +10,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 LABEL org.opencontainers.image.source=https://github.com/BrainXio/ocd
 LABEL org.opencontainers.image.description="OCD product image with Python, Node.js, Ollama, Claude Code, and the OCD package"
+LABEL org.opencontainers.image.licenses=MIT
 
 ARG OLLAMA_VERSION
 

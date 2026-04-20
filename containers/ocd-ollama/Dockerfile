@@ -10,6 +10,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 LABEL org.opencontainers.image.source=https://github.com/BrainXio/ocd
 LABEL org.opencontainers.image.description="Ollama runtime image for local LLM inference in the OCD project"
+LABEL org.opencontainers.image.licenses=MIT
 
 ARG OLLAMA_VERSION
 

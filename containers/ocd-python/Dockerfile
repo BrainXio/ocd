@@ -9,6 +9,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 LABEL org.opencontainers.image.source=https://github.com/BrainXio/ocd
 LABEL org.opencontainers.image.description="Python 3.12+ toolchain image with ruff, mypy, and mdformat for the OCD project"
+LABEL org.opencontainers.image.licenses=MIT
 
 ARG PYTHON_VERSION=3.12
 
