@@ -42,7 +42,7 @@ jobs:
   lint-dockerfile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install hadolint
         run: |
           HADOLINT_VERSION="2.14.0"
@@ -56,7 +56,7 @@ jobs:
     needs: [lint-dockerfile]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build ocd-base
         run: docker build -t ocd-base:latest containers/ocd-base/
       - name: Smoke test
@@ -70,7 +70,7 @@ jobs:
     needs: [lint-dockerfile]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build ocd-base
         run: docker build -t ocd-base:latest containers/ocd-base/
       - name: Build ocd-python
@@ -87,7 +87,7 @@ jobs:
     needs: [lint-dockerfile]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build ocd-base
         run: docker build -t ocd-base:latest containers/ocd-base/
       - name: Build ocd-node
@@ -103,7 +103,7 @@ jobs:
     needs: [lint-dockerfile]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build ocd-base
         run: docker build -t ocd-base:latest containers/ocd-base/
       - name: Build ocd-ollama
@@ -119,7 +119,7 @@ jobs:
     needs: [lint-dockerfile]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build ocd-base
         run: docker build -t ocd-base:latest containers/ocd-base/
       - name: Build ocd-python
@@ -151,7 +151,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build ocd-base
         run: docker build -t ocd-base:latest containers/ocd-base/
       - name: Build ocd-python
@@ -187,21 +187,21 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push ocd-base
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-base
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-base:latest
       - name: Build and push ocd-python
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-python
           build-args: |
@@ -210,7 +210,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-python:latest
       - name: Build and push ocd-node
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-node
           build-args: |
@@ -219,7 +219,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-node:latest
       - name: Build and push ocd-ollama
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-ollama
           build-args: |
@@ -228,7 +228,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-ollama:latest
       - name: Build and push ocd
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: containers/ocd/Dockerfile
@@ -243,18 +243,18 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Derive version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push ocd-base
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-base
           push: true
@@ -262,7 +262,7 @@ jobs:
             ${{ env.REGISTRY }}/brainxio/ocd-base:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-base:latest
       - name: Build and push ocd-python
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-python
           build-args: |
@@ -273,7 +273,7 @@ jobs:
             ${{ env.REGISTRY }}/brainxio/ocd-python:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-python:latest
       - name: Build and push ocd-node
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-node
           build-args: |
@@ -284,7 +284,7 @@ jobs:
             ${{ env.REGISTRY }}/brainxio/ocd-node:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-node:latest
       - name: Build and push ocd-ollama
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: containers/ocd-ollama
           build-args: |
@@ -295,7 +295,7 @@ jobs:
             ${{ env.REGISTRY }}/brainxio/ocd-ollama:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-ollama:latest
       - name: Build and push ocd
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: containers/ocd/Dockerfile
