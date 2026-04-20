@@ -1,5 +1,5 @@
 {
-  "name": "obsessive-claude-developer-linters",
+  "name": "brainxio-ocd-linters",
   "private": true,
   "license": "MIT",
   "description": "Frontend linters for the OCD project (stylelint, htmlhint, prettier)",

@@ -1,7 +1,7 @@
 [project]
-name = "obsessive-claude-developer"
+name = "brainxio-ocd"
 version = "0.1.0"
-description = "O.C.D. environment with a personal knowledge base compiled from AI conversations - inspired by Karpathy's LLM KB architecture"
+description = "Obsessive Code Discipline — quality enforcement, knowledge pipeline, and agent augmentation for AI-assisted development"
 license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
