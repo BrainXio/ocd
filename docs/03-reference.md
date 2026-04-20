@@ -201,7 +201,7 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | prettier | `.prettierrc` | JSON | `npm ci` |
 | sqlfluff | `.sqlfluff` | SQL | `uv sync --extra sql` |
 | hadolint | `.hadolint.yaml` | Dockerfile | binary install |
-| trivy | `trivy.yaml` | Vulnerabilities | binary install |
+| trivy | `trivy.yaml` + `.trivyignore` | Vulnerabilities | binary install |
 
 Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd-lint-work` hook reports missing linters gracefully — it does not block edits when a linter is unavailable.
 
