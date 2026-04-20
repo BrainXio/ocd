@@ -21,6 +21,7 @@ sql = ["sqlfluff>=3.0"]
 ocd = "ocd.cli:main"
 ocd-compile = "ocd.compile:main"
 ocd-flush = "ocd.flush:main"
+ocd-format = "ocd.format:main"
 ocd-query = "ocd.query:main"
 ocd-lint-kb = "ocd.lint:main"
 ocd-lint-work = "ocd.hooks.lint_work:main"

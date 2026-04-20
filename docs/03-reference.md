@@ -242,6 +242,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd` | `ocd.cli:main` | Container init, shell, and format — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
+| `ocd-format` | `ocd.format:main` | Run all formatters with auto-fix |
 | `ocd-lint-kb` | `ocd.lint:main` | Structural + LLM contradiction checks on knowledge base |
 | `ocd-query` | `ocd.query:main` | Index-guided knowledge base search |
 | `ocd-session-start` | `ocd.hooks.session_start:main` | Session start context injection |
