@@ -1,19 +1,30 @@
 """OCD container initialization entry point."""
 
+from __future__ import annotations
+
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+from ocd.config import (
+    CONCEPTS_DIR,
+    CONNECTIONS_DIR,
+    DAILY_DIR,
+    DEFAULT_INDEX_CONTENT,
+    INDEX_FILE,
+    KNOWLEDGE_DIR,
+    PROJECT_ROOT,
+    QA_DIR,
+    REPORTS_DIR,
+)
+
 TEMPLATES_DIR = Path("/opt/ocd/templates")
 
 AGENT_DIRS = [
-    ".agent/daily",
-    ".agent/knowledge/concepts",
-    ".agent/knowledge/connections",
-    ".agent/knowledge/qa",
-    ".agent/reports",
+    str(p.relative_to(PROJECT_ROOT))
+    for p in [DAILY_DIR, CONCEPTS_DIR, CONNECTIONS_DIR, QA_DIR, REPORTS_DIR]
 ]
 
 AGENT_GITIGNORE = """\
@@ -25,13 +36,6 @@ AGENT_GITIGNORE = """\
 !.gitignore
 # And subdirectories (so git can traverse into them)
 !*/
-"""
-
-AGENT_INDEX = """\
-# Knowledge Base Index
-
-| Article | Summary | Compiled From | Updated |
-|---------|---------|---------------|---------|
 """
 
 
@@ -49,7 +53,28 @@ def main() -> None:
 def _shell() -> None:
     """Start an interactive shell with the OCD environment."""
     shell = os.environ.get("SHELL", "/bin/bash")
+    if not _is_valid_shell(shell):
+        shell = "/bin/bash"
     os.execvp(shell, [shell])
+
+
+def _is_valid_shell(shell: str) -> bool:
+    """Check if a shell is in /etc/shells or is a known safe default."""
+    safe_defaults = {
+        "/bin/bash", "/bin/sh", "/bin/zsh", "/bin/fish",
+        "/usr/bin/bash", "/usr/bin/zsh", "/usr/bin/fish",
+    }
+    if shell in safe_defaults:
+        return True
+    etc_shells = Path("/etc/shells")
+    if etc_shells.exists():
+        try:
+            for line in etc_shells.read_text().splitlines():
+                if line.strip() == shell:
+                    return True
+        except OSError:
+            pass
+    return False
 
 
 def _detect_project(project_dir: Path) -> dict[str, bool]:
@@ -78,14 +103,14 @@ def _init_agent_dir(project_dir: Path) -> None:
             created = True
 
     # Knowledge index
-    knowledge_dir = agent_dir / "knowledge"
-    knowledge_dir.mkdir(parents=True, exist_ok=True)
-    if not (knowledge_dir / ".gitkeep").exists():
-        (knowledge_dir / ".gitkeep").touch()
+    local_knowledge_dir = project_dir / KNOWLEDGE_DIR.relative_to(PROJECT_ROOT)
+    local_knowledge_dir.mkdir(parents=True, exist_ok=True)
+    if not (local_knowledge_dir / ".gitkeep").exists():
+        (local_knowledge_dir / ".gitkeep").touch()
 
-    index_file = knowledge_dir / "index.md"
-    if not index_file.exists():
-        index_file.write_text(AGENT_INDEX)
+    local_index_file = project_dir / INDEX_FILE.relative_to(PROJECT_ROOT)
+    if not local_index_file.exists():
+        local_index_file.write_text(DEFAULT_INDEX_CONTENT + "\n")
         created = True
 
     # .gitignore

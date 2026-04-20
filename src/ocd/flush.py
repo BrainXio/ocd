@@ -33,7 +33,9 @@ from ocd.config import (
     FLUSH_STATE_FILE,
     PROJECT_ROOT,
     STATE_DIR,
+    STATE_FILE,
 )
+from ocd.utils import file_hash
 
 # Ensure state directory exists before writing logs
 STATE_DIR.mkdir(parents=True, exist_ok=True)
@@ -149,29 +151,25 @@ respond with exactly: FLUSH_OK
     return response
 
 
-COMPILE_AFTER_HOUR = 18  # 6 PM local time
-
-
 def maybe_trigger_compilation() -> None:
     """If it's past the compile hour and today's log hasn't been compiled, run compile."""
+    from ocd.config import COMPILE_AFTER_HOUR
+
     now = datetime.now(UTC).astimezone()
     if now.hour < COMPILE_AFTER_HOUR:
         return
 
     # Check if today's log has already been compiled
     today_log = f"{now.strftime('%Y-%m-%d')}.md"
-    compile_state_file = STATE_DIR / "state.json"
+    compile_state_file = STATE_FILE
     if compile_state_file.exists():
         try:
             compile_state = json.loads(compile_state_file.read_text(encoding="utf-8"))
             ingested = compile_state.get("ingested", {})
             if today_log in ingested:
-                # Already compiled today - check if the log has changed since
-                from hashlib import sha256
-
                 log_path = DAILY_DIR / today_log
                 if log_path.exists():
-                    current_hash = sha256(log_path.read_bytes()).hexdigest()[:16]
+                    current_hash = file_hash(log_path)
                     if ingested[today_log].get("hash") == current_hash:
                         return  # log unchanged since last compile
         except (json.JSONDecodeError, OSError):
@@ -201,6 +199,16 @@ def main() -> None:
 
     context_file = Path(sys.argv[1])
     session_id = sys.argv[2]
+
+    # Validate session_id (no path traversal)
+    if "/" in session_id or "\\" in session_id or ".." in session_id:
+        logging.error("Invalid session_id: %s", session_id)
+        sys.exit(1)
+
+    # Validate context_file stays within STATE_DIR
+    if not context_file.resolve().is_relative_to(STATE_DIR.resolve()):
+        logging.error("Context file escapes STATE_DIR: %s", context_file)
+        sys.exit(1)
 
     logging.info("flush started for session %s, context: %s", session_id, context_file)
 

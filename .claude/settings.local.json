@@ -56,32 +56,16 @@
       "Edit(git_hooks/pre-push)",
       "Edit(git_hooks/setup-hooks.sh)",
       "Edit(src/ocd/compile.py)",
-      "Edit(src/ocd/config.py)",
-      "Edit(src/ocd/flush.py)",
-      "Edit(src/ocd/hooks/hookslib.py)",
-      "Edit(src/ocd/hooks/lint_work.py)",
-      "Edit(src/ocd/hooks/pre_compact.py)",
-      "Edit(src/ocd/hooks/session_end.py)",
-      "Edit(src/ocd/hooks/session_start.py)",
       "Edit(src/ocd/lint.py)",
       "Edit(src/ocd/query.py)",
-      "Edit(src/ocd/utils.py)",
       "Write(.gitleaks.toml)",
       "Write(git_hooks/commit-msg)",
       "Write(git_hooks/pre-commit)",
       "Write(git_hooks/pre-push)",
       "Write(git_hooks/setup-hooks.sh)",
       "Write(src/ocd/compile.py)",
-      "Write(src/ocd/config.py)",
-      "Write(src/ocd/flush.py)",
-      "Write(src/ocd/hooks/hookslib.py)",
-      "Write(src/ocd/hooks/lint_work.py)",
-      "Write(src/ocd/hooks/pre_compact.py)",
-      "Write(src/ocd/hooks/session_end.py)",
-      "Write(src/ocd/hooks/session_start.py)",
       "Write(src/ocd/lint.py)",
-      "Write(src/ocd/query.py)",
-      "Write(src/ocd/utils.py)"
+      "Write(src/ocd/query.py)"
     ]
   }
 }

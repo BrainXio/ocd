@@ -1,5 +1,7 @@
 """Shared utilities for the personal knowledge base."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import re
@@ -10,6 +12,7 @@ from ocd.config import (
     CONCEPTS_DIR,
     CONNECTIONS_DIR,
     DAILY_DIR,
+    DEFAULT_INDEX_CONTENT,
     INDEX_FILE,
     KNOWLEDGE_DIR,
     QA_DIR,
@@ -51,8 +54,10 @@ def extract_wikilinks(content: str) -> list[str]:
 
 def wiki_article_exists(link: str) -> bool:
     """Check if a wikilinked article exists on disk."""
+    if ".." in link.split("/") or "\\" in link or link.startswith("/"):
+        return False
     path = KNOWLEDGE_DIR / f"{link}.md"
-    return path.exists()
+    return path.resolve().is_relative_to(KNOWLEDGE_DIR.resolve()) and path.exists()
 
 
 # ── Wiki content helpers ──────────────────────────────────────────────
@@ -62,11 +67,7 @@ def read_wiki_index() -> str:
     """Read the knowledge base index file."""
     if INDEX_FILE.exists():
         return INDEX_FILE.read_text(encoding="utf-8")
-    return (
-        "# Knowledge Base Index\n\n"
-        "| Article | Summary | Compiled From | Updated |\n"
-        "|---------|---------|---------------|---------|"
-    )
+    return DEFAULT_INDEX_CONTENT
 
 
 def read_all_wiki_content() -> str:
