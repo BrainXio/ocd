@@ -6,6 +6,7 @@ on:
     paths:
       - "containers/**"
       - ".hadolint.yaml"
+      - "trivy.yaml"
       - "src/ocd/**"
       - "pyproject.toml"
       - "package.json"
@@ -17,6 +18,7 @@ on:
     paths:
       - "containers/**"
       - ".hadolint.yaml"
+      - "trivy.yaml"
       - "src/ocd/**"
       - "pyproject.toml"
       - "package.json"
@@ -141,8 +143,47 @@ jobs:
           docker run --rm --entrypoint="" ocd:latest ls /home/ocd/.claude/
           docker run --rm --entrypoint="" ocd:latest ls /opt/ocd/templates/
 
-  publish-latest:
+  # ── Stage 3: Security scan ─────────────────────────────────────────────
+  scan-images:
     needs: [build-base, build-python, build-node, build-ollama, build-ocd]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ocd-base
+        run: docker build -t ocd-base:latest containers/ocd-base/
+      - name: Build ocd-python
+        run: docker build --build-arg BASE_TAG=latest -t ocd-python:latest containers/ocd-python/
+      - name: Build ocd
+        run: >
+          docker build
+          --build-arg BASE_TAG=latest
+          -t ocd:latest
+          -f containers/ocd/Dockerfile
+          .
+      - name: Install trivy
+        run: |
+          TRIVY_VERSION="0.70.0"
+          URL="https://github.com/aquasecurity/trivy/releases/download"
+          URL="${URL}/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -sL "$URL" | sudo tar xz -C /usr/local/bin trivy
+      - name: Scan ocd image
+        run: trivy image --config trivy.yaml --severity CRITICAL --exit-code 1 ocd:latest
+      - name: Scan ocd image (SARIF)
+        if: github.event_name == 'push'
+        run: trivy image --config trivy.yaml --format sarif --output trivy-results.sarif ocd:latest
+      - name: Upload SARIF
+        if: github.event_name == 'push'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-container
+
+  # ── Stage 4: Publish ────────────────────────────────────────────────────
+  publish-latest:
+    needs: [scan-images]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -198,7 +239,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/brainxio/ocd:latest
 
   publish-release:
-    needs: [build-base, build-python, build-node, build-ollama, build-ocd]
+    needs: [scan-images]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:

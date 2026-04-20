@@ -148,9 +148,22 @@ jobs:
       - name: prettier --check
         run: npx prettier --check "**/*.json" "!package-lock.json"
 
+  scan-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install trivy
+        run: |
+          TRIVY_VERSION="0.70.0"
+          URL="https://github.com/aquasecurity/trivy/releases/download"
+          URL="${URL}/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -sL "$URL" | sudo tar xz -C /usr/local/bin trivy
+      - name: trivy fs
+        run: trivy fs --config trivy.yaml --severity CRITICAL --exit-code 1 .
+
   # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
   lint-python:
-    needs: [lint-shell, lint-markdown, lint-yaml, secret-scan, lint-actions, lint-css, lint-html, lint-json]
+    needs: [lint-shell, lint-markdown, lint-yaml, secret-scan, lint-actions, lint-css, lint-html, lint-json, scan-deps]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
