@@ -74,7 +74,7 @@ The `AGENTS.md` file should document these tiers and provide setup instructions 
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| CI path filters | Add path-based triggers to `ci.yml` so doc-only changes skip Python lint/test/security jobs and only run relevant checks | Planned |
+| CI path filters | Add path-based triggers to `ci.yml` so doc-only changes skip Python lint/test/security jobs and only run relevant checks | Done |
 | Semantic versioning | Automated version bumps from conventional commits | Planned |
 | Changelog generation | Auto-generate CHANGELOG.md from commit history | Planned |
 | Release automation | CI job that composes release artifacts, creates a GitHub Release with composed package content, and uploads assets | Planned |

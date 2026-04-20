@@ -57,123 +57,201 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build ocd-base
-        run: docker build -t ocd-base:latest containers/ocd-base/
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push ocd-base
+        id: meta
+        uses: docker/build-push-action@v7
+        with:
+          context: containers/ocd-base
+          push: true
+          tags: ${{ env.REGISTRY }}/brainxio/ocd-base:sha-${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-base:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-base:cache,mode=max
       - name: Smoke test
         run: |
-          docker run --rm ocd-base:latest uv --version
-          docker run --rm ocd-base:latest git --version
-          docker run --rm ocd-base:latest shellcheck --version
-          docker run --rm ocd-base:latest whoami | grep -q ocd
+          docker pull ${{ env.REGISTRY }}/brainxio/ocd-base:sha-${{ github.sha }}
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-base:sha-${{ github.sha }} uv --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-base:sha-${{ github.sha }} git --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-base:sha-${{ github.sha }} shellcheck --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-base:sha-${{ github.sha }} whoami | grep -q ocd
 
   build-python:
-    needs: [lint-dockerfile]
+    needs: [build-base]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build ocd-base
-        run: docker build -t ocd-base:latest containers/ocd-base/
-      - name: Build ocd-python
-        run: docker build --build-arg BASE_TAG=latest -t ocd-python:latest containers/ocd-python/
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push ocd-python
+        uses: docker/build-push-action@v7
+        with:
+          context: containers/ocd-python
+          push: true
+          tags: ${{ env.REGISTRY }}/brainxio/ocd-python:sha-${{ github.sha }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=sha-${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-python:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-python:cache,mode=max
       - name: Smoke test
         run: |
-          docker run --rm ocd-python:latest python3 --version
-          docker run --rm ocd-python:latest ruff --version
-          docker run --rm ocd-python:latest mypy --version
-          docker run --rm ocd-python:latest mdformat --version
-          docker run --rm ocd-python:latest whoami | grep -q ocd
+          docker pull ${{ env.REGISTRY }}/brainxio/ocd-python:sha-${{ github.sha }}
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-python:sha-${{ github.sha }} python3 --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-python:sha-${{ github.sha }} ruff --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-python:sha-${{ github.sha }} mypy --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-python:sha-${{ github.sha }} mdformat --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-python:sha-${{ github.sha }} whoami | grep -q ocd
 
   build-node:
-    needs: [lint-dockerfile]
+    needs: [build-base]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build ocd-base
-        run: docker build -t ocd-base:latest containers/ocd-base/
-      - name: Build ocd-node
-        run: docker build --build-arg BASE_TAG=latest -t ocd-node:latest containers/ocd-node/
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push ocd-node
+        uses: docker/build-push-action@v7
+        with:
+          context: containers/ocd-node
+          push: true
+          tags: ${{ env.REGISTRY }}/brainxio/ocd-node:sha-${{ github.sha }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=sha-${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-node:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-node:cache,mode=max
       - name: Smoke test
         run: |
-          docker run --rm ocd-node:latest node --version
-          docker run --rm ocd-node:latest pnpm --version
-          docker run --rm ocd-node:latest prettier --version
-          docker run --rm ocd-node:latest whoami | grep -q ocd
+          docker pull ${{ env.REGISTRY }}/brainxio/ocd-node:sha-${{ github.sha }}
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-node:sha-${{ github.sha }} node --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-node:sha-${{ github.sha }} pnpm --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-node:sha-${{ github.sha }} prettier --version
+          docker run --rm ${{ env.REGISTRY }}/brainxio/ocd-node:sha-${{ github.sha }} whoami | grep -q ocd
 
   build-ollama:
-    needs: [lint-dockerfile]
+    needs: [build-base]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build ocd-base
-        run: docker build -t ocd-base:latest containers/ocd-base/
-      - name: Build ocd-ollama
-        run: docker build --build-arg BASE_TAG=latest -t ocd-ollama:latest containers/ocd-ollama/
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push ocd-ollama
+        uses: docker/build-push-action@v7
+        with:
+          context: containers/ocd-ollama
+          push: true
+          tags: ${{ env.REGISTRY }}/brainxio/ocd-ollama:sha-${{ github.sha }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-base
+            BASE_TAG=sha-${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-ollama:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-ollama:cache,mode=max
       - name: Smoke test
         run: |
-          docker run -d --name ollama-test ocd-ollama:latest
+          docker pull ${{ env.REGISTRY }}/brainxio/ocd-ollama:sha-${{ github.sha }}
+          docker run -d --name ollama-test ${{ env.REGISTRY }}/brainxio/ocd-ollama:sha-${{ github.sha }}
           sleep 3
           docker exec ollama-test ollama --version
           docker rm -f ollama-test
 
   build-ocd:
-    needs: [lint-dockerfile]
+    needs: [build-python]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build ocd-base
-        run: docker build -t ocd-base:latest containers/ocd-base/
-      - name: Build ocd-python
-        run: docker build --build-arg BASE_TAG=latest -t ocd-python:latest containers/ocd-python/
-      - name: Build ocd
-        run: >
-          docker build
-          --build-arg BASE_TAG=latest
-          -t ocd:latest
-          -f containers/ocd/Dockerfile
-          .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push ocd
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: containers/ocd/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/brainxio/ocd-python
+            BASE_TAG=sha-${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd:cache,mode=max
       - name: Smoke test
         run: |
-          docker run --rm --entrypoint="" ocd:latest python3 --version
-          docker run --rm --entrypoint="" ocd:latest node --version
-          docker run --rm --entrypoint="" ocd:latest ruff --version
-          docker run --rm --entrypoint="" ocd:latest claude --version
-          docker run --rm --entrypoint="" ocd:latest ollama --version
-          docker run --rm --entrypoint="" ocd:latest whoami | grep -q ocd
-          docker run --rm --entrypoint="" ocd:latest which ocd
-          docker run --rm --entrypoint="" ocd:latest ls /home/ocd/.claude/
-          docker run --rm --entrypoint="" ocd:latest ls /opt/ocd/templates/
+          docker pull ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }}
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} python3 --version
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} node --version
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} ruff --version
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} claude --version
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} ollama --version
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} whoami | grep -q ocd
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} which ocd
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} ls /home/ocd/.claude/
+          docker run --rm --entrypoint="" ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }} ls /opt/ocd/templates/
 
   # ── Stage 3: Security scan ─────────────────────────────────────────────
   scan-images:
-    needs: [build-base, build-python, build-node, build-ollama, build-ocd]
+    needs: [build-base, build-python, build-ocd]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
     steps:
       - uses: actions/checkout@v6
-      - name: Build ocd-base
-        run: docker build -t ocd-base:latest containers/ocd-base/
-      - name: Build ocd-python
-        run: docker build --build-arg BASE_TAG=latest -t ocd-python:latest containers/ocd-python/
-      - name: Build ocd
-        run: >
-          docker build
-          --build-arg BASE_TAG=latest
-          -t ocd:latest
-          -f containers/ocd/Dockerfile
-          .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install trivy
         run: |
           TRIVY_VERSION="0.70.0"
           URL="https://github.com/aquasecurity/trivy/releases/download"
           URL="${URL}/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
           curl -sL "$URL" | sudo tar xz -C /usr/local/bin trivy
+      - name: Pull ocd image
+        run: docker pull ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }}
       - name: Scan ocd image
-        run: trivy image --config trivy.yaml --severity CRITICAL --exit-code 1 ocd:latest
+        run: >
+          trivy image --config trivy.yaml --severity CRITICAL --exit-code 1
+          ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }}
       - name: Scan ocd image (SARIF)
         if: github.event_name == 'push'
-        run: trivy image --config trivy.yaml --exit-code 0 --format sarif --output trivy-results.sarif ocd:latest
+        run: >
+          trivy image --config trivy.yaml --exit-code 0 --format sarif
+          --output trivy-results.sarif
+          ${{ env.REGISTRY }}/brainxio/ocd:sha-${{ github.sha }}
       - name: Upload SARIF
         if: github.event_name == 'push'
         uses: github/codeql-action/upload-sarif@v3
@@ -200,6 +278,7 @@ jobs:
           context: containers/ocd-base
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-base:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-base:cache
       - name: Build and push ocd-python
         uses: docker/build-push-action@v7
         with:
@@ -209,6 +288,7 @@ jobs:
             BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-python:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-python:cache
       - name: Build and push ocd-node
         uses: docker/build-push-action@v7
         with:
@@ -218,6 +298,7 @@ jobs:
             BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-node:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-node:cache
       - name: Build and push ocd-ollama
         uses: docker/build-push-action@v7
         with:
@@ -227,6 +308,7 @@ jobs:
             BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd-ollama:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-ollama:cache
       - name: Build and push ocd
         uses: docker/build-push-action@v7
         with:
@@ -237,6 +319,7 @@ jobs:
             BASE_TAG=latest
           push: true
           tags: ${{ env.REGISTRY }}/brainxio/ocd:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd:cache
 
   publish-release:
     needs: [scan-images]
@@ -261,6 +344,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd-base:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-base:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-base:cache
       - name: Build and push ocd-python
         uses: docker/build-push-action@v7
         with:
@@ -272,6 +356,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd-python:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-python:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-python:cache
       - name: Build and push ocd-node
         uses: docker/build-push-action@v7
         with:
@@ -283,6 +368,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd-node:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-node:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-node:cache
       - name: Build and push ocd-ollama
         uses: docker/build-push-action@v7
         with:
@@ -294,6 +380,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd-ollama:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd-ollama:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd-ollama:cache
       - name: Build and push ocd
         uses: docker/build-push-action@v7
         with:
@@ -306,3 +393,4 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/brainxio/ocd:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/brainxio/ocd:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/brainxio/ocd:cache

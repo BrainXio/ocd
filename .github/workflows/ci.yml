@@ -14,11 +14,46 @@ permissions:
   contents: read
 
 jobs:
-  # ── Stage 1: Gate ───────────────────────────────────────────────────────
-  # Fastest check — reject bad commit messages in under a second.
-  # Patterns read from git_hooks/ai-patterns.txt (single source of truth)
+  # ── Stage 1: Detect changes + commit gate ────────────────────────────────
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      python: ${{ steps.filter.outputs.python }}
+      shell: ${{ steps.filter.outputs.shell }}
+      yaml: ${{ steps.filter.outputs.yaml }}
+      markdown: ${{ steps.filter.outputs.markdown }}
+      node: ${{ steps.filter.outputs.node }}
+      actions: ${{ steps.filter.outputs.actions }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            python:
+              - 'src/ocd/**'
+              - 'tests/**'
+              - 'pyproject.toml'
+              - 'uv.lock'
+            shell:
+              - 'git_hooks/**'
+            yaml:
+              - '.github/workflows/**'
+              - '.yamllint'
+            markdown:
+              - '**/*.md'
+              - 'docs/**'
+            node:
+              - '**/*.css'
+              - '**/*.html'
+              - '**/*.json'
+              - 'package.json'
+              - 'package-lock.json'
+            actions:
+              - '.github/workflows/**'
+
   check-commit-messages:
-    if: github.event_name == 'push'
+    needs: [changes]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -26,9 +61,13 @@ jobs:
           fetch-depth: 0
       - name: Reject AI attribution in commit messages
         run: |
-          RANGE="${{ github.event.before }}..${{ github.event.after }}"
-          if [ "$RANGE" = "0000000000000000000000000000000000000000..${{ github.event.after }}" ]; then
-            RANGE="${{ github.event.after }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RANGE="origin/main..HEAD"
+          else
+            RANGE="${{ github.event.before }}..${{ github.event.after }}"
+            if [ "$RANGE" = "0000000000000000000000000000000000000000..${{ github.event.after }}" ]; then
+              RANGE="${{ github.event.after }}"
+            fi
           fi
           failed=0
           while IFS= read -r hash; do
@@ -50,8 +89,10 @@ jobs:
             exit 1
           fi
 
-  # ── Stage 2: Fast lints (parallel) ──────────────────────────────────────
+  # ── Stage 2: Fast lints (parallel, path-conditioned) ─────────────────────
   lint-yaml:
+    needs: [changes]
+    if: needs.changes.outputs.yaml == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -64,6 +105,8 @@ jobs:
         run: yamllint -f parsable .github/workflows/
 
   lint-shell:
+    needs: [changes]
+    if: needs.changes.outputs.shell == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -73,6 +116,8 @@ jobs:
         run: shellcheck git_hooks/commit-msg git_hooks/pre-commit git_hooks/pre-push git_hooks/setup-hooks.sh
 
   lint-markdown:
+    needs: [changes]
+    if: needs.changes.outputs.markdown == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -85,6 +130,7 @@ jobs:
         run: mdformat --check README.md docs/*.md .claude/skills/*/SKILL.md
 
   secret-scan:
+    needs: [changes]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -100,6 +146,8 @@ jobs:
         run: gitleaks detect --source . -c .gitleaks.toml
 
   lint-actions:
+    needs: [changes]
+    if: needs.changes.outputs.actions == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -112,43 +160,28 @@ jobs:
       - name: actionlint
         run: actionlint
 
-  lint-css:
+  lint-node:
+    needs: [changes]
+    if: needs.changes.outputs.node == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
+          cache: npm
       - name: Install dependencies
         run: npm ci
       - name: stylelint
         run: npx stylelint "**/*.css" || echo "No CSS files found — skipping"
-
-  lint-html:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-      - name: Install dependencies
-        run: npm ci
       - name: htmlhint
         run: npx htmlhint "**/*.html" || echo "No HTML files found — skipping"
-
-  lint-json:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-      - name: Install dependencies
-        run: npm ci
       - name: prettier --check
         run: npx prettier --check "**/*.json" "!package-lock.json"
 
   scan-deps:
+    needs: [changes]
+    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -162,6 +195,8 @@ jobs:
         run: trivy fs --config trivy.yaml --severity CRITICAL --exit-code 1 .
 
   sast-scan:
+    needs: [changes]
+    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -173,25 +208,16 @@ jobs:
       - name: semgrep scan
         run: semgrep --config .semgrep.yml --config p/owasp-top-ten --error src/ocd/
 
-  # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
+  # ── Stage 3: Slow lints (only if Python code changed) ────────────────────
   lint-python:
-    needs:
-      [
-        lint-shell,
-        lint-markdown,
-        lint-yaml,
-        secret-scan,
-        lint-actions,
-        lint-css,
-        lint-html,
-        lint-json,
-        scan-deps,
-        sast-scan,
-      ]
+    needs: [changes, sast-scan, scan-deps]
+    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
       - name: Install dependencies
         run: uv sync
       - name: ruff check
@@ -201,13 +227,15 @@ jobs:
       - name: mypy (strict)
         run: uv run mypy src/ocd/ --strict
 
-  # ── Stage 4: Python tests ──────────────────────────────────────────────
+  # ── Stage 4: Python tests ───────────────────────────────────────────────
   test-python:
     needs: [lint-python]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
       - name: Install dependencies
         run: uv sync
       - name: Run tests

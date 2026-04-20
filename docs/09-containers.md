@@ -111,21 +111,25 @@ Path filters:
 | Stage | Job | Tool | Details |
 |-------|-----|------|---------|
 | 1 (lint) | `lint-dockerfile` | hadolint | Scans all `containers/*/Dockerfile` |
-| 2 (build) | `build-base` | Docker | Builds `ocd-base`, runs smoke tests |
-| 2 (build) | `build-python` | Docker | Builds `ocd-base` + `ocd-python`, runs smoke tests |
-| 2 (build) | `build-node` | Docker | Builds `ocd-base` + `ocd-node`, runs smoke tests |
-| 2 (build) | `build-ollama` | Docker | Builds `ocd-base` + `ocd-ollama`, runs smoke tests |
-| 2 (build) | `build-ocd` | Docker | Builds `ocd-base` + `ocd-python` + `ocd`, runs smoke tests |
-| 3 (scan) | `scan-images` | trivy image | Rebuilds `ocd-base`, `ocd-python`, `ocd`; scans with `trivy.yaml` config. CRITICAL CVEs fail the pipeline |
+| 2 (build) | `build-base` | build-push-action → GHCR | Builds `ocd-base`, pushes `:sha-<commit>` tag, runs smoke tests |
+| 2 (build) | `build-python` | build-push-action → GHCR | Builds `ocd-python` from registry base, pushes `:sha-<commit>` tag |
+| 2 (build) | `build-node` | build-push-action → GHCR | Builds `ocd-node` from registry base, pushes `:sha-<commit>` tag |
+| 2 (build) | `build-ollama` | build-push-action → GHCR | Builds `ocd-ollama` from registry base, pushes `:sha-<commit>` tag |
+| 2 (build) | `build-ocd` | build-push-action → GHCR | Builds `ocd` from registry base, pushes `:sha-<commit>` tag |
+| 3 (scan) | `scan-images` | trivy image | Pulls `ocd:sha-<commit>` from GHCR; scans with `trivy.yaml` config |
 | 3 (scan) | `scan-images` | trivy SARIF | Generates SARIF report on push; uploads to GitHub Security tab via CodeQL |
 | 4 (publish) | `publish-latest` | build-push-action | Pushes `:latest` tags to GHCR on push to `main` only |
 | 4 (publish) | `publish-release` | build-push-action | Pushes `:<version>` + `:latest` tags to GHCR on `v*` tag push |
 
+All build jobs use `docker/build-push-action` with GHCR layer caching
+(`cache-from`/`cache-to`). Images are pushed with ephemeral `:sha-<commit>` tags
+so downstream jobs (scan, publish) can pull them without rebuilding.
+
 ### Scan Stage Details
 
-The `scan-images` job rebuilds three images (`ocd-base`, `ocd-python`, `ocd`)
-rather than all five to reduce CI time — the node and ollama images inherit from
-`ocd-base` and don't add vulnerable package managers.
+The `scan-images` job pulls the `ocd` image from GHCR (tagged
+`:sha-<commit>`) instead of rebuilding it. This eliminates redundant Docker
+builds that previously accounted for ~131s per run.
 
 Trivy scans with severity `CRITICAL` and exit code 1, meaning any CRITICAL CVE
 fails the pipeline. Accepted risks are documented in `.trivyignore` with NVD
@@ -136,9 +140,9 @@ GitHub Security tab via `github/codeql-action/upload-sarif`.
 
 ### Publish Stage Details
 
-Publishing uses `docker/build-push-action` with `BASE_IMAGE` set to the GHCR
-registry path (e.g., `ghcr.io/brainxio/ocd-base`) so child images pull from
-the registry rather than building locally.
+Publishing uses `docker/build-push-action` with GHCR layer caching. Child
+images use `BASE_IMAGE` set to the GHCR registry path so they pull cached base
+layers instead of building from scratch.
 
 | Job | When | Tags pushed |
 |-----|------|-------------|

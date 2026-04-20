@@ -238,21 +238,24 @@ All entry points are defined in `pyproject.toml` `[project.scripts]` and install
 
 ## CI Pipeline
 
-| Stage | Job | Tool | Trigger |
-|-------|-----|------|---------|
-| 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | push only |
-| 2 (parallel) | `lint-yaml` | yamllint | all |
-| 2 (parallel) | `lint-shell` | shellcheck | all |
-| 2 (parallel) | `lint-markdown` | mdformat | all |
-| 2 (parallel) | `secret-scan` | gitleaks (binary install, reads `.gitleaks.toml`) | all |
-| 2 (parallel) | `lint-actions` | actionlint (binary install) | all |
-| 2 (parallel) | `lint-css` | stylelint (npm) | all |
-| 2 (parallel) | `lint-html` | htmlhint (npm) | all |
-| 2 (parallel) | `lint-json` | prettier (npm) | all |
-| 2 (parallel) | `scan-deps` | trivy fs (binary install, reads `trivy.yaml`) | all |
-| 2 (parallel) | `sast-scan` | semgrep (pip install, reads `.semgrep.yml`) | all |
-| 3 (after 1+2) | `lint-python` | ruff + mypy | all |
-| 4 (after 3) | `test-python` | pytest | all |
+Stage 1 detects changed paths and gates commit messages. Stage 2 runs
+path-conditioned lints in parallel — only jobs matching the changed files run.
+Stages 3–4 run only when Python code changes.
+
+| Stage | Job | Tool | Condition |
+|-------|-----|------|-----------|
+| 1 (detect) | `changes` | `dorny/paths-filter` | always |
+| 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | always |
+| 2 (parallel) | `lint-yaml` | yamllint | YAML/workflow changes |
+| 2 (parallel) | `lint-shell` | shellcheck | `git_hooks/**` changes |
+| 2 (parallel) | `lint-markdown` | mdformat | `**/*.md` changes |
+| 2 (parallel) | `secret-scan` | gitleaks (reads `.gitleaks.toml`) | always |
+| 2 (parallel) | `lint-actions` | actionlint | workflow changes |
+| 2 (parallel) | `lint-node` | stylelint + htmlhint + prettier (npm) | CSS/HTML/JSON changes |
+| 2 (parallel) | `scan-deps` | trivy fs (reads `trivy.yaml`) | Python changes |
+| 2 (parallel) | `sast-scan` | semgrep (reads `.semgrep.yml`) | Python changes |
+| 3 (after 2) | `lint-python` | ruff + mypy | Python changes |
+| 4 (after 3) | `test-python` | pytest | Python changes |
 
 Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` only. Branch protection on `main` requires passing CI, signed commits, and resolved conversations.
 
