@@ -3,7 +3,7 @@ title: Reference
 aliases: [reference, api, specs, tables]
 tags: [reference]
 created: 2026-04-17
-updated: 2026-04-18
+updated: 2026-04-20
 ---
 
 All lookup tables, schemas, and specifications in one place. Dry, authoritative, complete.
@@ -258,61 +258,36 @@ Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` o
 
 ## Container CI Pipeline
 
+Defined in `.github/workflows/containers.yml`. Full details in
+[containers](09-containers.md).
+
 | Stage | Job | Tool | Trigger |
 |-------|-----|------|---------|
-| 1 (lint) | `lint-dockerfile` | hadolint (binary install, reads `.hadolint.yaml`) | paths: `containers/**`, `.hadolint.yaml` |
-| 2 (build) | `build-base` | Docker | after lint |
-| 2 (build) | `build-python` | Docker | after lint |
-| 2 (build) | `build-node` | Docker | after lint |
-| 2 (build) | `build-ollama` | Docker | after lint |
-| 2 (build) | `build-ocd` | Docker | after lint |
-| 3 (scan) | `scan-images` | trivy image (binary install, reads `trivy.yaml`) | after build |
-| 4 (publish) | `publish-latest` | Docker + GHCR | after scan |
-| 4 (publish) | `publish-release` | Docker + GHCR | after scan |
+| 1 (lint) | `lint-dockerfile` | hadolint | paths filter |
+| 2 (build) | `build-base`, `build-python`, `build-node`, `build-ollama`, `build-ocd` | Docker + smoke tests | after lint |
+| 3 (scan) | `scan-images` | trivy image + SARIF upload | after build |
+| 4 (publish) | `publish-latest`, `publish-release` | build-push-action → GHCR | after scan |
 
-Runs on push to `main` and on PRs touching `containers/**`, `.hadolint.yaml`, or `trivy.yaml`. Separate from the main CI pipeline to avoid gating code quality checks on slow container builds.
+Separate from the main CI pipeline to avoid gating code quality checks on slow
+container builds. Also triggered by `workflow_dispatch`.
 
 ### Container Images
 
 | Image | Base | Purpose |
 |-------|------|---------|
-| `ocd-base` | `debian:bookworm-slim` | Hardened foundational image with `uv`, `git`, `shellcheck` |
-| `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` with frontmatter plugin |
+| `ocd-base` | `debian:bookworm-slim` | Hardened foundation: `uv`, `git`, `shellcheck` |
 | `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint`, `stylelint`, `htmlhint` |
-| `ocd` | `ocd-python` | Product image: Python + Node + Ollama + Claude Code + OCD package + dep cache |
 | `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference |
+| `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` with frontmatter plugin |
+| `ocd` | `ocd-python` | Product image: Python + Node + Ollama + Claude Code + OCD package |
 
-Images live in `containers/<name>/Dockerfile`. Build commands:
-
-```bash
-docker build -t ocd-base:0.1.0 containers/ocd-base/
-docker build --build-arg BASE_TAG=0.1.0 -t ocd-python:0.1.0 containers/ocd-python/
-docker build --build-arg BASE_TAG=0.1.0 -t ocd-node:0.1.0 containers/ocd-node/
-docker build --build-arg BASE_TAG=0.1.0 -t ocd-ollama:0.1.0 containers/ocd-ollama/
-docker build --build-arg BASE_TAG=0.1.0 -t ocd:0.1.0 -f containers/ocd/Dockerfile .
-```
-
-Published images are available at `ghcr.io/brainxio/ocd-<name>:<version>` (e.g., `ghcr.io/brainxio/ocd:0.1.0` for the product image).
-
-## Devcontainer
-
-The `.devcontainer/devcontainer.json` provides instant onboarding with VS Code:
-
-- References pre-built image `ghcr.io/brainxio/ocd:0.1.0`
-- Includes Python 3.12, Node.js 22, all linters, Ollama, and Claude Code
-- OCD package and `.claude/` config (skills, agents, rules) pre-installed at `/opt/ocd/venv/` and `/home/ocd/.claude/`
-- Runs `ocd init` on creation (seeds project-level templates, installs deps and git hooks)
-- Recommended extensions: Python, ruff, mypy, shellcheck, markdownlint, YAML, remote-containers
+Images live in `containers/<name>/Dockerfile`. Published to
+`ghcr.io/brainxio/ocd-<name>:<tag>`.
 
 ### Inceptive Container
 
-The `ocd` container image is "inceptive" — it embeds the OCD tooling itself so any project using it immediately benefits from OCD features:
-
-- **OCD package** installed in `/opt/ocd/venv/` (entry points on PATH regardless of workspace mount)
-- **`.claude/` config** at `/home/ocd/.claude/` (skills, agents, rules, settings available to all projects via user-level config)
-- **Templates** at `/opt/ocd/templates/` (git hooks, gitleaks config — copied to project by `ocd init`)
-- **`ocd init`** scaffolds `.agent/` structure (daily logs, knowledge index, reports), seeds project-level templates, installs dependencies, sets up git hooks
-- **`ocd shell`** starts an interactive bash session with the OCD environment
+The `ocd` product image embeds the OCD tooling itself — see
+[containers](09-containers.md#inceptive-container) for details.
 
 ## Permissions and Sandbox
 

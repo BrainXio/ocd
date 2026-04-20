@@ -3,7 +3,7 @@ title: How-To Guides
 aliases: [how-to, guides, tasks]
 tags: [how-to]
 created: 2026-04-17
-updated: 2026-04-17
+updated: 2026-04-20
 ---
 
 Task-oriented guides. Each section is independent — jump to what you need.
@@ -191,3 +191,40 @@ hadolint containers/ocd-base/Dockerfile
 ```
 
 The pre-commit hook runs hadolint on staged Dockerfiles if hadolint is installed. If hadolint is not installed, it prints a warning and continues — install it from <https://github.com/hadolint/hadolint#installing>.
+
+## Trigger Container CI
+
+The container pipeline runs automatically on path filters (see [containers](09-containers.md#triggers)) and on `workflow_dispatch`.
+
+Trigger manually from the GitHub Actions UI:
+
+1. Go to **Actions** → **Containers** workflow
+1. Click **Run workflow** → select branch → **Run workflow**
+
+Or via `gh` CLI:
+
+```bash
+gh workflow run containers.yml
+```
+
+## Publish a Container Release
+
+1. Ensure CI passes on `main` and the container build + scan succeeds
+1. Create and push a version tag:
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+The `publish-release` job builds all 5 images and pushes `:<version>` + `:latest`
+tags to GHCR. The version is derived from the tag (e.g., `v1.2.3` → `1.2.3`).
+
+To verify published images:
+
+```bash
+docker pull ghcr.io/brainxio/ocd:1.2.3
+docker run --rm --entrypoint="" ghcr.io/brainxio/ocd:1.2.3 whoami  # ocd
+```
+
+See [containers](09-containers.md) for the full pipeline documentation.

@@ -3,7 +3,7 @@ title: Explanation
 aliases: [explanation, concepts, architecture, rationale]
 tags: [explanation]
 created: 2026-04-17
-updated: 2026-04-17
+updated: 2026-04-20
 ---
 
 Why things are the way they are. This is not a guide for what to do — see [how-to](02-how-to.md) for that. This is for understanding the design.
@@ -90,3 +90,14 @@ The system is designed to improve itself:
 - Gaps in the system (missing skills, needed agents, uncaught patterns) are recorded in [planning](05-planning.md) and filled
 
 This loop means the project accumulates institutional memory. Decisions, lessons, and rationale are not lost at session end — they become part of the context for every future session.
+
+## Why Separate CI Pipelines
+
+The main CI pipeline (`.github/workflows/ci.yml`) and the container pipeline (`.github/workflows/containers.yml`) are intentionally separate:
+
+- **Speed** — Container builds take minutes; linters take seconds. A slow Docker build should not block a fast lint failure from being reported.
+- **Trigger scope** — The main pipeline runs on every push and PR. The container pipeline runs only when container-relevant paths change (Dockerfiles, dependencies, workflow file), plus `workflow_dispatch` for manual triggers.
+- **Permissions** — The container pipeline needs `packages: write` to push images to GHCR. The main pipeline only needs `contents: read`. Separating them follows least privilege.
+- **Independent failure** — A trivy image scan failure should not prevent the main pipeline from reporting lint or test results. Each pipeline's status is reported independently on PRs.
+
+The two pipelines share no state — the container pipeline rebuilds images from scratch rather than depending on artifacts from the main pipeline.
