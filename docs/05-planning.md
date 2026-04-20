@@ -33,15 +33,51 @@ Before adding `sqlfluff`, determine what additional tools and dependencies the `
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| GitHub Release packaging | Build and attach the `obsessive-claude-developer` sdist/wheel to GitHub Releases alongside container images | Planned |
+| GitHub Release packaging | Build and attach the `brainxio-ocd` sdist/wheel to GitHub Releases alongside container images | Planned |
+| Release package composition | Define which artifacts go into a GitHub Release and how they are assembled (see below) | Planned |
+| `AGENTS.md` | Instruction file for external agents on which packages and assets to download from this repo and how to set them up in foreign environments | Planned |
 | Internal CI library | Python library for agent-based CI workflows, driven by `.github/workflows/` definitions | Planned |
+
+### Release Package Composition
+
+A GitHub Release should contain three tiers of artifacts:
+
+**Essential** (minimum viable OCD — knowledge pipeline + hooks):
+
+| Artifact | Contents |
+|----------|----------|
+| `brainxio_ocd-<version>-py3-none-any.whl` | Python package (all 13 modules, 9 entry points) |
+| `brainxio_ocd-<version>.tar.gz` | Source distribution |
+| `ocd-config.zip` | `.claude/settings.json`, `.claude/rules/commit-hygiene.md`, `.claude/rules/infrastructure.md`, `.claude/skills/ocd/SKILL.md` |
+| `ocd-templates.zip` | `git_hooks/setup-hooks.sh`, `git_hooks/ai-patterns.txt`, `.gitleaks.toml`, `package.json`, `package-lock.json` |
+
+**Recommended** (adds enforcement + core skills + audit agents):
+
+| Artifact | Contents |
+|----------|----------|
+| `ocd-hooks.zip` | `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/pre-push` |
+| `ocd-skills-core.zip` | `.claude/skills/{git,bash,python,docker}/SKILL.md` |
+| `ocd-rules-core.zip` | `.claude/rules/{markdown,doc-sync,pr-workflow}.md` |
+| `ocd-agents-core.zip` | `.claude/agents/{lint-status,hook-integrity,hook-coverage,dead-code-hunter}.md` |
+
+**Optional** (language-specific skills, remaining agents, containers):
+
+| Artifact | Contents |
+|----------|----------|
+| `ocd-skills-extra.zip` | All remaining `.claude/skills/*/SKILL.md` (15 language/infra skills) |
+| `ocd-agents-extra.zip` | All remaining `.claude/agents/*.md` (21 audit agents) |
+| Container images | Published to GHCR (`ghcr.io/brainxio/ocd-<name>:<version>`) |
+
+The `AGENTS.md` file should document these tiers and provide setup instructions for each.
 
 ## CI/CD Beyond Lint
 
 | Item | Purpose | Status |
 |------|---------|--------|
+| CI path filters | Add path-based triggers to `ci.yml` so doc-only changes skip Python lint/test/security jobs and only run relevant checks | Planned |
 | Semantic versioning | Automated version bumps from conventional commits | Planned |
 | Changelog generation | Auto-generate CHANGELOG.md from commit history | Planned |
+| Release automation | CI job that composes release artifacts, creates a GitHub Release with composed package content, and uploads assets | Planned |
 | Deployment pipelines | Staging → production deployment workflows | Planned |
 
 ## Developer Experience
