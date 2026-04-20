@@ -99,6 +99,7 @@ model: haiku
 | PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
 | SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
 | Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write | Edit) | Lint edited files, report missing linters |
+| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write | Edit) | Auto-format edited files, capture violations |
 | Lint (commit) | `ocd-lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
 
 All Python hooks are installed as entry points via `pyproject.toml` `[project.scripts]`. Source code lives in `src/ocd/hooks/`.
@@ -136,6 +137,15 @@ Hooks receive a JSON object on stdin:
 | `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
 | `write_context_file(session_id, context, prefix)` | Write context to `.agent/.state/{prefix}-{session_id}-{timestamp}.md` |
 
+### State Files
+
+| File | Purpose |
+| ---- | ------- |
+| `.agent/.state/format-violations.jsonl` | Per-line JSON records of auto-format corrections (file, formatter, timestamp) |
+| `.agent/.state/flush.log` | Background flush process log |
+| `.agent/.state/state.json` | Session state |
+| `.agent/.state/last-flush.json` | Last flush metadata |
+
 ## Claude Code Rules
 
 Rules in `.claude/rules/` provide advisory instructions to Claude Code sessions.
@@ -156,7 +166,7 @@ Path-scoped rules load only when matching files are read; unconditional rules lo
 
 | Hook | Purpose |
 | ------------ | ------------------------------------------------------------------------------------------------------- |
-| `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks); lint Dockerfiles (hadolint) |
+| `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks); lint Dockerfiles (hadolint); auto-format markdown (mdformat) |
 | `pre-push` | Run `pytest` before push; abort if tests fail |
 | `commit-msg` | Reject AI attribution in commit messages |
 
@@ -249,6 +259,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd-session-end` | `ocd.hooks.session_end:main` | Session end transcript capture |
 | `ocd-pre-compact` | `ocd.hooks.pre_compact:main` | Pre-compaction context save |
 | `ocd-lint-work` | `ocd.hooks.lint_work:main` | Real-time file linting on edit/commit |
+| `ocd-format-work` | `ocd.hooks.format_work:main` | Real-time file auto-formatting on edit |
 
 All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
 
@@ -341,7 +352,7 @@ Deny rules in `.claude/settings.json` block Claude from reading secrets or modif
 
 Protected files (project-root-relative paths):
 
-- `src/ocd/hooks/lint_work.py`, `src/ocd/hooks/hookslib.py`, `src/ocd/hooks/pre_compact.py`, `src/ocd/hooks/session_start.py`, `src/ocd/hooks/session_end.py`
+- `src/ocd/hooks/format_work.py`, `src/ocd/hooks/lint_work.py`, `src/ocd/hooks/hookslib.py`, `src/ocd/hooks/pre_compact.py`, `src/ocd/hooks/session_start.py`, `src/ocd/hooks/session_end.py`
 - `src/ocd/config.py`, `src/ocd/compile.py`, `src/ocd/flush.py`, `src/ocd/lint.py`, `src/ocd/query.py`, `src/ocd/utils.py`
 - `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/pre-push`, `git_hooks/setup-hooks.sh`
 - `.gitleaks.toml`
