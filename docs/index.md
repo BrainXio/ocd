@@ -3,7 +3,7 @@ title: O.C.D. Documentation Index
 aliases: [index, docs-index]
 tags: [index]
 created: 2026-04-17
-updated: 2026-04-17
+updated: 2026-04-20
 ---
 
 Documentation organized by the [Diataxis framework](https://diataxis.fr/) — four content types for four different needs.
@@ -16,3 +16,4 @@ Documentation organized by the [Diataxis framework](https://diataxis.fr/) — fo
 - [Usage](06-usage.md) — an intelligence's guide to using O.C.D.
 - [Development Setup](07-development.md) — venv activation and local development workflow
 - [Code Workspace](08-code-workspace.md) — how the workspace file configures VS Code
+- [Containers](09-containers.md) — images, CI pipeline, security scanning, and publishing

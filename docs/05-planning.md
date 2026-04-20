@@ -13,15 +13,6 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 | Linter | Purpose | Status |
 |--------|---------|--------|
 | `sqlfluff` | SQL linting CI job for the `sql` skill | Pending tool evaluation |
-| `trivy` | Container image and dependency vulnerability scanning in CI | Done |
-| `hadolint` | Dockerfile linting commit gate for the `docker` skill | Done
-
-## Security
-
-| Item | Purpose | Status |
-|------|---------|--------|
-| `trivy` CI job | Scan container images and Python dependencies for known vulnerabilities | Done |
-| `semgrep` CI job | Static analysis for OWASP Top 10 patterns | Done |
 
 ## New Commands
 
@@ -35,14 +26,12 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 |------|---------|--------|
 | Semantic versioning | Automated version bumps from conventional commits | Planned |
 | Changelog generation | Auto-generate CHANGELOG.md from commit history | Planned |
-| Container image publishing | Push built images to GHCR on release | Done |
 | Deployment pipelines | Staging → production deployment workflows | Planned |
 
 ## Knowledge Pipeline
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| Agent directory scaffolding | `ocd init` creates `.agent/` structure with gitkeep files | Done |
 | Automated URL ingestion | Fetch URL content and route to flush.py in one step | Planned |
 | KB export/sync | Share compiled knowledge between instances | Planned |
 
