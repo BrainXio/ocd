@@ -13,12 +13,6 @@ class TestPathConstants:
     def test_project_root_contains_git(self):
         assert (config.PROJECT_ROOT / ".git").is_dir()
 
-    def test_claude_dir_name(self):
-        assert config.CLAUDE_DIR.name == ".claude"
-
-    def test_claude_dir_under_project_root(self):
-        assert config.CLAUDE_DIR == config.PROJECT_ROOT / ".claude"
-
     def test_agent_dir_under_project_root(self):
         assert config.AGENT_DIR == config.PROJECT_ROOT / ".agent"
 

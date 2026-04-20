@@ -30,7 +30,6 @@ def _find_project_root() -> Path:
 
 
 PROJECT_ROOT = _find_project_root()
-CLAUDE_DIR = PROJECT_ROOT / ".claude"
 AGENT_DIR = PROJECT_ROOT / ".agent"
 VENV_BIN = Path(sys.executable).parent
 
@@ -47,15 +46,12 @@ FLUSH_STATE_FILE = STATE_DIR / "last-flush.json"
 FLUSH_LOG_FILE = STATE_DIR / "flush.log"
 
 INDEX_FILE = KNOWLEDGE_DIR / "index.md"
-LOG_FILE = KNOWLEDGE_DIR / "log.md"
 
 # Flush thresholds
 MIN_TURNS_SESSION_END = 1
 MIN_TURNS_PRE_COMPACT = 5
 MAX_FLUSH_CONTEXT_CHARS = 15_000
 MAX_FLUSH_TURNS = 30
-
-TIMEZONE = "UTC"
 
 
 def now_iso() -> str:

@@ -22,7 +22,7 @@ from ocd.config import (
 def load_state() -> dict[str, Any]:
     """Load persistent state from state.json."""
     if STATE_FILE.exists():
-        result: dict[str, object] = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        result: dict[str, Any] = json.loads(STATE_FILE.read_text(encoding="utf-8"))
         return result
     return {"ingested": {}, "query_count": 0, "last_lint": None, "total_cost": 0.0}
 
@@ -39,18 +39,6 @@ def save_state(state: dict[str, Any]) -> None:
 def file_hash(path: Path) -> str:
     """SHA-256 hash of a file (first 16 hex chars)."""
     return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
-
-
-# ── Slug / naming ─────────────────────────────────────────────────────
-
-
-def slugify(text: str) -> str:
-    """Convert text to a filename-safe slug."""
-    text = text.lower().strip()
-    text = re.sub(r"[^\w\s-]", "", text)
-    text = re.sub(r"[\s_]+", "-", text)
-    text = re.sub(r"-+", "-", text)
-    return text.strip("-")
 
 
 # ── Wikilink helpers ──────────────────────────────────────────────────
@@ -115,12 +103,10 @@ def list_raw_files() -> list[Path]:
 # ── Index helpers ─────────────────────────────────────────────────────
 
 
-def count_inbound_links(target: str, exclude_file: Path | None = None) -> int:
+def count_inbound_links(target: str) -> int:
     """Count how many wiki articles link to a given target."""
     count = 0
     for article in list_wiki_articles():
-        if article == exclude_file:
-            continue
         content = article.read_text(encoding="utf-8")
         if f"[[{target}]]" in content:
             count += 1
@@ -138,7 +124,3 @@ def get_article_word_count(path: Path) -> int:
     return len(content.split())
 
 
-def build_index_entry(rel_path: str, summary: str, sources: str, updated: str) -> str:
-    """Build a single index table row."""
-    link = rel_path.replace(".md", "")
-    return f"| [[{link}]] | {summary} | {sources} | {updated} |"

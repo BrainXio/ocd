@@ -89,7 +89,6 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "FLUSH_STATE_FILE": state_dir / "last-flush.json",
         "FLUSH_LOG_FILE": state_dir / "flush.log",
         "INDEX_FILE": knowledge_dir / "index.md",
-        "LOG_FILE": knowledge_dir / "log.md",
     }
 
     # Patch the canonical source

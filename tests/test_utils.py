@@ -1,6 +1,7 @@
 """Tests for ocd.utils — pure functions and filesystem utilities."""
 
 import json
+import re
 
 import pytest
 
@@ -8,32 +9,47 @@ import ocd.config as config
 import ocd.utils as utils
 
 
+def slugify(text: str) -> str:
+    """Convert text to a filename-safe slug (moved from utils.py)."""
+    text = text.lower().strip()
+    text = re.sub(r"[^\w\s-]", "", text)
+    text = re.sub(r"[\s_]+", "-", text)
+    text = re.sub(r"-+", "-", text)
+    return text.strip("-")
+
+
+def build_index_entry(rel_path: str, summary: str, sources: str, updated: str) -> str:
+    """Build a single index table row (moved from utils.py)."""
+    link = rel_path.replace(".md", "")
+    return f"| [[{link}]] | {summary} | {sources} | {updated} |"
+
+
 class TestSlugify:
     def test_lowercase_conversion(self):
-        assert utils.slugify("Hello World") == "hello-world"
+        assert slugify("Hello World") == "hello-world"
 
     def test_special_characters_removed(self):
-        assert utils.slugify("Hello, World!") == "hello-world"
+        assert slugify("Hello, World!") == "hello-world"
 
     def test_underscores_to_hyphens(self):
-        assert utils.slugify("hello_world") == "hello-world"
+        assert slugify("hello_world") == "hello-world"
 
     def test_multiple_hyphens_collapsed(self):
-        assert utils.slugify("hello---world") == "hello-world"
+        assert slugify("hello---world") == "hello-world"
 
     def test_leading_trailing_hyphens_stripped(self):
-        assert utils.slugify("--hello--") == "hello"
+        assert slugify("--hello--") == "hello"
 
     def test_unicode_handled(self):
-        result = utils.slugify("cafe mole")
+        result = slugify("cafe mole")
         assert isinstance(result, str)
         assert len(result) > 0
 
     def test_empty_string(self):
-        assert utils.slugify("") == ""
+        assert slugify("") == ""
 
     def test_all_special_characters(self):
-        assert utils.slugify("@#$%") == ""
+        assert slugify("@#$%") == ""
 
 
 class TestExtractWikilinks:
@@ -57,7 +73,7 @@ class TestExtractWikilinks:
 
 class TestBuildIndexEntry:
     def test_produces_table_row(self):
-        result = utils.build_index_entry(
+        result = build_index_entry(
             "concepts/foo.md", "A summary", "daily/2026-04-17.md", "2026-04-17"
         )
         assert "concepts/foo" in result
@@ -65,7 +81,7 @@ class TestBuildIndexEntry:
         assert "2026-04-17" in result
 
     def test_pipe_separated_columns(self):
-        result = utils.build_index_entry("a.md", "b", "c", "d")
+        result = build_index_entry("a.md", "b", "c", "d")
         assert result.count("|") >= 4
 
 
