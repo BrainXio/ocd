@@ -10,22 +10,22 @@ import ocd.config
 import ocd.hooks.hookslib as hookslib
 
 
-class TestReadStdin:
+class TestParseStdinJson:
     def test_valid_json(self, monkeypatch):
         monkeypatch.setattr("sys.stdin", MagicMock(read=lambda: '{"key": "value"}'))
-        result = hookslib.read_stdin()
+        result = hookslib.parse_stdin_json()
         assert result == {"key": "value"}
 
     def test_windows_backslash_fix(self, monkeypatch):
         raw = '{"path": "C:\\\\Users\\\\test"}'
         monkeypatch.setattr("sys.stdin", MagicMock(read=lambda: raw))
-        result = hookslib.read_stdin()
+        result = hookslib.parse_stdin_json()
         assert "path" in result
 
     def test_invalid_json_raises(self, monkeypatch):
         monkeypatch.setattr("sys.stdin", MagicMock(read=lambda: "not json at all"))
         with pytest.raises(json.JSONDecodeError):
-            hookslib.read_stdin()
+            hookslib.parse_stdin_json()
 
 
 class TestExtractConversationContext:

@@ -51,7 +51,7 @@ exclude = ["tests/"]
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]
-disable_error_code = ["no-untyped-def", "no-any-return", "unused-ignore"]
+disable_error_code = ["no-untyped-def", "no-any-return", "unused-ignore", "import-untyped"]
 
 [dependency-groups]
 dev = [

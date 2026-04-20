@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from ocd.config import PROJECT_ROOT, VENV_BIN
-from ocd.hooks.hookslib import read_stdin
+from ocd.hooks.hookslib import parse_stdin_json
 
 # ── Linter registry ──────────────────────────────────────────────────
 # (extensions, command_template, config_files | None, is_blocking, timeout, scope,
@@ -286,7 +286,7 @@ def run_linter(entry: tuple[Any, ...], file_path: str) -> tuple[bool, str]:
     if scope == "project" or "{file}" not in command_template:
         command = command_template
     else:
-        command = command_template.format(file=file_path)
+        command = command_template.format(file=shlex.quote(file_path))
 
     # Ensure venv bin is on PATH so linters can find venv-installed tools
     env = os.environ.copy()
@@ -393,7 +393,7 @@ def lint_file(file_path: str, include_project: bool = False) -> list[dict[str, A
 
 def edit_mode() -> None:
     """Lint the file just written/edited and feed results back."""
-    hook_input = read_stdin()
+    hook_input = parse_stdin_json()
     tool_input = hook_input.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
 
@@ -446,7 +446,7 @@ def edit_mode() -> None:
 
 def commit_mode() -> None:
     """Lint all staged files and block the commit if errors found."""
-    hook_input = read_stdin()
+    hook_input = parse_stdin_json()
     tool_input = hook_input.get("tool_input", {})
     command = tool_input.get("command", "")
 

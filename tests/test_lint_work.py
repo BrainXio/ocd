@@ -168,7 +168,7 @@ class TestEditMode:
             lambda entry, path: (True, "E501 line too long"),
         )
         monkeypatch.setattr(
-            lint_work, "read_stdin", lambda: {"tool_input": {"file_path": "test.py"}}
+            lint_work, "parse_stdin_json", lambda: {"tool_input": {"file_path": "test.py"}}
         )
 
         lint_work.edit_mode()
@@ -180,7 +180,7 @@ class TestEditMode:
         """When a linter is missing, edit_mode should report it as context."""
         monkeypatch.setattr(lint_work, "_tool_available", lambda cmd: False)
         monkeypatch.setattr(
-            lint_work, "read_stdin", lambda: {"tool_input": {"file_path": "test.py"}}
+            lint_work, "parse_stdin_json", lambda: {"tool_input": {"file_path": "test.py"}}
         )
 
         lint_work.edit_mode()
@@ -192,7 +192,7 @@ class TestEditMode:
     def test_no_output_for_unknown_extension(self, monkeypatch, capsys):
         """Files with no registered linter should produce no output."""
         monkeypatch.setattr(
-            lint_work, "read_stdin", lambda: {"tool_input": {"file_path": "data.xyz"}}
+            lint_work, "parse_stdin_json", lambda: {"tool_input": {"file_path": "data.xyz"}}
         )
 
         lint_work.edit_mode()
@@ -212,7 +212,7 @@ class TestCommitMode:
         )
         monkeypatch.setattr(
             lint_work,
-            "read_stdin",
+            "parse_stdin_json",
             lambda: {"tool_input": {"command": "git commit -m test"}},
         )
         monkeypatch.setattr(
@@ -228,7 +228,7 @@ class TestCommitMode:
     def test_skips_non_git_commit(self, monkeypatch, capsys):
         """commit_mode should do nothing for non-git-commit commands."""
         monkeypatch.setattr(
-            lint_work, "read_stdin", lambda: {"tool_input": {"command": "npm test"}}
+            lint_work, "parse_stdin_json", lambda: {"tool_input": {"command": "npm test"}}
         )
         lint_work.commit_mode()
         output = capsys.readouterr().out

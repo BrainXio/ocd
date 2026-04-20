@@ -10,27 +10,17 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from ocd.config import (
-    MAX_FLUSH_CONTEXT_CHARS,
-    MAX_FLUSH_TURNS,
-    MIN_TURNS_PRE_COMPACT,
-    MIN_TURNS_SESSION_END,
-    STATE_DIR,
-)
+from ocd.config import MAX_FLUSH_CONTEXT_CHARS, MAX_FLUSH_TURNS, STATE_DIR
 
 __all__ = [
-    "MAX_FLUSH_CONTEXT_CHARS",
-    "MAX_FLUSH_TURNS",
-    "MIN_TURNS_PRE_COMPACT",
-    "MIN_TURNS_SESSION_END",
     "extract_conversation_context",
-    "read_stdin",
+    "parse_stdin_json",
     "spawn_flush",
     "write_context_file",
 ]
 
 
-def read_stdin() -> dict[str, Any]:
+def parse_stdin_json() -> dict[str, Any]:
     """Read and parse JSON from stdin, with Windows backslash fix."""
     raw = sys.stdin.read()
     try:
@@ -94,6 +84,11 @@ def extract_conversation_context(transcript_path: Path) -> tuple[str, int]:
 
 def spawn_flush(context_file: Path, session_id: str) -> None:
     """Spawn flush as a background process to extract knowledge."""
+    if "/" in session_id or "\\" in session_id or ".." in session_id:
+        import logging
+
+        logging.error("Invalid session_id in spawn_flush: %s", session_id)
+        return
     cmd = [
         sys.executable,
         "-m",
@@ -121,8 +116,12 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
 
 def write_context_file(session_id: str, context: str, prefix: str = "flush-context") -> Path:
     """Write conversation context to a temp file for the background flush process."""
+    if "/" in session_id or "\\" in session_id or ".." in session_id:
+        raise ValueError(f"Invalid session_id: {session_id}")
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(UTC).astimezone().strftime("%Y%m%d-%H%M%S")
     context_file = STATE_DIR / f"{prefix}-{session_id}-{timestamp}.md"
+    if not context_file.resolve().is_relative_to(STATE_DIR.resolve()):
+        raise ValueError(f"Context file path escapes STATE_DIR: {context_file}")
     context_file.write_text(context, encoding="utf-8")
     return context_file

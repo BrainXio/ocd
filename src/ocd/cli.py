@@ -1,12 +1,42 @@
 """OCD container initialization entry point."""
 
+from __future__ import annotations
+
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+from ocd.config import (
+    CONCEPTS_DIR,
+    CONNECTIONS_DIR,
+    DAILY_DIR,
+    DEFAULT_INDEX_CONTENT,
+    INDEX_FILE,
+    KNOWLEDGE_DIR,
+    PROJECT_ROOT,
+    QA_DIR,
+    REPORTS_DIR,
+)
+
 TEMPLATES_DIR = Path("/opt/ocd/templates")
+
+AGENT_DIRS = [
+    str(p.relative_to(PROJECT_ROOT))
+    for p in [DAILY_DIR, CONCEPTS_DIR, CONNECTIONS_DIR, QA_DIR, REPORTS_DIR]
+]
+
+AGENT_GITIGNORE = """\
+# Ignore everything in .agent (runtime data)
+*
+# Except .gitkeep files (preserve directory structure)
+!.gitkeep
+# Except this .gitignore itself
+!.gitignore
+# And subdirectories (so git can traverse into them)
+!*/
+"""
 
 
 def main() -> None:
@@ -23,7 +53,33 @@ def main() -> None:
 def _shell() -> None:
     """Start an interactive shell with the OCD environment."""
     shell = os.environ.get("SHELL", "/bin/bash")
+    if not _is_valid_shell(shell):
+        shell = "/bin/bash"
     os.execvp(shell, [shell])
+
+
+def _is_valid_shell(shell: str) -> bool:
+    """Check if a shell is in /etc/shells or is a known safe default."""
+    safe_defaults = {
+        "/bin/bash",
+        "/bin/sh",
+        "/bin/zsh",
+        "/bin/fish",
+        "/usr/bin/bash",
+        "/usr/bin/zsh",
+        "/usr/bin/fish",
+    }
+    if shell in safe_defaults:
+        return True
+    etc_shells = Path("/etc/shells")
+    if etc_shells.exists():
+        try:
+            for line in etc_shells.read_text().splitlines():
+                if line.strip() == shell:
+                    return True
+        except OSError:
+            pass
+    return False
 
 
 def _detect_project(project_dir: Path) -> dict[str, bool]:
@@ -35,10 +91,49 @@ def _detect_project(project_dir: Path) -> dict[str, bool]:
     }
 
 
+def _init_agent_dir(project_dir: Path) -> None:
+    """Scaffold .agent/ directory structure for the knowledge pipeline."""
+    agent_dir = project_dir / ".agent"
+    gitignore = agent_dir / ".gitignore"
+
+    if gitignore.exists():
+        return
+
+    created = False
+    for dir_path in AGENT_DIRS:
+        full = project_dir / dir_path
+        if not full.exists():
+            full.mkdir(parents=True, exist_ok=True)
+            (full / ".gitkeep").touch()
+            created = True
+
+    # Knowledge index
+    local_knowledge_dir = project_dir / KNOWLEDGE_DIR.relative_to(PROJECT_ROOT)
+    local_knowledge_dir.mkdir(parents=True, exist_ok=True)
+    if not (local_knowledge_dir / ".gitkeep").exists():
+        (local_knowledge_dir / ".gitkeep").touch()
+
+    local_index_file = project_dir / INDEX_FILE.relative_to(PROJECT_ROOT)
+    if not local_index_file.exists():
+        local_index_file.write_text(DEFAULT_INDEX_CONTENT + "\n")
+        created = True
+
+    # .gitignore
+    if not gitignore.exists():
+        gitignore.write_text(AGENT_GITIGNORE)
+        created = True
+
+    if created:
+        print("Created .agent/ knowledge pipeline structure.")
+
+
 def _init() -> None:
     """Initialize the OCD environment in a container."""
     project_dir = Path.cwd()
     project = _detect_project(project_dir)
+
+    # Scaffold .agent/ for knowledge pipeline
+    _init_agent_dir(project_dir)
 
     # Seed templates from /opt/ocd/templates/
     copied = _copy_templates(project_dir)

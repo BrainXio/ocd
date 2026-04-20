@@ -13,11 +13,10 @@ import logging
 import os
 from pathlib import Path
 
-from ocd.config import FLUSH_LOG_FILE, STATE_DIR
+from ocd.config import FLUSH_LOG_FILE, MIN_TURNS_SESSION_END, STATE_DIR
 from ocd.hooks.hookslib import (
-    MIN_TURNS_SESSION_END,
     extract_conversation_context,
-    read_stdin,
+    parse_stdin_json,
     spawn_flush,
     write_context_file,
 )
@@ -38,7 +37,7 @@ def main() -> None:
     if os.environ.get("CLAUDE_INVOKED_BY"):
         return
 
-    hook_input = read_stdin()
+    hook_input = parse_stdin_json()
 
     session_id = hook_input.get("session_id", "unknown")
     source = hook_input.get("source", "unknown")

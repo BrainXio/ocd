@@ -1,5 +1,7 @@
 """Shared utilities for the personal knowledge base."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import re
@@ -10,6 +12,7 @@ from ocd.config import (
     CONCEPTS_DIR,
     CONNECTIONS_DIR,
     DAILY_DIR,
+    DEFAULT_INDEX_CONTENT,
     INDEX_FILE,
     KNOWLEDGE_DIR,
     QA_DIR,
@@ -22,7 +25,7 @@ from ocd.config import (
 def load_state() -> dict[str, Any]:
     """Load persistent state from state.json."""
     if STATE_FILE.exists():
-        result: dict[str, object] = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        result: dict[str, Any] = json.loads(STATE_FILE.read_text(encoding="utf-8"))
         return result
     return {"ingested": {}, "query_count": 0, "last_lint": None, "total_cost": 0.0}
 
@@ -41,18 +44,6 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
 
 
-# ── Slug / naming ─────────────────────────────────────────────────────
-
-
-def slugify(text: str) -> str:
-    """Convert text to a filename-safe slug."""
-    text = text.lower().strip()
-    text = re.sub(r"[^\w\s-]", "", text)
-    text = re.sub(r"[\s_]+", "-", text)
-    text = re.sub(r"-+", "-", text)
-    return text.strip("-")
-
-
 # ── Wikilink helpers ──────────────────────────────────────────────────
 
 
@@ -63,8 +54,10 @@ def extract_wikilinks(content: str) -> list[str]:
 
 def wiki_article_exists(link: str) -> bool:
     """Check if a wikilinked article exists on disk."""
+    if ".." in link.split("/") or "\\" in link or link.startswith("/"):
+        return False
     path = KNOWLEDGE_DIR / f"{link}.md"
-    return path.exists()
+    return path.resolve().is_relative_to(KNOWLEDGE_DIR.resolve()) and path.exists()
 
 
 # ── Wiki content helpers ──────────────────────────────────────────────
@@ -74,11 +67,7 @@ def read_wiki_index() -> str:
     """Read the knowledge base index file."""
     if INDEX_FILE.exists():
         return INDEX_FILE.read_text(encoding="utf-8")
-    return (
-        "# Knowledge Base Index\n\n"
-        "| Article | Summary | Compiled From | Updated |\n"
-        "|---------|---------|---------------|---------|"
-    )
+    return DEFAULT_INDEX_CONTENT
 
 
 def read_all_wiki_content() -> str:
@@ -115,12 +104,10 @@ def list_raw_files() -> list[Path]:
 # ── Index helpers ─────────────────────────────────────────────────────
 
 
-def count_inbound_links(target: str, exclude_file: Path | None = None) -> int:
+def count_inbound_links(target: str) -> int:
     """Count how many wiki articles link to a given target."""
     count = 0
     for article in list_wiki_articles():
-        if article == exclude_file:
-            continue
         content = article.read_text(encoding="utf-8")
         if f"[[{target}]]" in content:
             count += 1
@@ -136,9 +123,3 @@ def get_article_word_count(path: Path) -> int:
         if end != -1:
             content = content[end + 3 :]
     return len(content.split())
-
-
-def build_index_entry(rel_path: str, summary: str, sources: str, updated: str) -> str:
-    """Build a single index table row."""
-    link = rel_path.replace(".md", "")
-    return f"| [[{link}]] | {summary} | {sources} | {updated} |"

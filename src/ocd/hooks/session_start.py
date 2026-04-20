@@ -10,10 +10,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 
-from ocd.config import DAILY_DIR, INDEX_FILE
-
-MAX_CONTEXT_CHARS = 20_000
-MAX_LOG_LINES = 30
+from ocd.config import DAILY_DIR, INDEX_FILE, MAX_CONTEXT_CHARS, MAX_LOG_LINES
 
 
 def get_recent_log() -> str:

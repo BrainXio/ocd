@@ -120,7 +120,11 @@ def check_missing_backlinks() -> list[dict[str, Any]]:
         for link in extract_wikilinks(content):
             if link.startswith("daily/"):
                 continue
+            if ".." in link.split("/") or "\\" in link or link.startswith("/"):
+                continue
             target_path = KNOWLEDGE_DIR / f"{link}.md"
+            if not target_path.resolve().is_relative_to(KNOWLEDGE_DIR.resolve()):
+                continue
             if target_path.exists():
                 target_content = target_path.read_text(encoding="utf-8")
                 if f"[[{source_link}]]" not in target_content:

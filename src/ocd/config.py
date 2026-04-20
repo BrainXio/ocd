@@ -1,5 +1,7 @@
 """Path constants and configuration for the personal knowledge base."""
 
+from __future__ import annotations
+
 import os
 import sys
 from datetime import UTC, datetime
@@ -30,7 +32,6 @@ def _find_project_root() -> Path:
 
 
 PROJECT_ROOT = _find_project_root()
-CLAUDE_DIR = PROJECT_ROOT / ".claude"
 AGENT_DIR = PROJECT_ROOT / ".agent"
 VENV_BIN = Path(sys.executable).parent
 
@@ -47,7 +48,12 @@ FLUSH_STATE_FILE = STATE_DIR / "last-flush.json"
 FLUSH_LOG_FILE = STATE_DIR / "flush.log"
 
 INDEX_FILE = KNOWLEDGE_DIR / "index.md"
-LOG_FILE = KNOWLEDGE_DIR / "log.md"
+
+DEFAULT_INDEX_CONTENT = (
+    "# Knowledge Base Index\n\n"
+    "| Article | Summary | Compiled From | Updated |\n"
+    "|---------|---------|---------------|---------|"
+)
 
 # Flush thresholds
 MIN_TURNS_SESSION_END = 1
@@ -55,7 +61,12 @@ MIN_TURNS_PRE_COMPACT = 5
 MAX_FLUSH_CONTEXT_CHARS = 15_000
 MAX_FLUSH_TURNS = 30
 
-TIMEZONE = "UTC"
+# Session start thresholds
+MAX_CONTEXT_CHARS = 20_000
+MAX_LOG_LINES = 30
+
+# Compilation trigger
+COMPILE_AFTER_HOUR = 18
 
 
 def now_iso() -> str:

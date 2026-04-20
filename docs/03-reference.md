@@ -3,7 +3,7 @@ title: Reference
 aliases: [reference, api, specs, tables]
 tags: [reference]
 created: 2026-04-17
-updated: 2026-04-17
+updated: 2026-04-18
 ---
 
 All lookup tables, schemas, and specifications in one place. Dry, authoritative, complete.
@@ -131,7 +131,7 @@ Hooks receive a JSON object on stdin:
 
 | Function | Purpose |
 |----------|---------|
-| `read_stdin()` | Parse JSON from stdin (includes Windows backslash fix) |
+| `parse_stdin_json()` | Parse JSON from stdin (includes Windows backslash fix) |
 | `extract_conversation_context(path)` | Read JSONL transcript, extract last 30 turns as markdown, capped at 15,000 chars |
 | `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
 | `write_context_file(session_id, context, prefix)` | Write context to `.agent/.state/{prefix}-{session_id}-{timestamp}.md` |
@@ -222,7 +222,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 
 | Command | Module | Purpose |
 |---------|--------|---------|
-| `ocd` | `ocd.cli:main` | Container init (`ocd init`) and shell (`ocd shell`) |
+| `ocd` | `ocd.cli:main` | Container init and shell — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
 | `ocd-lint-kb` | `ocd.lint:main` | Structural + LLM contradiction checks on knowledge base |
@@ -285,7 +285,7 @@ docker build --build-arg BASE_TAG=0.1.0 -t ocd-ollama:0.1.0 containers/ocd-ollam
 docker build --build-arg BASE_TAG=0.1.0 -t ocd:0.1.0 -f containers/ocd/Dockerfile .
 ```
 
-Published images will be available at `ghcr.io/brainxio/ocd-<name>:<version>` (e.g., `ghcr.io/brainxio/ocd:0.1.0` for the product image).
+Published images are available at `ghcr.io/brainxio/ocd-<name>:<version>` (e.g., `ghcr.io/brainxio/ocd:0.1.0` for the product image).
 
 ## Devcontainer
 
@@ -304,7 +304,7 @@ The `ocd` container image is "inceptive" — it embeds the OCD tooling itself so
 - **OCD package** installed in `/opt/ocd/venv/` (entry points on PATH regardless of workspace mount)
 - **`.claude/` config** at `/home/ocd/.claude/` (skills, agents, rules, settings available to all projects via user-level config)
 - **Templates** at `/opt/ocd/templates/` (git hooks, gitleaks config — copied to project by `ocd init`)
-- **`ocd init`** seeds project-level files, installs dependencies, sets up git hooks
+- **`ocd init`** scaffolds `.agent/` structure (daily logs, knowledge index, reports), seeds project-level templates, installs dependencies, sets up git hooks
 - **`ocd shell`** starts an interactive bash session with the OCD environment
 
 ## Permissions and Sandbox
@@ -374,13 +374,14 @@ The sandbox restricts Claude's filesystem access at the process level:
 
 | Constant | Value | Where |
 |----------|-------|-------|
-| Max context chars (session start) | 20,000 | `ocd.hooks.session_start` |
+| Max context chars (session start) | 20,000 | `ocd.config` |
+| Max log lines (session start) | 30 | `ocd.config` |
 | Max flush turns | 30 | `ocd.config` |
 | Max flush context chars | 15,000 | `ocd.config` |
 | Min turns (session end) | 1 | `ocd.config` |
 | Min turns (pre-compact) | 5 | `ocd.config` |
 | Flush dedup window | 60 seconds | `ocd.flush` |
-| Auto-compile trigger time | 18:00+ local | `ocd.flush` |
+| Auto-compile trigger time | 18:00+ local | `ocd.config` |
 
 ## Pipeline Commands
 
