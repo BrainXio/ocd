@@ -11,7 +11,7 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 ## Skill Registry
 
 | Skill | Description |
-|-------|-------------|
+| ------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `bash` | `set -euo pipefail` mandatory, `shellcheck` zero-warnings gate. No unquoted expansions. |
 | `cpp` | C++17 minimum, smart pointers only, `#pragma once` headers, CMake. No raw `new`/`delete`. |
 | `csharp` | C# 10+ / .NET 8+, nullable reference types, file-scoped namespaces. No legacy collections. |
@@ -42,7 +42,7 @@ All skills live in `.claude/skills/<name>/SKILL.md`.
 ## Subagent Registry
 
 | Agent | Model | Tools | Purpose |
-|-------|-------|-------|---------|
+| ----------------------- | ----- | ---------------------- | --------------------------------------------------------------------------------------------- |
 | `ci-drift` | haiku | Glob, Grep, Read | Detect CI drift: compare local config vs CI workflow |
 | `dead-code-hunter` | haiku | Glob, Grep, Read | Find dead code: unused functions, variables, configs |
 | `dependency-auditor` | haiku | Bash, Read, Glob, Grep | Audit Python dependencies: unused, conflicting, missing |
@@ -74,7 +74,7 @@ All agents live in `.claude/agents/<name>.md`.
 ### Agent Frontmatter Schema
 
 | Field | Required | Description |
-|-------|----------|-------------|
+| ------------- | -------- | --------------------------------------------------------------------------- |
 | `name` | yes | Agent identifier (matches filename without `.md`) |
 | `description` | yes | One-line purpose (quote values containing colons) |
 | `tools` | yes | Comma-separated list of tools the agent can use |
@@ -85,7 +85,7 @@ Example:
 ```yaml
 ---
 name: lint-status
-description: 'Run linters and report: errors, clean, missing'
+description: "Run linters and report: errors, clean, missing"
 tools: Bash, Glob
 model: haiku
 ---
@@ -94,11 +94,11 @@ model: haiku
 ## Claude Code Hooks
 
 | Hook | Entry Point | Trigger | Purpose |
-|------|-------------|---------|---------|
+| ------------- | ------------------------ | ----------------------------- | ----------------------------------------------- | ----------------------------------------- |
 | SessionStart | `ocd-session-start` | SessionStart | Inject KB index + recent log as context |
 | PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
 | SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
-| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write|Edit) | Lint edited files, report missing linters |
+| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write | Edit) | Lint edited files, report missing linters |
 | Lint (commit) | `ocd-lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
 
 All Python hooks are installed as entry points via `pyproject.toml` `[project.scripts]`. Source code lives in `src/ocd/hooks/`.
@@ -108,8 +108,8 @@ All Python hooks are installed as entry points via `pyproject.toml` `[project.sc
 Hooks are declared in `.claude/settings.json` under the `hooks` key:
 
 | Field | Required | Description |
-|-------|----------|-------------|
-| `matcher` | yes | Tool event pattern (e.g., `Write|Edit`, `Bash`) |
+| --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | -------------- |
+| `matcher` | yes | Tool event pattern (e.g., `Write                                                                                  | Edit`, `Bash`) |
 | `if` | no | Conditional filter (e.g., `Bash(git commit*)`). Note: `if` is a YAML reserved word — some parsers require quoting |
 | `type` | yes | Currently only `command` |
 | `command` | yes | Shell command to run (entry point name) |
@@ -130,7 +130,7 @@ Hooks receive a JSON object on stdin:
 ### hookslib API
 
 | Function | Purpose |
-|----------|---------|
+| ------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `parse_stdin_json()` | Parse JSON from stdin (includes Windows backslash fix) |
 | `extract_conversation_context(path)` | Read JSONL transcript, extract last 30 turns as markdown, capped at 15,000 chars |
 | `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
@@ -142,7 +142,7 @@ Rules in `.claude/rules/` provide advisory instructions to Claude Code sessions.
 Rules are distinct from hooks: hooks enforce deterministically, rules guide behavior.
 
 | Rule File | Scope | Purpose |
-|-----------|-------|---------|
+| ------------------- | -------------------- | -------------------------------------------------------- |
 | `commit-hygiene.md` | Unconditional | Conventional commits, branch naming, no AI attribution |
 | `pr-workflow.md` | Unconditional | PR labels, body template, merge requirements |
 | `doc-sync.md` | Unconditional | Update reference/planning docs when shipping features |
@@ -155,7 +155,7 @@ Path-scoped rules load only when matching files are read; unconditional rules lo
 ## Git Hooks
 
 | Hook | Purpose |
-|------|---------|
+| ------------ | ------------------------------------------------------------------------------------------------------- |
 | `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks); lint Dockerfiles (hadolint) |
 | `pre-push` | Run `pytest` before push; abort if tests fail |
 | `commit-msg` | Reject AI attribution in commit messages |
@@ -165,7 +165,7 @@ Path-scoped rules load only when matching files are read; unconditional rules lo
 Single source of truth: `git_hooks/ai-patterns.txt`
 
 | Pattern | Matches |
-|---------|---------|
+| ------------------------------ | ------------------------------------- |
 | `^Co-Authored-By:` | Standard git co-author trailer |
 | `^Generated (with\|by\|using)` | "Generated with/by/using" attribution |
 | `^\[AI(-generated)?\]` | `[AI]` or `[AI-generated]` tags |
@@ -188,7 +188,7 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 ## Linter Configurations
 
 | Linter | Config file | Scope | Install |
-|--------|-------------|-------|---------|
+| ---------- | ------------------------------ | ------------------- | --------------------- |
 | ruff | `pyproject.toml` `[tool.ruff]` | Python | `uv sync` |
 | mypy | `pyproject.toml` `[tool.mypy]` | Python | `uv sync` |
 | mdformat | `pyproject.toml` (dep) | Markdown | `uv sync` |
@@ -205,6 +205,21 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | semgrep | `.semgrep.yml` | SAST (OWASP Top 10) | pip install |
 
 Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd-lint-work` hook reports missing linters gracefully — it does not block edits when a linter is unavailable.
+
+## Formatter Registry
+
+`ocd format` runs all available formatters with auto-fix. Each formatter is only run if its tool is installed and its config file exists.
+
+| Formatter | Command | Scope |
+| -------------- | ------------------------------------------ | ----------------- |
+| `ruff-format` | `ruff format src/ tests/` | Python |
+| `ruff-fix` | `ruff check --fix src/ tests/` | Python |
+| `mdformat` | `mdformat README.md docs/ .claude/skills/` | Markdown |
+| `prettier` | `npx prettier --write .` | JSON / CSS / HTML |
+| `stylelint` | `npx stylelint --fix "**/*.css"` | CSS |
+| `sqlfluff-fix` | `sqlfluff fix --force` | SQL |
+
+The formatter registry lives in `src/ocd/format.py`. Missing formatters are reported with install hints. Formatters that fail (non-zero exit) cause `ocd format` to exit with code 1.
 
 ## IDE Configuration
 
@@ -223,8 +238,8 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 ## Package Entry Points
 
 | Command | Module | Purpose |
-|---------|--------|---------|
-| `ocd` | `ocd.cli:main` | Container init and shell — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ocd` | `ocd.cli:main` | Container init, shell, and format — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
 | `ocd-lint-kb` | `ocd.lint:main` | Structural + LLM contradiction checks on knowledge base |
@@ -243,7 +258,7 @@ path-conditioned lints in parallel — only jobs matching the changed files run.
 Stages 3–4 run only when Python code changes.
 
 | Stage | Job | Tool | Condition |
-|-------|-----|------|-----------|
+| ------------ | ----------------------- | ---------------------------------------- | ---------------------- |
 | 1 (detect) | `changes` | `dorny/paths-filter` | always |
 | 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | always |
 | 2 (parallel) | `lint-yaml` | yamllint | YAML/workflow changes |
@@ -265,7 +280,7 @@ Defined in `.github/workflows/containers.yml`. Full details in
 [containers](09-containers.md).
 
 | Stage | Job | Tool | Trigger |
-|-------|-----|------|---------|
+| ----------- | ----------------------------------------------------------------------- | -------------------------- | ------------ |
 | 1 (lint) | `lint-dockerfile` | hadolint | paths filter |
 | 2 (build) | `build-base`, `build-python`, `build-node`, `build-ollama`, `build-ocd` | Docker + smoke tests | after lint |
 | 3 (scan) | `scan-images` | trivy image + SARIF upload | after build |
@@ -277,7 +292,7 @@ container builds. Also triggered by `workflow_dispatch`.
 ### Container Images
 
 | Image | Base | Purpose |
-|-------|------|---------|
+| ------------ | ---------------------- | ---------------------------------------------------------------------------- |
 | `ocd-base` | `debian:bookworm-slim` | Hardened foundation: `uv`, `git`, `shellcheck` |
 | `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint`, `stylelint`, `htmlhint` |
 | `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference |
@@ -301,7 +316,7 @@ Deny rules in `.claude/settings.json` block Claude from reading secrets or modif
 **Read deny** (block access to sensitive files):
 
 | Pattern | What it blocks |
-|---------|----------------|
+| ------------------------------- | -------------------------- |
 | `Read(**/.env*)` | Environment variable files |
 | `Read(**/*.pem)` | TLS certificates |
 | `Read(**/*.key)` | Private keys |
@@ -320,7 +335,7 @@ Deny rules in `.claude/settings.json` block Claude from reading secrets or modif
 **Edit/Write deny** (block modification of infrastructure):
 
 | Surface | Pattern | What it blocks |
-|---------|---------|----------------|
+| ---------------------------- | -------------------------------------- | -------------------------------- |
 | `Edit(path)` / `Write(path)` | Edit and Write tools on matching files | Direct modification or overwrite |
 
 Protected files (project-root-relative paths):
@@ -333,7 +348,7 @@ Protected files (project-root-relative paths):
 **Bash deny** (block shell deletion of infrastructure):
 
 | Surface | Pattern | What it blocks |
-|---------|---------|----------------|
+| ----------------- | -------------------------------------- | ------------------ |
 | `Bash(rm *:path)` | `rm` commands targeting matching paths | Deletion via shell |
 
 Bash deny covers the same paths as Edit/Write deny.
@@ -358,7 +373,7 @@ The sandbox restricts Claude's filesystem access at the process level:
 ## Pipeline Constants
 
 | Constant | Value | Where |
-|----------|-------|-------|
+| --------------------------------- | ------------ | ------------ |
 | Max context chars (session start) | 20,000 | `ocd.config` |
 | Max log lines (session start) | 30 | `ocd.config` |
 | Max flush turns | 30 | `ocd.config` |
@@ -378,4 +393,5 @@ ocd-lint-kb                              # full lint (structural + LLM)
 ocd-lint-kb --structural-only             # skip LLM checks
 ocd-query "question"                     # query the KB
 ocd-query "q" --file-back                # query + file answer
+ocd format                                # run all formatters with auto-fix
 ```
