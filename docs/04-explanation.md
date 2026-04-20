@@ -42,7 +42,7 @@ This separation means you can share the project and source code without exposing
 ## The Eight Standards
 
 | Standard | Meaning | How It Applies |
-|----------|---------|----------------|
+| -------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | Consistent Defaults | Every tool and config has a sensible zero-config starting point | Skills ship with default rules; no configuration needed to get started |
 | Defense in Depth | Multiple independent protections against each failure mode | Deny rules + git hooks + CI gates all enforce the same constraints independently |
 | Deterministic Ordering | Same inputs always produce same outputs | Ordered lists, sorted tables, consistent commit message format |

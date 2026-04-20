@@ -47,34 +47,40 @@ Report findings in this structure:
 ## Hook Coverage Report
 
 ### Symlink Targets
-| Hook | Target | Exists? |
-|------|--------|---------|
-| `commit-msg` | `.claude/hooks/commit-msg` | YES/NO |
-| `pre-commit` | `.claude/hooks/pre-commit` | YES/NO |
+
+| Hook         | Target                     | Exists? |
+| ------------ | -------------------------- | ------- |
+| `commit-msg` | `.claude/hooks/commit-msg` | YES/NO  |
+| `pre-commit` | `.claude/hooks/pre-commit` | YES/NO  |
 
 ### Script Existence
-| Script | Location | Status |
-|--------|----------|--------|
+
+| Script       | Location         | Status         |
+| ------------ | ---------------- | -------------- |
 | `commit-msg` | `.claude/hooks/` | EXISTS/MISSING |
 | `pre-commit` | `.claude/hooks/` | EXISTS/MISSING |
 
 ### Executable Permissions
-| Script | Executable? |
-|--------|-------------|
-| `commit-msg` | YES/NO |
-| `pre-commit` | YES/NO |
+
+| Script       | Executable? |
+| ------------ | ----------- |
+| `commit-msg` | YES/NO      |
+| `pre-commit` | YES/NO      |
 
 ### Hook Chain
-| Link | Status |
-|------|--------|
+
+| Link                                                 | Status    |
+| ---------------------------------------------------- | --------- |
 | `.git/hooks/commit-msg` → `.claude/hooks/commit-msg` | OK/BROKEN |
-| `.claude/hooks/commit-msg` → `.claude/scripts/*` | OK/BROKEN |
+| `.claude/hooks/commit-msg` → `.claude/scripts/*`     | OK/BROKEN |
 
 ### CI Parity
+
 - [ ] CI has `check-commit-messages` job: YES/NO
 - [ ] CI uses same patterns file: YES/NO
 
 ### Issues Found
+
 [List broken symlinks, missing scripts, permission issues]
 ```
 

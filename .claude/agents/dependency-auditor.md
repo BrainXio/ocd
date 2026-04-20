@@ -47,30 +47,36 @@ Report findings in this structure:
 ## Dependency Audit Report
 
 ### Unused Dependencies (declared but never imported)
-| Package | Version | Evidence |
-|---------|---------|----------|
+
+| Package    | Version   | Evidence        |
+| ---------- | --------- | --------------- |
 | `requests` | `^2.31.0` | No import found |
 
 ### Missing Dependencies (imported but not declared)
-| Package | Imported In | Stdlib? |
-|---------|-------------|---------|
-| `yaml` | config.py | No (PyYAML) |
+
+| Package | Imported In | Stdlib?     |
+| ------- | ----------- | ----------- |
+| `yaml`  | config.py   | No (PyYAML) |
 
 ### Version Concerns
-| Package | Issue | Recommendation |
-|---------|-------|----------------|
+
+| Package | Issue          | Recommendation      |
+| ------- | -------------- | ------------------- |
 | `flask` | No version pin | Add minimum version |
 
 ### Dev/Runtime Bleed
-| Package | Current | Should Be |
-|---------|---------|-----------|
+
+| Package  | Current      | Should Be        |
+| -------- | ------------ | ---------------- |
 | `pytest` | dependencies | dev-dependencies |
 
 ### Label Check
+
 - [ ] `dependencies` label exists on repo: YES/NO
 - [ ] Other labels from dependabot.yml: [list]
 
 ### Summary
+
 - Unused: N
 - Missing: N
 - Version concerns: N

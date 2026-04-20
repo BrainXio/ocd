@@ -130,13 +130,16 @@ Create a markdown file at `.agent/daily/YYYY-MM-DD.md` with structured content, 
 **Context:** Key insights from the Kubernetes documentation.
 
 **Key Exchanges:**
+
 - Init containers run before app containers
 - Pod phases: Pending → Running → Succeeded/Failed
 
 **Decisions Made:**
+
 - Use startup probes for slow-starting containers
 
 **Lessons Learned:**
+
 - readinessProbe failures remove pods from Service endpoints without restarting
 ```
 

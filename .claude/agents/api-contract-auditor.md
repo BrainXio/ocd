@@ -65,39 +65,39 @@ Report findings in this structure:
 
 ### Endpoint Naming
 
-| File | Endpoint | Issue | Suggestion |
-|------|----------|-------|------------|
+| File        | Endpoint      | Issue       | Suggestion             |
+| ----------- | ------------- | ----------- | ---------------------- |
 | `routes.py` | `/createUser` | Verb in URL | Use `/users` with POST |
 
 ### HTTP Method Semantics
 
-| File | Endpoint | Current | Issue | Suggestion |
-|------|----------|---------|-------|------------|
+| File          | Endpoint      | Current             | Issue                      | Suggestion |
+| ------------- | ------------- | ------------------- | -------------------------- | ---------- |
 | `handlers.py` | `/users/{id}` | GET modifying state | Use POST/PUT for mutations |
 
 ### Error Response Consistency
 
-| File | Endpoint | Issue | Suggestion |
-|------|----------|-------|------------|
-| `errors.py` | mixed | Different error schemas | Standardize error envelope |
+| File        | Endpoint | Issue                   | Suggestion                 |
+| ----------- | -------- | ----------------------- | -------------------------- |
+| `errors.py` | mixed    | Different error schemas | Standardize error envelope |
 
 ### Request/Response Schemas
 
-| File | Endpoint | Issue | Suggestion |
-|------|----------|-------|------------|
+| File       | Endpoint | Issue                | Suggestion                           |
+| ---------- | -------- | -------------------- | ------------------------------------ |
 | `views.py` | `/users` | Missing content type | Add `Content-Type: application/json` |
 
 ### Versioning and Documentation
 
-| File | Endpoint | Issue | Suggestion |
-|------|----------|-------|------------|
+| File     | Endpoint     | Issue             | Suggestion          |
+| -------- | ------------ | ----------------- | ------------------- |
 | `api.py` | `/api/users` | No version prefix | Use `/api/v1/users` |
 
 ### Security Headers
 
-| File | Endpoint | Missing Header | Suggestion |
-|------|----------|---------------|------------|
-| `middleware.py` | all | `X-Content-Type-Options` | Add `nosniff` header |
+| File            | Endpoint | Missing Header           | Suggestion           |
+| --------------- | -------- | ------------------------ | -------------------- |
+| `middleware.py` | all      | `X-Content-Type-Options` | Add `nosniff` header |
 
 ### Summary
 

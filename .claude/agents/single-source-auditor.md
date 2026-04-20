@@ -62,37 +62,37 @@ Report findings in this structure:
 
 ### Duplicated Constants
 
-| Constant | File A | File B | Value |
-|----------|--------|--------|-------|
-| `MAX_CONTEXT_CHARS` | `hooks/session_start.py` | (not in `config.py`) | `20_000` |
-| `COMPILE_AFTER_HOUR` | `flush.py` | (not in `config.py`) | `18` |
+| Constant             | File A                   | File B               | Value    |
+| -------------------- | ------------------------ | -------------------- | -------- |
+| `MAX_CONTEXT_CHARS`  | `hooks/session_start.py` | (not in `config.py`) | `20_000` |
+| `COMPILE_AFTER_HOUR` | `flush.py`               | (not in `config.py`) | `18`     |
 
 ### Duplicated Path Patterns
 
-| Path Fragment | Occurrences | Should Be Constant |
-|--------------|-------------|-------------------|
-| `.agent/daily/` | 4 files | YES — use `config.DAILY_DIR` |
-| `.agent/knowledge/` | 3 files | YES — use `config.KNOWLEDGE_DIR` |
+| Path Fragment       | Occurrences | Should Be Constant               |
+| ------------------- | ----------- | -------------------------------- |
+| `.agent/daily/`     | 4 files     | YES — use `config.DAILY_DIR`     |
+| `.agent/knowledge/` | 3 files     | YES — use `config.KNOWLEDGE_DIR` |
 
 ### Duplicated Config (CI vs Local)
 
-| Setting | CI Value | Local Value | Match |
-|---------|----------|-------------|-------|
-| Python version | `3.12` | `>=3.12` | YES |
-| ruff version | `>=0.8` | `>=0.8` | YES |
+| Setting        | CI Value | Local Value | Match |
+| -------------- | -------- | ----------- | ----- |
+| Python version | `3.12`   | `>=3.12`    | YES   |
+| ruff version   | `>=0.8`  | `>=0.8`     | YES   |
 
 ### Duplicated Logic
 
-| Pattern | Module A | Module B | Shared Utility? |
-|---------|----------|----------|----------------|
+| Pattern         | Module A   | Module B   | Shared Utility?            |
+| --------------- | ---------- | ---------- | -------------------------- |
 | load/save state | `flush.py` | `utils.py` | NO — should use `utils.py` |
 
 ### Duplicated Hook Configuration
 
-| Hook Command | In settings.json | In pyproject.toml | Match |
-|-------------|-----------------|-------------------|-------|
-| `ocd-session-start` | YES | YES | OK |
-| `ocd-compile` | NO | YES | MISMATCH |
+| Hook Command        | In settings.json | In pyproject.toml | Match    |
+| ------------------- | ---------------- | ----------------- | -------- |
+| `ocd-session-start` | YES              | YES               | OK       |
+| `ocd-compile`       | NO               | YES               | MISMATCH |
 
 ### Summary
 
@@ -107,6 +107,6 @@ Report findings in this structure:
 
 - Only report duplications — do not fix them
 - Be conservative: similar values at different scales (e.g., `20_000` vs `15_000`) are different constants, not duplications
-- Flag values that *should* be in `config.py` but are defined locally in other modules
+- Flag values that _should_ be in `config.py` but are defined locally in other modules
 - Do not flag test files as duplications of source code — tests are expected to import and reference source modules
 - Do not flag intentional duplication (e.g., CI specifying Python version separately from `pyproject.toml` — these serve different purposes)

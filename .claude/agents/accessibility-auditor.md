@@ -70,39 +70,39 @@ Report findings in this structure:
 
 ### Semantic HTML
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `index.html` | 42 | `<div>` used as button | Use `<button>` element |
+| File         | Line | Issue                  | Suggestion             |
+| ------------ | ---- | ---------------------- | ---------------------- |
+| `index.html` | 42   | `<div>` used as button | Use `<button>` element |
 
 ### ARIA Attributes
 
-| File | Line | Element | Issue | Suggestion |
-|------|------|---------|-------|------------|
-| `app.html` | 15 | `<button role="button">` | Redundant role | Remove `role="button"` |
+| File       | Line | Element                  | Issue          | Suggestion             |
+| ---------- | ---- | ------------------------ | -------------- | ---------------------- |
+| `app.html` | 15   | `<button role="button">` | Redundant role | Remove `role="button"` |
 
 ### Keyboard Navigation
 
-| File | Line | Element | Issue | Suggestion |
-|------|------|---------|-------|------------|
-| `modal.html` | 8 | `<div onclick="...">` | No keyboard handler | Add keyboard events or use `<button>` |
+| File         | Line | Element               | Issue               | Suggestion                            |
+| ------------ | ---- | --------------------- | ------------------- | ------------------------------------- |
+| `modal.html` | 8    | `<div onclick="...">` | No keyboard handler | Add keyboard events or use `<button>` |
 
 ### Color and Contrast
 
-| File | Line | Element | Issue | Suggestion |
-|------|------|---------|-------|------------|
-| `styles.css` | 30 | `color: #ccc` on white bg | Contrast ratio < 4.5:1 | Darken text color |
+| File         | Line | Element                   | Issue                  | Suggestion        |
+| ------------ | ---- | ------------------------- | ---------------------- | ----------------- |
+| `styles.css` | 30   | `color: #ccc` on white bg | Contrast ratio < 4.5:1 | Darken text color |
 
 ### Forms
 
-| File | Line | Element | Issue | Suggestion |
-|------|------|---------|-------|------------|
-| `contact.html` | 12 | `<input>` | No associated label | Add `<label>` or `aria-label` |
+| File           | Line | Element   | Issue               | Suggestion                    |
+| -------------- | ---- | --------- | ------------------- | ----------------------------- |
+| `contact.html` | 12   | `<input>` | No associated label | Add `<label>` or `aria-label` |
 
 ### Media and Motion
 
-| File | Line | Element | Issue | Suggestion |
-|------|------|---------|-------|------------|
-| (none found) | — | — | — | — |
+| File         | Line | Element | Issue | Suggestion |
+| ------------ | ---- | ------- | ----- | ---------- |
+| (none found) | —    | —       | —     | —          |
 
 ### Summary
 

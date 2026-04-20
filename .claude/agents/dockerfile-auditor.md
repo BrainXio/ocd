@@ -71,40 +71,40 @@ Report findings in this structure:
 
 ### Layer Ordering
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `Dockerfile` | 5 | COPY before RUN install | Reorder: install deps first, copy source last |
+| File         | Line | Issue                   | Suggestion                                    |
+| ------------ | ---- | ----------------------- | --------------------------------------------- |
+| `Dockerfile` | 5    | COPY before RUN install | Reorder: install deps first, copy source last |
 
 ### Security
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `Dockerfile` | 12 | Running as root | Add `USER` directive |
-| `Dockerfile` | 8 | `ADD` for local files | Use `COPY` instead |
+| File         | Line | Issue                 | Suggestion           |
+| ------------ | ---- | --------------------- | -------------------- |
+| `Dockerfile` | 12   | Running as root       | Add `USER` directive |
+| `Dockerfile` | 8    | `ADD` for local files | Use `COPY` instead   |
 
 ### Base Image
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `Dockerfile` | 1 | `FROM python:latest` | Pin version: `FROM python:3.12-slim` |
+| File         | Line | Issue                | Suggestion                           |
+| ------------ | ---- | -------------------- | ------------------------------------ |
+| `Dockerfile` | 1    | `FROM python:latest` | Pin version: `FROM python:3.12-slim` |
 
 ### Multi-Stage
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `Dockerfile` | — | Single-stage for Go | Add builder stage |
+| File         | Line | Issue               | Suggestion        |
+| ------------ | ---- | ------------------- | ----------------- |
+| `Dockerfile` | —    | Single-stage for Go | Add builder stage |
 
 ### Docker Compose
 
-| File | Service | Issue | Suggestion |
-|------|---------|-------|------------|
-| `docker-compose.yml` | `app` | No health check | Add `healthcheck:` directive |
+| File                 | Service | Issue           | Suggestion                   |
+| -------------------- | ------- | --------------- | ---------------------------- |
+| `docker-compose.yml` | `app`   | No health check | Add `healthcheck:` directive |
 
 ### Efficiency
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `Dockerfile` | 3 | Missing `.dockerignore` | Add `.dockerignore` with common exclusions |
+| File         | Line | Issue                   | Suggestion                                 |
+| ------------ | ---- | ----------------------- | ------------------------------------------ |
+| `Dockerfile` | 3    | Missing `.dockerignore` | Add `.dockerignore` with common exclusions |
 
 ### Summary
 

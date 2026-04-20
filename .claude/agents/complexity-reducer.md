@@ -55,33 +55,33 @@ Report findings in this structure:
 
 ### High Cyclomatic Complexity
 
-| Function | File | Complexity | Threshold | Key Contributors |
-|----------|------|-----------|-----------|-------------------|
-| `lint_file()` | `hooks/lint_work.py` | 14 | >10 | 7 conditionals, 3 loops, 4 exceptions |
-| `commit_mode()` | `hooks/lint_work.py` | 8 | OK | — |
+| Function        | File                 | Complexity | Threshold | Key Contributors                      |
+| --------------- | -------------------- | ---------- | --------- | ------------------------------------- |
+| `lint_file()`   | `hooks/lint_work.py` | 14         | >10       | 7 conditionals, 3 loops, 4 exceptions |
+| `commit_mode()` | `hooks/lint_work.py` | 8          | OK        | —                                     |
 
 ### Deep Nesting
 
-| Function | File | Max Depth | Threshold | Worst Section |
-|----------|------|-----------|-----------|---------------|
-| `edit_mode()` | `hooks/lint_work.py` | 5 | >4 | Result classification block |
+| Function      | File                 | Max Depth | Threshold | Worst Section               |
+| ------------- | -------------------- | --------- | --------- | --------------------------- |
+| `edit_mode()` | `hooks/lint_work.py` | 5         | >4        | Result classification block |
 
 ### Long Functions
 
-| Function | File | Lines | Threshold | Suggestion |
-|----------|------|-------|-----------|------------|
-| `lint_file()` | `hooks/lint_work.py` | 68 | >50 | Extract linter result building |
+| Function      | File                 | Lines | Threshold | Suggestion                     |
+| ------------- | -------------------- | ----- | --------- | ------------------------------ |
+| `lint_file()` | `hooks/lint_work.py` | 68    | >50       | Extract linter result building |
 
 ### Long Parameter Lists
 
-| Function | File | Parameters | Threshold |
-|----------|------|-----------|-----------|
-| (none found) | — | — | >5 |
+| Function     | File | Parameters | Threshold |
+| ------------ | ---- | ---------- | --------- |
+| (none found) | —    | —          | >5        |
 
 ### Complex Conditionals
 
-| Function | File | Condition | Suggestion |
-|----------|------|-----------|------------|
+| Function | File                     | Condition               | Suggestion                         |
+| -------- | ------------------------ | ----------------------- | ---------------------------------- |
 | `main()` | `hooks/session_start.py` | 4-term `and` expression | Extract to `is_relevant_context()` |
 
 ### Summary

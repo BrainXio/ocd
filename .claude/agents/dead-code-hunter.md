@@ -54,31 +54,37 @@ Report findings in this structure:
 ## Dead Code Report
 
 ### Dead Functions (defined but never called)
-| Function | File | Evidence |
-|----------|------|----------|
-| `foo()` | file.py | Only appears in definition |
+
+| Function | File    | Evidence                   |
+| -------- | ------- | -------------------------- |
+| `foo()`  | file.py | Only appears in definition |
 
 ### Dead Variables (set but never read)
-| Variable | File | Evidence |
-|----------|------|----------|
+
+| Variable  | File      | Evidence           |
+| --------- | --------- | ------------------ |
 | `ALLOW_X` | config.py | Assigned, no reads |
 
 ### Dead Config Values
-| Key | File | Evidence |
-|-----|------|----------|
+
+| Key            | File          | Evidence                         |
+| -------------- | ------------- | -------------------------------- |
 | `feature_flag` | settings.json | Defaults to false, never enabled |
 
 ### Unused Imports
-| Import | File | Unused Symbol |
-|--------|------|---------------|
-| `from os import path` | utils.py | `path` |
+
+| Import                | File     | Unused Symbol |
+| --------------------- | -------- | ------------- |
+| `from os import path` | utils.py | `path`        |
 
 ### One-Use Files (inline candidates)
-| File | Lines | Referenced By |
-|------|-------|---------------|
-| helpers.py | 15 | main.py (1) |
+
+| File       | Lines | Referenced By |
+| ---------- | ----- | ------------- |
+| helpers.py | 15    | main.py (1)   |
 
 ### Summary
+
 - Dead functions: N
 - Dead variables: N
 - Dead config: N

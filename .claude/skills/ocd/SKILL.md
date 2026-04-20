@@ -69,22 +69,24 @@ When `/ocd review [target]` is invoked:
 ```markdown
 ## O.C.D. Review: [target]
 
-| Standard | Score | Issues |
-|----------|-------|--------|
-| Consistent Defaults | ?/3 | ... |
-| Defense in Depth | ?/3 | ... |
-| Deterministic Ordering | ?/3 | ... |
-| Minimal Surface | ?/3 | ... |
-| No Dead Code | ?/3 | ... |
-| Progressive Simp | ?/3 | ... |
-| Single Source | ?/3 | ... |
-| Structural Honesty | ?/3 | ... |
-| **Total** | **?/24** | |
+| Standard               | Score    | Issues |
+| ---------------------- | -------- | ------ |
+| Consistent Defaults    | ?/3      | ...    |
+| Defense in Depth       | ?/3      | ...    |
+| Deterministic Ordering | ?/3      | ...    |
+| Minimal Surface        | ?/3      | ...    |
+| No Dead Code           | ?/3      | ...    |
+| Progressive Simp       | ?/3      | ...    |
+| Single Source          | ?/3      | ...    |
+| Structural Honesty     | ?/3      | ...    |
+| **Total**              | **?/24** |        |
 
 ### Critical Issues (must fix)
+
 - ...
 
 ### Recommended Simplifications
+
 - ...
 ```
 

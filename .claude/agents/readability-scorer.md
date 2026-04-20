@@ -54,36 +54,36 @@ Report findings in this structure:
 
 ### Unclear Variable Names
 
-| File | Line | Name | Issue | Suggestion |
-|------|------|------|-------|------------|
-| `lint_work.py` | 233 | `d` | Single-letter dict | `linter_entry` |
-| `flush.py` | 45 | `val` | Ambiguous abbreviation | `flush_result` |
+| File           | Line | Name  | Issue                  | Suggestion     |
+| -------------- | ---- | ----- | ---------------------- | -------------- |
+| `lint_work.py` | 233  | `d`   | Single-letter dict     | `linter_entry` |
+| `flush.py`     | 45   | `val` | Ambiguous abbreviation | `flush_result` |
 
 ### Missing Type Hints
 
-| File | Function | Missing | Suggestion |
-|------|----------|---------|------------|
-| `hookslib.py` | `read_stdin()` | Return type | `-> dict[str, Any]` |
-| `config.py` | `PROJECT_ROOT` | Variable type | `Path` (already inferred) |
+| File          | Function       | Missing       | Suggestion                |
+| ------------- | -------------- | ------------- | ------------------------- |
+| `hookslib.py` | `read_stdin()` | Return type   | `-> dict[str, Any]`       |
+| `config.py`   | `PROJECT_ROOT` | Variable type | `Path` (already inferred) |
 
 ### Dense One-Liners
 
-| File | Line | Issue | Suggestion |
-|------|------|-------|------------|
-| `lint_work.py` | 234 | Nested dict comprehension | Split into for-loop |
+| File           | Line | Issue                     | Suggestion          |
+| -------------- | ---- | ------------------------- | ------------------- |
+| `lint_work.py` | 234  | Nested dict comprehension | Split into for-loop |
 
 ### Magic Numbers and Strings
 
-| File | Line | Value | Should Be Constant |
-|------|------|-------|-------------------|
-| `session_start.py` | 22 | `20000` | `MAX_CONTEXT_CHARS` |
-| `lint_work.py` | 36 | `"mdformat"` | Already in registry — OK |
+| File               | Line | Value        | Should Be Constant       |
+| ------------------ | ---- | ------------ | ------------------------ |
+| `session_start.py` | 22   | `20000`      | `MAX_CONTEXT_CHARS`      |
+| `lint_work.py`     | 36   | `"mdformat"` | Already in registry — OK |
 
 ### Inconsistent Naming
 
-| File | Name | Convention | Expected |
-|------|------|-----------|----------|
-| (none found) | — | — | — |
+| File         | Name | Convention | Expected |
+| ------------ | ---- | ---------- | -------- |
+| (none found) | —    | —          | —        |
 
 ### Summary
 

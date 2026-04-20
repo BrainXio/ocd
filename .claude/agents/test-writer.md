@@ -70,46 +70,46 @@ Report findings in this structure:
 
 ### Missing Test Files
 
-| Source Module | Expected Test File | Status |
-|---------------|-------------------|--------|
+| Source Module        | Expected Test File      | Status  |
+| -------------------- | ----------------------- | ------- |
 | `src/ocd/compile.py` | `tests/test_compile.py` | Missing |
-| `src/ocd/flush.py` | `tests/test_flush.py` | Exists |
+| `src/ocd/flush.py`   | `tests/test_flush.py`   | Exists  |
 
 ### Untested Public Functions
 
-| Module | Function | Test File | Status |
-|--------|----------|-----------|--------|
-| `config.py` | `get_project_root()` | `tests/test_config.py` | No test found |
-| `utils.py` | `parse_args()` | `tests/test_utils.py` | Happy path only |
+| Module      | Function             | Test File              | Status          |
+| ----------- | -------------------- | ---------------------- | --------------- |
+| `config.py` | `get_project_root()` | `tests/test_config.py` | No test found   |
+| `utils.py`  | `parse_args()`       | `tests/test_utils.py`  | Happy path only |
 
 ### Edge Case Gaps
 
-| Module | Function | Missing Edge Case | Suggested Test |
-|--------|----------|-------------------|----------------|
-| `flush.py` | `write_output()` | Empty input list | `test_write_output_empty_list` |
-| `hookslib.py` | `read_stdin()` | Malformed JSON | `test_read_stdin_malformed` |
+| Module        | Function         | Missing Edge Case | Suggested Test                 |
+| ------------- | ---------------- | ----------------- | ------------------------------ |
+| `flush.py`    | `write_output()` | Empty input list  | `test_write_output_empty_list` |
+| `hookslib.py` | `read_stdin()`   | Malformed JSON    | `test_read_stdin_malformed`    |
 
 ### Integration Test Gaps
 
-| Entry Point | Current Coverage | Suggested Test |
-|-------------|-----------------|----------------|
-| `ocd-session-start` | Unit only | `test_session_start_integration` |
-| `ocd-lint-work` | Not tested | `test_lint_work_integration` |
+| Entry Point         | Current Coverage | Suggested Test                   |
+| ------------------- | ---------------- | -------------------------------- |
+| `ocd-session-start` | Unit only        | `test_session_start_integration` |
+| `ocd-lint-work`     | Not tested       | `test_lint_work_integration`     |
 
 ### Test Quality Issues
 
-| Test File | Issue | Suggestion |
-|-----------|-------|------------|
-| `test_utils.py` | Over-mocked `parse_args` | Test with real argparse |
-| `test_config.py` | No assertions in `test_default` | Add assertion |
+| Test File        | Issue                           | Suggestion              |
+| ---------------- | ------------------------------- | ----------------------- |
+| `test_utils.py`  | Over-mocked `parse_args`        | Test with real argparse |
+| `test_config.py` | No assertions in `test_default` | Add assertion           |
 
 ### Coverage Gate
 
-| Check | Status |
-|-------|--------|
-| Coverage threshold configured | Yes (pyproject.toml) |
-| Threshold value | 80% |
-| Modules below threshold | `compile.py` (62%), `flush.py` (71%) |
+| Check                         | Status                               |
+| ----------------------------- | ------------------------------------ |
+| Coverage threshold configured | Yes (pyproject.toml)                 |
+| Threshold value               | 80%                                  |
+| Modules below threshold       | `compile.py` (62%), `flush.py` (71%) |
 
 ### Summary
 

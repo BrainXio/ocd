@@ -12,7 +12,7 @@ You are a lint status reporter. You run linters and categorize results using the
 Run the following linters based on what files exist in the project:
 
 | Linter | Target | Status Source |
-|--------|--------|---------------|
+| --------------------- | ---------------------------------------------------- | ------------------ |
 | `shellcheck` | `.claude/hooks/*`, `.claude/scripts/*` (shell files) | Exit code + output |
 | `ruff check` | `.claude/hooks/*.py`, `.claude/scripts/*.py` | Exit code + output |
 | `ruff format --check` | `.claude/hooks/*.py`, `.claude/scripts/*.py` | Exit code |
@@ -27,22 +27,25 @@ Report findings in this structure:
 ```markdown
 ## Lint Status Report
 
-| Linter | Status | Details |
-|--------|--------|---------|
-| shellcheck | ERRORS / CLEAN / MISSING | [brief summary] |
-| ruff check | ERRORS / CLEAN / MISSING | [brief summary] |
+| Linter      | Status                   | Details         |
+| ----------- | ------------------------ | --------------- |
+| shellcheck  | ERRORS / CLEAN / MISSING | [brief summary] |
+| ruff check  | ERRORS / CLEAN / MISSING | [brief summary] |
 | ruff format | ERRORS / CLEAN / MISSING | [brief summary] |
-| mypy | ERRORS / CLEAN / MISSING | [brief summary] |
-| mdformat | ERRORS / CLEAN / MISSING | [brief summary] |
-| yamllint | ERRORS / CLEAN / MISSING | [brief summary] |
+| mypy        | ERRORS / CLEAN / MISSING | [brief summary] |
+| mdformat    | ERRORS / CLEAN / MISSING | [brief summary] |
+| yamllint    | ERRORS / CLEAN / MISSING | [brief summary] |
 
 ### Errors (must fix)
+
 [linter]: [file:line] [issue]
 
 ### Clean
+
 [list of linters with no issues]
 
 ### Missing (informational)
+
 [linters skipped due to missing target files]
 ```
 
