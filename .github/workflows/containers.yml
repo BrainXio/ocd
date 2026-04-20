@@ -173,7 +173,7 @@ jobs:
         run: trivy image --config trivy.yaml --severity CRITICAL --exit-code 1 ocd:latest
       - name: Scan ocd image (SARIF)
         if: github.event_name == 'push'
-        run: trivy image --config trivy.yaml --format sarif --output trivy-results.sarif ocd:latest
+        run: trivy image --config trivy.yaml --exit-code 0 --format sarif --output trivy-results.sarif ocd:latest
       - name: Upload SARIF
         if: github.event_name == 'push'
         uses: github/codeql-action/upload-sarif@v3
