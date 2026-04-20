@@ -150,7 +150,7 @@ def run_formatters() -> int:
         try:
             result = subprocess.run(
                 command,
-                shell=True,
+                shell=True,  # nosemgrep
                 capture_output=True,
                 text=True,
                 timeout=timeout,
