@@ -161,9 +161,33 @@ jobs:
       - name: trivy fs
         run: trivy fs --config trivy.yaml --severity CRITICAL --exit-code 1 .
 
+  sast-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install semgrep
+        run: pip install "semgrep>=1.158"
+      - name: semgrep scan
+        run: semgrep --config .semgrep.yml --config p/owasp-top-ten --error src/ocd/
+
   # ── Stage 3: Slow lints (only if fast checks pass) ─────────────────────
   lint-python:
-    needs: [lint-shell, lint-markdown, lint-yaml, secret-scan, lint-actions, lint-css, lint-html, lint-json, scan-deps]
+    needs:
+      [
+        lint-shell,
+        lint-markdown,
+        lint-yaml,
+        secret-scan,
+        lint-actions,
+        lint-css,
+        lint-html,
+        lint-json,
+        scan-deps,
+        sast-scan,
+      ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

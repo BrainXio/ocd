@@ -55,7 +55,7 @@ def _shell() -> None:
     shell = os.environ.get("SHELL", "/bin/bash")
     if not _is_valid_shell(shell):
         shell = "/bin/bash"
-    os.execvp(shell, [shell])
+    os.execvp(shell, [shell])  # nosemgrep: dangerous-os-exec-tainted-env-args
 
 
 def _is_valid_shell(shell: str) -> bool:

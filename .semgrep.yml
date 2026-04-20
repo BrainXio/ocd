@@ -1,0 +1,4 @@
+# Project-specific semgrep rules and suppressions.
+# OWASP Top 10 rules are loaded via --config p/owasp-top-ten in CI.
+# Add custom rules or nosemgrep annotations here as needed.
+rules: []

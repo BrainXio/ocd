@@ -21,7 +21,7 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 | Item | Purpose | Status |
 |------|---------|--------|
 | `trivy` CI job | Scan container images and Python dependencies for known vulnerabilities | Done |
-| `semgrep` CI job | Static analysis for OWASP Top 10 patterns | Planned |
+| `semgrep` CI job | Static analysis for OWASP Top 10 patterns | Done |
 
 ## New Commands
 

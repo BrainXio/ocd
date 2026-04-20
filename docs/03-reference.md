@@ -202,6 +202,7 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | sqlfluff | `.sqlfluff` | SQL | `uv sync --extra sql` |
 | hadolint | `.hadolint.yaml` | Dockerfile | binary install |
 | trivy | `trivy.yaml` + `.trivyignore` | Vulnerabilities | binary install |
+| semgrep | `.semgrep.yml` | SAST (OWASP Top 10) | pip install |
 
 Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd-lint-work` hook reports missing linters gracefully — it does not block edits when a linter is unavailable.
 
@@ -249,6 +250,7 @@ All entry points are defined in `pyproject.toml` `[project.scripts]` and install
 | 2 (parallel) | `lint-html` | htmlhint (npm) | all |
 | 2 (parallel) | `lint-json` | prettier (npm) | all |
 | 2 (parallel) | `scan-deps` | trivy fs (binary install, reads `trivy.yaml`) | all |
+| 2 (parallel) | `sast-scan` | semgrep (pip install, reads `.semgrep.yml`) | all |
 | 3 (after 1+2) | `lint-python` | ruff + mypy | all |
 | 4 (after 3) | `test-python` | pytest | all |
 
