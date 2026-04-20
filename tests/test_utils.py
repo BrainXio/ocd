@@ -163,8 +163,10 @@ class TestReadWikiIndex:
     def test_returns_default_when_file_missing(self, tmp_path, monkeypatch):
         knowledge = tmp_path / "k"
         knowledge.mkdir()
+        missing_index = knowledge / "index.md"
         monkeypatch.setattr(config, "KNOWLEDGE_DIR", knowledge)
-        monkeypatch.setattr(config, "INDEX_FILE", knowledge / "index.md")
+        monkeypatch.setattr(config, "INDEX_FILE", missing_index)
+        monkeypatch.setattr(utils, "INDEX_FILE", missing_index)
         result = utils.read_wiki_index()
         assert "Knowledge Base Index" in result
         assert "| Article |" in result
