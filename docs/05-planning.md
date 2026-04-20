@@ -13,14 +13,14 @@ Planned additions and improvements to the O.C.D. project. Items are organized by
 | Linter | Purpose | Status |
 |--------|---------|--------|
 | `sqlfluff` | SQL linting CI job for the `sql` skill | Pending tool evaluation |
-| `trivy` | Container image and dependency vulnerability scanning in CI | Pending tool evaluation |
+| `trivy` | Container image and dependency vulnerability scanning in CI | Done |
 | `hadolint` | Dockerfile linting commit gate for the `docker` skill | Done
 
 ## Security
 
 | Item | Purpose | Status |
 |------|---------|--------|
-| `trivy` CI job | Scan container images and Python dependencies for known vulnerabilities | Planned |
+| `trivy` CI job | Scan container images and Python dependencies for known vulnerabilities | Done |
 | `semgrep` CI job | Static analysis for OWASP Top 10 patterns | Planned |
 
 ## New Commands

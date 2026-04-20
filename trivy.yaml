@@ -1,0 +1,22 @@
+# Trivy configuration — single source of truth for CI and local scans.
+# See: https://aquasecurity.github.io/trivy/latest/docs/configuration/
+
+severity:
+  - CRITICAL
+  - HIGH
+
+exit-code: 1
+
+format: table
+
+skip-dirs:
+  - .venv
+  - node_modules
+  - .git
+  - .mypy_cache
+  - .ruff_cache
+  - .pytest_cache
+
+# Add CVE IDs to ignored-cves when triaged as false positives or accepted risk.
+# Example: ignored-cves: [CVE-2025-12345]
+ignored-cves: []

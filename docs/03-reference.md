@@ -201,6 +201,7 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | prettier | `.prettierrc` | JSON | `npm ci` |
 | sqlfluff | `.sqlfluff` | SQL | `uv sync --extra sql` |
 | hadolint | `.hadolint.yaml` | Dockerfile | binary install |
+| trivy | `trivy.yaml` | Vulnerabilities | binary install |
 
 Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd-lint-work` hook reports missing linters gracefully — it does not block edits when a linter is unavailable.
 
@@ -247,6 +248,7 @@ All entry points are defined in `pyproject.toml` `[project.scripts]` and install
 | 2 (parallel) | `lint-css` | stylelint (npm) | all |
 | 2 (parallel) | `lint-html` | htmlhint (npm) | all |
 | 2 (parallel) | `lint-json` | prettier (npm) | all |
+| 2 (parallel) | `scan-deps` | trivy fs (binary install, reads `trivy.yaml`) | all |
 | 3 (after 1+2) | `lint-python` | ruff + mypy | all |
 | 4 (after 3) | `test-python` | pytest | all |
 
@@ -262,8 +264,11 @@ Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` o
 | 2 (build) | `build-node` | Docker | after lint |
 | 2 (build) | `build-ollama` | Docker | after lint |
 | 2 (build) | `build-ocd` | Docker | after lint |
+| 3 (scan) | `scan-images` | trivy image (binary install, reads `trivy.yaml`) | after build |
+| 4 (publish) | `publish-latest` | Docker + GHCR | after scan |
+| 4 (publish) | `publish-release` | Docker + GHCR | after scan |
 
-Runs on push to `main` and on PRs touching `containers/**` or `.hadolint.yaml`. Separate from the main CI pipeline to avoid gating code quality checks on slow container builds.
+Runs on push to `main` and on PRs touching `containers/**`, `.hadolint.yaml`, or `trivy.yaml`. Separate from the main CI pipeline to avoid gating code quality checks on slow container builds.
 
 ### Container Images
 
