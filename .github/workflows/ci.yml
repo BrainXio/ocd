@@ -23,6 +23,7 @@ jobs:
       yaml: ${{ steps.filter.outputs.yaml }}
       markdown: ${{ steps.filter.outputs.markdown }}
       node: ${{ steps.filter.outputs.node }}
+      sql: ${{ steps.filter.outputs.sql }}
       actions: ${{ steps.filter.outputs.actions }}
     steps:
       - uses: actions/checkout@v6
@@ -49,6 +50,8 @@ jobs:
               - '**/*.json'
               - 'package.json'
               - 'package-lock.json'
+            sql:
+              - '**/*.sql'
             actions:
               - '.github/workflows/**'
 
@@ -178,6 +181,20 @@ jobs:
         run: npx htmlhint "**/*.html" || echo "No HTML files found — skipping"
       - name: prettier --check
         run: npx prettier --check "**/*.json" "!package-lock.json"
+
+  lint-sql:
+    needs: [changes]
+    if: needs.changes.outputs.sql == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install sqlfluff
+        run: pip install "sqlfluff>=3.0"
+      - name: sqlfluff lint
+        run: sqlfluff lint .
 
   scan-deps:
     needs: [changes]
