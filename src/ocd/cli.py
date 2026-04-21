@@ -50,6 +50,8 @@ def main() -> None:
         sys.exit(run_formatters())
     elif sys.argv[1] == "kb":
         _kb()
+    elif sys.argv[1] == "route":
+        _route()
     else:
         print(f"Unknown command: {sys.argv[1]}", file=sys.stderr)
         sys.exit(1)
@@ -71,6 +73,15 @@ def _kb() -> None:
     else:
         print(f"Unknown kb subcommand: {sub}", file=sys.stderr)
         sys.exit(1)
+
+
+def _route() -> None:
+    """Handle route subcommand — delegate to ocd.router."""
+    from ocd.router import main as router_main
+
+    route_args = sys.argv[2:]
+    sys.argv = [sys.argv[0], *route_args]
+    router_main()
 
 
 def _shell() -> None:

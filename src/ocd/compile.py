@@ -212,6 +212,9 @@ def main() -> None:
     parser.add_argument("--all", action="store_true", help="Force recompile all logs")
     parser.add_argument("--file", type=str, help="Compile a specific daily log file")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be compiled")
+    parser.add_argument(
+        "--manifest", action="store_true", help="Rebuild agent manifest after compilation"
+    )
     args = parser.parse_args()
 
     state = load_state()
@@ -270,6 +273,15 @@ def main() -> None:
     index = build_kb_index_json()
     save_kb_index(index)
     print(f"Index saved: {len(index['articles'])} articles indexed")
+
+    # Rebuild agent manifest if requested
+    if args.manifest:
+        from ocd.router import build_manifest, save_manifest
+
+        print("Rebuilding agent manifest...")
+        manifest = build_manifest()
+        save_manifest(manifest)
+        print(f"Manifest saved: {len(manifest['agents'])} agents")
 
 
 if __name__ == "__main__":
