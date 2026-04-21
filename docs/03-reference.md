@@ -98,8 +98,8 @@ model: haiku
 | SessionStart | `ocd-session-start` | SessionStart | Inject KB index + recent log as context |
 | PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
 | SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
-| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write | Edit) | Lint edited files, report missing linters |
-| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write | Edit) | Auto-format edited files, capture violations |
+| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write|Edit) | Lint edited files, report missing linters |
+| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write|Edit) | Auto-format edited files, capture violations |
 | Lint (commit) | `ocd-lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
 
 All Python hooks are installed as entry points via `pyproject.toml` `[project.scripts]`. Source code lives in `src/ocd/hooks/`.
@@ -109,8 +109,8 @@ All Python hooks are installed as entry points via `pyproject.toml` `[project.sc
 Hooks are declared in `.claude/settings.json` under the `hooks` key:
 
 | Field | Required | Description |
-| --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | -------------- |
-| `matcher` | yes | Tool event pattern (e.g., `Write                                                                                  | Edit`, `Bash`) |
+| --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `matcher` | yes | Tool event pattern (e.g., `Write&#124;Edit`, `Bash`) |
 | `if` | no | Conditional filter (e.g., `Bash(git commit*)`). Note: `if` is a YAML reserved word — some parsers require quoting |
 | `type` | yes | Currently only `command` |
 | `command` | yes | Shell command to run (entry point name) |
