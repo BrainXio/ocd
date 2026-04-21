@@ -11,13 +11,13 @@ security scanning that gates releases.
 
 ## Images
 
-| Image        | Base                   | Purpose                                                                       |
+| Image | Base | Purpose |
 | ------------ | ---------------------- | ----------------------------------------------------------------------------- |
-| `ocd-base`   | `debian:bookworm-slim` | Hardened foundation: `uv`, `git`, `shellcheck`                                |
-| `ocd-python` | `ocd-base`             | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` with frontmatter plugin    |
-| `ocd-node`   | `ocd-base`             | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint`, `stylelint`, `htmlhint`  |
-| `ocd-ollama` | `ocd-base`             | Ollama runtime for local LLM inference                                        |
-| `ocd`        | `ocd-python`           | Product image: Python + Node + Ollama + Claude Code + OCD package + dep cache |
+| `ocd-base` | `debian:bookworm-slim` | Hardened foundation: `uv`, `git`, `shellcheck` |
+| `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` with frontmatter plugin |
+| `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint`, `stylelint`, `htmlhint` |
+| `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference |
+| `ocd` | `ocd-python` | Product image: Python + Node + Ollama + Claude Code + OCD package + dep cache |
 
 All Dockerfiles live in `containers/<name>/Dockerfile`. Each image has its own
 `.dockerignore`.
@@ -64,13 +64,13 @@ installed. If hadolint is missing, it prints a warning and continues.
 
 Each CI build job runs smoke tests to verify the image is functional:
 
-| Image        | Checks                                                                                                                                                                                    |
+| Image | Checks |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ocd-base`   | `uv --version`, `git --version`, `shellcheck --version`, `whoami` = `ocd`                                                                                                                 |
-| `ocd-python` | `python3 --version`, `ruff --version`, `mypy --version`, `mdformat --version`, `whoami` = `ocd`                                                                                           |
-| `ocd-node`   | `node --version`, `pnpm --version`, `prettier --version`, `whoami` = `ocd`                                                                                                                |
-| `ocd-ollama` | `ollama --version` (detached container, 3-second startup wait)                                                                                                                            |
-| `ocd`        | `python3 --version`, `node --version`, `ruff --version`, `claude --version`, `ollama --version`, `whoami` = `ocd`, `which ocd`, `/home/ocd/.claude/` exists, `/opt/ocd/templates/` exists |
+| `ocd-base` | `uv --version`, `git --version`, `shellcheck --version`, `whoami` = `ocd` |
+| `ocd-python` | `python3 --version`, `ruff --version`, `mypy --version`, `mdformat --version`, `whoami` = `ocd` |
+| `ocd-node` | `node --version`, `pnpm --version`, `prettier --version`, `whoami` = `ocd` |
+| `ocd-ollama` | `ollama --version` (detached container, 3-second startup wait) |
+| `ocd` | `python3 --version`, `node --version`, `ruff --version`, `claude --version`, `ollama --version`, `whoami` = `ocd`, `which ocd`, `/home/ocd/.claude/` exists, `/opt/ocd/templates/` exists |
 
 Run the same checks locally:
 
@@ -88,12 +88,12 @@ builds.
 
 ### Triggers
 
-| Event               | Condition                               |
+| Event | Condition |
 | ------------------- | --------------------------------------- |
-| Push to `main`      | Path filters match                      |
-| Pull request        | Path filters match                      |
-| `workflow_dispatch` | Manual trigger from GitHub Actions UI   |
-| Tag push            | `v*` pattern (triggers release publish) |
+| Push to `main` | Path filters match |
+| Pull request | Path filters match |
+| `workflow_dispatch` | Manual trigger from GitHub Actions UI |
+| Tag push | `v*` pattern (triggers release publish) |
 
 Path filters:
 
@@ -108,18 +108,18 @@ Path filters:
 
 ### Stages
 
-| Stage       | Job               | Tool                     | Details                                                                   |
+| Stage | Job | Tool | Details |
 | ----------- | ----------------- | ------------------------ | ------------------------------------------------------------------------- |
-| 1 (lint)    | `lint-dockerfile` | hadolint                 | Scans all `containers/*/Dockerfile`                                       |
-| 2 (build)   | `build-base`      | build-push-action → GHCR | Builds `ocd-base`, pushes `:sha-<commit>` tag, runs smoke tests           |
-| 2 (build)   | `build-python`    | build-push-action → GHCR | Builds `ocd-python` from registry base, pushes `:sha-<commit>` tag        |
-| 2 (build)   | `build-node`      | build-push-action → GHCR | Builds `ocd-node` from registry base, pushes `:sha-<commit>` tag          |
-| 2 (build)   | `build-ollama`    | build-push-action → GHCR | Builds `ocd-ollama` from registry base, pushes `:sha-<commit>` tag        |
-| 2 (build)   | `build-ocd`       | build-push-action → GHCR | Builds `ocd` from registry base, pushes `:sha-<commit>` tag               |
-| 3 (scan)    | `scan-images`     | trivy image              | Pulls `ocd:sha-<commit>` from GHCR; scans with `trivy.yaml` config        |
-| 3 (scan)    | `scan-images`     | trivy SARIF              | Generates SARIF report on push; uploads to GitHub Security tab via CodeQL |
-| 4 (publish) | `publish-latest`  | build-push-action        | Pushes `:latest` tags to GHCR on push to `main` only                      |
-| 4 (publish) | `publish-release` | build-push-action        | Pushes `:<version>` + `:latest` tags to GHCR on `v*` tag push             |
+| 1 (lint) | `lint-dockerfile` | hadolint | Scans all `containers/*/Dockerfile` |
+| 2 (build) | `build-base` | build-push-action → GHCR | Builds `ocd-base`, pushes `:sha-<commit>` tag, runs smoke tests |
+| 2 (build) | `build-python` | build-push-action → GHCR | Builds `ocd-python` from registry base, pushes `:sha-<commit>` tag |
+| 2 (build) | `build-node` | build-push-action → GHCR | Builds `ocd-node` from registry base, pushes `:sha-<commit>` tag |
+| 2 (build) | `build-ollama` | build-push-action → GHCR | Builds `ocd-ollama` from registry base, pushes `:sha-<commit>` tag |
+| 2 (build) | `build-ocd` | build-push-action → GHCR | Builds `ocd` from registry base, pushes `:sha-<commit>` tag |
+| 3 (scan) | `scan-images` | trivy image | Pulls `ocd:sha-<commit>` from GHCR; scans with `trivy.yaml` config |
+| 3 (scan) | `scan-images` | trivy SARIF | Generates SARIF report on push; uploads to GitHub Security tab via CodeQL |
+| 4 (publish) | `publish-latest` | build-push-action | Pushes `:latest` tags to GHCR on push to `main` only |
+| 4 (publish) | `publish-release` | build-push-action | Pushes `:<version>` + `:latest` tags to GHCR on `v*` tag push |
 
 All build jobs use `docker/build-push-action` with GHCR layer caching
 (`cache-from`/`cache-to`). Images are pushed with ephemeral `:sha-<commit>` tags
@@ -144,10 +144,10 @@ Publishing uses `docker/build-push-action` with GHCR layer caching. Child
 images use `BASE_IMAGE` set to the GHCR registry path so they pull cached base
 layers instead of building from scratch.
 
-| Job               | When           | Tags pushed                               |
+| Job | When | Tags pushed |
 | ----------------- | -------------- | ----------------------------------------- |
-| `publish-latest`  | Push to `main` | `:latest` for all 5 images                |
-| `publish-release` | `v*` tag push  | `:<version>` + `:latest` for all 5 images |
+| `publish-latest` | Push to `main` | `:latest` for all 5 images |
+| `publish-release` | `v*` tag push | `:<version>` + `:latest` for all 5 images |
 
 Release version is derived from the git tag (e.g., tag `v1.2.3` → version
 `1.2.3`). Each child image uses the version-tagged parent as its

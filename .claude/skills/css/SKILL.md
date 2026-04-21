@@ -1,4 +1,4 @@
----
+______________________________________________________________________
 
 ## name: css description: "Write, refactor, and audit CSS with modern layout, custom properties, and methodology-driven architecture. Use when creating, reviewing, or fixing stylesheets, CSS modules, or design system tokens." argument-hint: "[file path or 'audit' or 'layout']"
 

@@ -1,4 +1,4 @@
----
+______________________________________________________________________
 
 ## name: terraform description: "Write, refactor, and audit Terraform/OpenTofu IaC with state hygiene, no hardcoded secrets, and composable modules. Use when creating, reviewing, or fixing .tf files, modules, state, or provider configs." argument-hint: "[file path or 'audit' or 'plan']"
 

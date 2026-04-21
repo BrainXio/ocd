@@ -1,4 +1,4 @@
----
+______________________________________________________________________
 
 ## name: csharp description: "Write, refactor, and debug C# and .NET code with modern idioms, null safety, and performance. Use when creating, reviewing, or fixing C# files, .NET projects, or ASP.NET applications." argument-hint: "[file path or 'audit' or 'format']"
 

@@ -1,4 +1,4 @@
----
+______________________________________________________________________
 
 ## name: json description: "Write, refactor, and audit JSON with strict schema validation, consistent formatting, and no trailing commas. Use when creating, reviewing, or fixing .json/.jsonc files, configs, or data schemas." argument-hint: "[file path or 'audit' or 'validate']"
 

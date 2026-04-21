@@ -1,4 +1,4 @@
----
+______________________________________________________________________
 
 ## name: swift description: "Write, refactor, and audit Swift code with strict concurrency, modern idioms, and SwiftLint gates. Use when creating, reviewing, or fixing Swift files, packages, or concurrency code." argument-hint: "[file path or 'audit' or 'concurrency']"
 

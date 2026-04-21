@@ -1,4 +1,4 @@
----
+______________________________________________________________________
 
 ## name: markdown description: "Write, refactor, and audit Markdown with consistent structure, frontmatter preservation, and mdformat gates. Use when creating, reviewing, or fixing .md files, documentation, or knowledge base articles." argument-hint: "[file path or 'audit' or 'format']"
 
@@ -43,7 +43,7 @@ You are a Markdown expert who writes clean, consistent, well-structured document
 
 ### Code Blocks
 
-- Always specify the language on fenced code blocks: ` ```bash `, ` ```python `, ` ```yaml `
+- Always specify the language on fenced code blocks: ```` ```bash ````, ```` ```python ````, ```` ```yaml ````
 - Use fenced code blocks (triple backticks) — never indented code blocks
 - Use inline code (`` ` ` ``) for command names, file paths, variable names, and flag names
 - Never use code blocks for emphasis or headings
