@@ -1,5 +1,5 @@
 ---
-title: 'Planning: Future Expansions'
+title: "Planning: Future Expansions"
 aliases: [planning, future, roadmap]
 tags: [planning]
 created: 2026-04-17
@@ -14,12 +14,12 @@ Highest-priority initiative. Goal: eliminate repetitive, high-token-cost work fr
 
 ### TP-1: Smart KB Injection Tool (Priority: Highest)
 
-| Field | Detail |
+| Field        | Detail                                                                                                                                                                                                  |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What | Replace naive KB context dump with intelligent relevance-ranked injection. `ocd kb query --relevant-to "<request>"` returns 3-5 most relevant articles + 50-token KB health card instead of full index. |
-| Why | SessionStart currently injects up to 20,000 chars (~4,356 tokens) of undifferentiated KB index regardless of what the user is about to work on. Only 3-5 articles are typically relevant. |
-| Est. Savings | ~3,500-4,000 tokens per session start |
-| Status | Done |
+| What         | Replace naive KB context dump with intelligent relevance-ranked injection. `ocd kb query --relevant-to "<request>"` returns 3-5 most relevant articles + 50-token KB health card instead of full index. |
+| Why          | SessionStart currently injects up to 20,000 chars (~4,356 tokens) of undifferentiated KB index regardless of what the user is about to work on. Only 3-5 articles are typically relevant.               |
+| Est. Savings | ~3,500-4,000 tokens per session start                                                                                                                                                                   |
+| Status       | Done                                                                                                                                                                                                    |
 
 Acceptance criteria:
 
@@ -40,12 +40,12 @@ Integration points:
 
 ### TP-2: Lightweight Task Router (Priority: High)
 
-| Field | Detail |
+| Field        | Detail                                                                                                                                                                                                            |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What | External Python router replaces main LLM agent-selection reasoning. `ocd-route "<request>"` scores request against `manifest.json` keywords and returns optimal 1-3 agent names. |
-| Why | Main LLM currently reads all 25 agent names/descriptions (~1,200 tokens always present) and reasons about which to call (~500-800 tokens per delegation). A keyword matcher does this in \<50ms with zero tokens. |
-| Est. Savings | ~500-800 tokens per delegation + ~1,200 tokens from system prompt |
-| Status | Done |
+| What         | External Python router replaces main LLM agent-selection reasoning. `ocd-route "<request>"` scores request against `manifest.json` keywords and returns optimal 1-3 agent names.                                  |
+| Why          | Main LLM currently reads all 25 agent names/descriptions (~1,200 tokens always present) and reasons about which to call (~500-800 tokens per delegation). A keyword matcher does this in \<50ms with zero tokens. |
+| Est. Savings | ~500-800 tokens per delegation + ~1,200 tokens from system prompt                                                                                                                                                 |
+| Status       | Done                                                                                                                                                                                                              |
 
 Acceptance criteria:
 
@@ -65,12 +65,12 @@ Integration points:
 
 ### TP-3: Standards-as-Reference System (Priority: High)
 
-| Field | Detail |
+| Field        | Detail                                                                                                                                                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What | Extract Eight Standards text into versioned `standards.md` with hash reference. Agents receive only `ocd-standards:v1.0 [hash]` instead of full ~1,919-token text. System auto-injects full text on demand via `Read`. |
-| Why | Every `/ocd` invocation loads the full Eight Standards (~7,678 chars). Most agent invocations never need the standards text. A hash reference costs ~15 tokens. |
-| Est. Savings | ~1,919 tokens per invocation that doesn't need standards immediately; ~3,800-5,700 for 2-3 invocations per session |
-| Status | Done |
+| What         | Extract Eight Standards text into versioned `standards.md` with hash reference. Agents receive only `ocd-standards:v1.0 [hash]` instead of full ~1,919-token text. System auto-injects full text on demand via `Read`. |
+| Why          | Every `/ocd` invocation loads the full Eight Standards (~7,678 chars). Most agent invocations never need the standards text. A hash reference costs ~15 tokens.                                                        |
+| Est. Savings | ~1,919 tokens per invocation that doesn't need standards immediately; ~3,800-5,700 for 2-3 invocations per session                                                                                                     |
+| Status       | Done                                                                                                                                                                                                                   |
 
 Acceptance criteria:
 
@@ -90,12 +90,12 @@ Integration points:
 
 ### TP-4: Closed-Loop Fix Family (Priority: Medium)
 
-| Field | Detail |
+| Field        | Detail                                                                                                                                                                                                                                                |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What | Expand `ocd format` into `ocd fix-cycle`, `ocd lint-and-fix`, `ocd test-and-fix`, `ocd security-scan-and-patch`. Each runs full detect-fix-verify cycle externally, returning structured JSON. LLM says "run ocd-fix-cycle on X" and gets the result. |
-| Why | Current fix loops cost ~500-1,300 tokens per iteration (read error → propose fix → apply → re-read error). Typical 2-3 iteration cycle = ~1,500-3,900 tokens. External command replaces entire loop with one tool call. |
-| Est. Savings | ~2,000-5,000 tokens per fix cycle; ~6,000-15,000 for 3-5 cycles per session |
-| Status | Done |
+| What         | Expand `ocd format` into `ocd fix-cycle`, `ocd lint-and-fix`, `ocd test-and-fix`, `ocd security-scan-and-patch`. Each runs full detect-fix-verify cycle externally, returning structured JSON. LLM says "run ocd-fix-cycle on X" and gets the result. |
+| Why          | Current fix loops cost ~500-1,300 tokens per iteration (read error → propose fix → apply → re-read error). Typical 2-3 iteration cycle = ~1,500-3,900 tokens. External command replaces entire loop with one tool call.                               |
+| Est. Savings | ~2,000-5,000 tokens per fix cycle; ~6,000-15,000 for 3-5 cycles per session                                                                                                                                                                           |
+| Status       | Done                                                                                                                                                                                                                                                  |
 
 Acceptance criteria:
 
@@ -117,12 +117,12 @@ Integration points:
 
 ### TP-5: Pre-compiled Agent Manifest + Session State Card (Priority: Medium)
 
-| Field | Detail |
+| Field        | Detail                                                                                                                                                                                                                                       |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What | Part A: Generate `manifest.json` (~4 KB) at session start, replacing 97 KB of agent `.md` definitions. Part B: Auto-generate 200-300 token session state card after every file modification, replacing full history replay after compaction. |
-| Why | All 25 agent files total 97 KB (~24,286 tokens). After compaction, the LLM loses most context and must reconstruct state. A 300-token session card captures essential state: what changed, what passed, what's pending. |
-| Est. Savings | ~23,000 tokens from manifest; ~15,000-20,000 per post-compaction context rebuild |
-| Status | Done |
+| What         | Part A: Generate `manifest.json` (~4 KB) at session start, replacing 97 KB of agent `.md` definitions. Part B: Auto-generate 200-300 token session state card after every file modification, replacing full history replay after compaction. |
+| Why          | All 25 agent files total 97 KB (~24,286 tokens). After compaction, the LLM loses most context and must reconstruct state. A 300-token session card captures essential state: what changed, what passed, what's pending.                      |
+| Est. Savings | ~23,000 tokens from manifest; ~15,000-20,000 per post-compaction context rebuild                                                                                                                                                             |
+| Status       | Done                                                                                                                                                                                                                                         |
 
 Acceptance criteria:
 
@@ -145,31 +145,31 @@ Integration points:
 
 ### TP Execution Roadmap (7-10 Days)
 
-| Day | Scope |
+| Day | Scope                                                                                                                                  |
 | --- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1-2 | TP-1: Smart KB Injection — `relevance.py`, `kb-index.json`, modified `session_start.py` |
+| 1-2 | TP-1: Smart KB Injection — `relevance.py`, `kb-index.json`, modified `session_start.py`                                                |
 | 3-4 | TP-2: Task Router — `router.py`, `manifest.json`, `ocd route` command. TP-3: Standards Reference — `standards.md`, modified `SKILL.md` |
-| 5-6 | TP-4: Closed-Loop Fix Family — `fix.py`, 4 new CLI commands, `FixResult` dataclass |
-| 7-8 | TP-5: Manifest + Session Card — `session_card.py`, manifest at session start, card in PostToolUse |
-| 9 | Cross-feature integration testing, token measurement (before/after benchmark sessions) |
-| 10 | Documentation updates (`03-reference.md`, `02-how-to.md`, this file), CHANGELOG, PR |
+| 5-6 | TP-4: Closed-Loop Fix Family — `fix.py`, 4 new CLI commands, `FixResult` dataclass                                                     |
+| 7-8 | TP-5: Manifest + Session Card — `session_card.py`, manifest at session start, card in PostToolUse                                      |
+| 9   | Cross-feature integration testing, token measurement (before/after benchmark sessions)                                                 |
+| 10  | Documentation updates (`03-reference.md`, `02-how-to.md`, this file), CHANGELOG, PR                                                    |
 
 ### TP Risks & Mitigation
 
-| Risk | Mitigation |
+| Risk                                             | Mitigation                                                                                                                |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| TF-IDF relevance poor for short queries | Fallback to 3 most-recently-updated articles when confidence below threshold |
-| `kb-index.json` stale after updates | Session start checks hash against current articles, triggers re-index on mismatch |
-| Agent manifest keywords insufficient for routing | Include `scope_summary` for disambiguation; log routing decisions; allow `ocd-route --force <agent>` |
-| Session card grows too large | Hard cap at 1,200 chars, FIFO eviction of oldest entries |
-| Fix-cycle makes incorrect auto-fixes | Only auto-fixes via formatters (already safe); lint auto-fix requires explicit `--fix` flag |
-| Feature scope creep | Strict acceptance criteria per feature; each new module ≤300 lines; no new config knobs without measurement justification |
+| TF-IDF relevance poor for short queries          | Fallback to 3 most-recently-updated articles when confidence below threshold                                              |
+| `kb-index.json` stale after updates              | Session start checks hash against current articles, triggers re-index on mismatch                                         |
+| Agent manifest keywords insufficient for routing | Include `scope_summary` for disambiguation; log routing decisions; allow `ocd-route --force <agent>`                      |
+| Session card grows too large                     | Hard cap at 1,200 chars, FIFO eviction of oldest entries                                                                  |
+| Fix-cycle makes incorrect auto-fixes             | Only auto-fixes via formatters (already safe); lint auto-fix requires explicit `--fix` flag                               |
+| Feature scope creep                              | Strict acceptance criteria per feature; each new module ≤300 lines; no new config knobs without measurement justification |
 
 Total new surface area: 4 Python modules (`relevance.py`, `router.py`, `fix.py`, `session_card.py`), 4 generated artifacts (all gitignored in `.agent/`), 5 new CLI entry points. All generated, all deterministic, all zero-dependency beyond existing `pyproject.toml`.
 
 ## New Linters
 
-| Linter | Purpose | Status |
+| Linter     | Purpose                                | Status                  |
 | ---------- | -------------------------------------- | ----------------------- |
 | `sqlfluff` | SQL linting CI job for the `sql` skill | Pending tool evaluation |
 
@@ -184,18 +184,18 @@ Before adding `sqlfluff`, determine what additional tools and dependencies the `
 
 ## New Commands
 
-| Command | Purpose | Status |
+| Command      | Purpose                                                 | Status |
 | ------------ | ------------------------------------------------------- | ------ |
-| `ocd format` | Run all formatters with auto-fix (ruff, mdformat, etc.) | Done |
+| `ocd format` | Run all formatters with auto-fix (ruff, mdformat, etc.) | Done   |
 
 ## Packaging and Distribution
 
-| Item | Purpose | Status |
+| Item                        | Purpose                                                                                                                                     | Status  |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| GitHub Release packaging | Build and attach the `brainxio-ocd` sdist/wheel to GitHub Releases alongside container images | Planned |
-| Release package composition | Define which artifacts go into a GitHub Release and how they are assembled (see below) | Planned |
-| `AGENTS.md` | Instruction file for external agents on which packages and assets to download from this repo and how to set them up in foreign environments | Planned |
-| Internal CI library | Python library for agent-based CI workflows, driven by `.github/workflows/` definitions | Planned |
+| GitHub Release packaging    | Build and attach the `brainxio-ocd` sdist/wheel to GitHub Releases alongside container images                                               | Planned |
+| Release package composition | Define which artifacts go into a GitHub Release and how they are assembled (see below)                                                      | Planned |
+| `AGENTS.md`                 | Instruction file for external agents on which packages and assets to download from this repo and how to set them up in foreign environments | Planned |
+| Internal CI library         | Python library for agent-based CI workflows, driven by `.github/workflows/` definitions                                                     | Planned |
 
 ### Release Package Composition
 
@@ -203,54 +203,54 @@ A GitHub Release should contain three tiers of artifacts:
 
 **Essential** (minimum viable OCD — knowledge pipeline + hooks):
 
-| Artifact | Contents |
+| Artifact                                  | Contents                                                                                                                     |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `brainxio_ocd-<version>-py3-none-any.whl` | Python package (all 13 modules, 9 entry points) |
-| `brainxio_ocd-<version>.tar.gz` | Source distribution |
-| `ocd-config.zip` | `.claude/settings.json`, `.claude/rules/commit-hygiene.md`, `.claude/rules/infrastructure.md`, `.claude/skills/ocd/SKILL.md` |
-| `ocd-templates.zip` | `git_hooks/setup-hooks.sh`, `git_hooks/ai-patterns.txt`, `.gitleaks.toml`, `package.json`, `package-lock.json` |
+| `brainxio_ocd-<version>-py3-none-any.whl` | Python package (all 13 modules, 9 entry points)                                                                              |
+| `brainxio_ocd-<version>.tar.gz`           | Source distribution                                                                                                          |
+| `ocd-config.zip`                          | `.claude/settings.json`, `.claude/rules/commit-hygiene.md`, `.claude/rules/infrastructure.md`, `.claude/skills/ocd/SKILL.md` |
+| `ocd-templates.zip`                       | `git_hooks/setup-hooks.sh`, `git_hooks/ai-patterns.txt`, `.gitleaks.toml`, `package.json`, `package-lock.json`               |
 
 **Recommended** (adds enforcement + core skills + audit agents):
 
-| Artifact | Contents |
+| Artifact              | Contents                                                                        |
 | --------------------- | ------------------------------------------------------------------------------- |
-| `ocd-hooks.zip` | `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/pre-push` |
-| `ocd-skills-core.zip` | `.claude/skills/{git,bash,python,docker}/SKILL.md` |
-| `ocd-rules-core.zip` | `.claude/rules/{markdown,doc-sync,pr-workflow}.md` |
+| `ocd-hooks.zip`       | `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/pre-push`            |
+| `ocd-skills-core.zip` | `.claude/skills/{git,bash,python,docker}/SKILL.md`                              |
+| `ocd-rules-core.zip`  | `.claude/rules/{markdown,doc-sync,pr-workflow}.md`                              |
 | `ocd-agents-core.zip` | `.claude/agents/{lint-status,hook-integrity,hook-coverage,dead-code-hunter}.md` |
 
 **Optional** (language-specific skills, remaining agents, containers):
 
-| Artifact | Contents |
+| Artifact               | Contents                                                             |
 | ---------------------- | -------------------------------------------------------------------- |
 | `ocd-skills-extra.zip` | All remaining `.claude/skills/*/SKILL.md` (15 language/infra skills) |
-| `ocd-agents-extra.zip` | All remaining `.claude/agents/*.md` (21 audit agents) |
-| Container images | Published to GHCR (`ghcr.io/brainxio/ocd-<name>:<version>`) |
+| `ocd-agents-extra.zip` | All remaining `.claude/agents/*.md` (21 audit agents)                |
+| Container images       | Published to GHCR (`ghcr.io/brainxio/ocd-<name>:<version>`)          |
 
 The `AGENTS.md` file should document these tiers and provide setup instructions for each.
 
 ## CI/CD Beyond Lint
 
-| Item | Purpose | Status |
+| Item                 | Purpose                                                                                                                  | Status  |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
-| CI path filters | Add path-based triggers to `ci.yml` so doc-only changes skip Python lint/test/security jobs and only run relevant checks | Done |
-| Semantic versioning | Automated version bumps from conventional commits | Planned |
-| Changelog generation | Auto-generate CHANGELOG.md from commit history | Planned |
-| Release automation | CI job that composes release artifacts, creates a GitHub Release with composed package content, and uploads assets | Planned |
-| Deployment pipelines | Staging → production deployment workflows | Planned |
+| CI path filters      | Add path-based triggers to `ci.yml` so doc-only changes skip Python lint/test/security jobs and only run relevant checks | Done    |
+| Semantic versioning  | Automated version bumps from conventional commits                                                                        | Planned |
+| Changelog generation | Auto-generate CHANGELOG.md from commit history                                                                           | Planned |
+| Release automation   | CI job that composes release artifacts, creates a GitHub Release with composed package content, and uploads assets       | Planned |
+| Deployment pipelines | Staging → production deployment workflows                                                                                | Planned |
 
 ## Developer Experience
 
-| Item | Purpose | Status |
+| Item                   | Purpose                                                                                                   | Status  |
 | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------- |
 | Local dev requirements | Document all prerequisites and setup steps for a local dev environment (system packages, tools, versions) | Planned |
 
 ## Knowledge Pipeline
 
-| Item | Purpose | Status |
+| Item                    | Purpose                                             | Status  |
 | ----------------------- | --------------------------------------------------- | ------- |
 | Automated URL ingestion | Fetch URL content and route to flush.py in one step | Planned |
-| KB export/sync | Share compiled knowledge between instances | Planned |
+| KB export/sync          | Share compiled knowledge between instances          | Planned |
 
 ## Resolved Decisions
 
