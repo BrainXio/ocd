@@ -95,7 +95,7 @@ model: haiku
 
 | Hook | Entry Point | Trigger | Purpose |
 | ------------- | ------------------------ | ----------------------------- | ----------------------------------------------- | ----------------------------------------- |
-| SessionStart | `ocd-session-start` | SessionStart | Inject relevant KB articles + health card as context |
+| SessionStart | `ocd-session-start` | SessionStart | Inject relevant KB articles + health card + standards reference as context |
 | PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
 | SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
 | Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write|Edit) | Lint edited files, report missing linters |
@@ -147,6 +147,7 @@ Hooks receive a JSON object on stdin:
 | `.agent/.state/last-flush.json` | Last flush metadata |
 | `.agent/.state/kb-index.json` | TF-IDF search index for KB relevance queries |
 | `.agent/.state/manifest.json` | Agent keyword manifest for task routing |
+| `.claude/skills/ocd/standards.md` | Eight Standards full text with version + hash frontmatter |
 
 ## Claude Code Rules
 
@@ -251,7 +252,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 
 | Command | Module | Purpose |
 | ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, and routing — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents |
+| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, and standards — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
 | `ocd-format` | `ocd.format:main` | Run all formatters with auto-fix |
@@ -264,6 +265,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd-format-work` | `ocd.hooks.format_work:main` | Real-time file auto-formatting on edit |
 | `ocd-kb-query` | `ocd.relevance:main` | TF-IDF relevance query against KB index |
 | `ocd-route` | `ocd.router:main` | Route user request to optimal agent(s) |
+| `ocd-standards` | `ocd.standards:main` | Manage standards hash reference (verify, update) |
 
 All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
 
@@ -400,6 +402,7 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Auto-compile trigger time | 18:00+ local | `ocd.config` |
 | KB injection count | 3 | `ocd.config` |
 | Max relevant context chars | 8,000 | `ocd.config` |
+| Standards file | `.claude/skills/ocd/standards.md` | `ocd.config` |
 
 ## Pipeline Commands
 
@@ -417,4 +420,7 @@ ocd kb query --relevant-to "auth redirect" # TF-IDF relevance query (3-5 article
 ocd-kb-query --build-index               # rebuild KB search index
 ocd route "find dead code"               # route request to optimal agent(s)
 ocd-route --build-manifest               # rebuild agent manifest
+ocd standards                            # print current standards reference
+ocd-standards --verify                    # verify hash matches content
+ocd-standards --update                   # recompute and update hash in frontmatter
 ```

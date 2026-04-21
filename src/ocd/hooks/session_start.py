@@ -2,15 +2,18 @@
 
 Uses TF-IDF relevance scoring to inject only the most pertinent articles
 instead of the full KB index. Falls back to most recently updated articles
-when no query is available.
+when no query is available. Also includes a standards hash reference for
+on-demand access to the full Eight Standards text.
 """
 
 from __future__ import annotations
 
 import json
+import sys
 
 from ocd.config import MAX_RELEVANT_CONTEXT_CHARS
 from ocd.relevance import build_relevant_context
+from ocd.standards import get_standards_reference, verify_standards_hash
 
 
 def main() -> None:
@@ -18,6 +21,24 @@ def main() -> None:
         query="",
         max_chars=MAX_RELEVANT_CONTEXT_CHARS,
     )
+
+    # Verify standards hash and add reference line
+    verification = verify_standards_hash()
+    if verification.get("error"):
+        # standards.md doesn't exist yet — skip reference
+        pass
+    elif not verification["match"]:
+        print(
+            f"WARNING: Standards hash mismatch! "
+            f"Stored: {verification['stored_hash']}, "
+            f"Computed: {verification['computed_hash']}. "
+            f"Run 'ocd-standards --update' to fix.",
+            file=sys.stderr,
+        )
+    else:
+        ref = get_standards_reference()
+        if ref:
+            context = f"{context}\n\n---\n\n{ref}"
 
     output = {
         "hookSpecificOutput": {
