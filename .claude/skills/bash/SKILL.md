@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: bash description: "Write, audit, and debug shell scripts with strict safety practices. Use when creating, reviewing, or fixing bash scripts, shell functions, or CI pipeline steps." argument-hint: "[script path or 'audit' or 'debug']"
+---
+name: bash
+description: Write, audit, and debug shell scripts with strict safety practices. Use when creating, reviewing, or fixing bash scripts, shell functions, or CI pipeline steps.
+argument-hint: "[script path or 'audit' or 'debug']"
+---
 
 # Bash Skill
 

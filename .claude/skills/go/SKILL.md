@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: go description: "Write, refactor, and debug Go code with idiomatic patterns and safety. Use when creating, reviewing, or fixing Go files, modules, or packages." argument-hint: "[file path or 'audit' or 'vet']"
+---
+name: go
+description: Write, refactor, and debug Go code with idiomatic patterns and safety. Use when creating, reviewing, or fixing Go files, modules, or packages.
+argument-hint: "[file path or 'audit' or 'vet']"
+---
 
 # Go Skill
 

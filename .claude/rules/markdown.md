@@ -1,7 +1,7 @@
 ---
 description: mdformat, frontmatter plugin, ordered list normalization, CI check paths
 paths:
-  - "**/*.md"
+  - '**/*.md'
 ---
 
 # Markdown Formatting
@@ -22,6 +22,14 @@ pip install mdformat-frontmatter>=2.0.10
 
 The CI lint-markdown job installs both mdformat and mdformat-frontmatter.
 The dependency is declared in `pyproject.toml`.
+
+## IMPORTANT: Skill File Frontmatter
+
+Skill files (`.claude/skills/*/SKILL.md`) use proper YAML frontmatter with `---`
+delimiters — not `## heading` metadata lines and not `______` horizontal rules.
+mdformat normalizes thematic breaks (dashes or underscores) to `______`, but
+preserves `---` as frontmatter delimiters when the frontmatter plugin is active.
+Always use YAML frontmatter in skill files.
 
 ## Ordered List Markers
 
@@ -48,6 +56,12 @@ Project docs use these frontmatter fields:
 - `tags` (YAML list: `tags: [tag1, tag2]`)
 - `created` (date: YYYY-MM-DD)
 - `updated` (date: YYYY-MM-DD, update on every edit)
+
+Skill files use these frontmatter fields:
+
+- `name` (skill name, matches directory name)
+- `description` (quoted string describing the skill)
+- `argument-hint` (quoted string showing expected arguments)
 
 ## Line Length
 

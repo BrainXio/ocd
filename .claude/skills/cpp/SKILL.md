@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: cpp description: "Write, refactor, and debug C and C++ code with memory safety, RAII, and modern standards. Use when creating, reviewing, or fixing C/C++ files, headers, CMake projects, or native libraries." argument-hint: "[file path or 'audit' or 'tidy']"
+---
+name: cpp
+description: Write, refactor, and debug C and C++ code with memory safety, RAII, and modern standards. Use when creating, reviewing, or fixing C/C++ files, headers, CMake projects, or native libraries.
+argument-hint: "[file path or 'audit' or 'tidy']"
+---
 
 # C/C++ Skill
 

@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: github description: "Write, refactor, and audit GitHub config: Actions workflows, branch protection, issue/PR templates, and gh CLI usage. Use when creating, reviewing, or fixing .github/ files, workflows, or repository settings." argument-hint: "[file path or 'audit' or 'workflow']"
+---
+name: github
+description: 'Write, refactor, and audit GitHub config: Actions workflows, branch protection, issue/PR templates, and gh CLI usage. Use when creating, reviewing, or fixing .github/ files, workflows, or repository settings.'
+argument-hint: "[file path or 'audit' or 'workflow']"
+---
 
 # GitHub Skill
 
