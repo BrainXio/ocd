@@ -1,9 +1,2 @@
-{
-  "sqlfluff": {
-    "dialect": "ansi",
-    "rules": {
-      "LT01": {"operator": "space"},
-      "RF01": true
-    }
-  }
-}
+[sqlfluff]
+dialect = ansi

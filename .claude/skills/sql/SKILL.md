@@ -66,6 +66,25 @@ You are a SQL expert who writes clean, efficient, safe queries following these c
 - Never drop columns that might be referenced by views, triggers, or application code — deprecate first
 - Use `IF NOT EXISTS` / `IF EXISTS` guards for idempotent DDL
 
+## Linting / Formatting
+
+```bash
+# Lint all SQL files
+sqlfluff lint .
+
+# Lint a single file
+sqlfluff lint path/to/file.sql
+
+# Auto-fix formatting issues
+sqlfluff fix --force
+
+# Auto-fix a single file
+sqlfluff fix --force path/to/file.sql
+```
+
+`sqlfluff` configuration lives in `.sqlfluff` (INI format) at the project root.
+Install the optional SQL extra with `uv sync --extra sql`.
+
 ## Anti-Patterns to Avoid
 
 - `SELECT *` — always list columns explicitly

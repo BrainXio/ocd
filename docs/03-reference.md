@@ -287,6 +287,7 @@ Stages 3–4 run only when Python code changes.
 | 2 (parallel) | `secret-scan` | gitleaks (reads `.gitleaks.toml`) | always |
 | 2 (parallel) | `lint-actions` | actionlint | workflow changes |
 | 2 (parallel) | `lint-node` | stylelint + htmlhint + prettier (npm) | CSS/HTML/JSON changes |
+| 2 (parallel) | `lint-sql` | sqlfluff | SQL changes |
 | 2 (parallel) | `scan-deps` | trivy fs (reads `trivy.yaml`) | Python changes |
 | 2 (parallel) | `sast-scan` | semgrep (reads `.semgrep.yml`) | Python changes |
 | 3 (after 2) | `lint-python` | ruff + mypy | Python changes |
