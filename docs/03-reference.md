@@ -3,7 +3,7 @@ title: Reference
 aliases: [reference, api, specs, tables]
 tags: [reference]
 created: 2026-04-17
-updated: 2026-04-20
+updated: 2026-04-21
 ---
 
 All lookup tables, schemas, and specifications in one place. Dry, authoritative, complete.
@@ -95,7 +95,7 @@ model: haiku
 
 | Hook | Entry Point | Trigger | Purpose |
 | ------------- | ------------------------ | ----------------------------- | ----------------------------------------------- | ----------------------------------------- |
-| SessionStart | `ocd-session-start` | SessionStart | Inject KB index + recent log as context |
+| SessionStart | `ocd-session-start` | SessionStart | Inject relevant KB articles + health card as context |
 | PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
 | SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
 | Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write|Edit) | Lint edited files, report missing linters |
@@ -145,6 +145,8 @@ Hooks receive a JSON object on stdin:
 | `.agent/.state/flush.log` | Background flush process log |
 | `.agent/.state/state.json` | Session state |
 | `.agent/.state/last-flush.json` | Last flush metadata |
+| `.agent/.state/kb-index.json` | TF-IDF search index for KB relevance queries |
+| `.agent/.state/manifest.json` | Agent keyword manifest for task routing |
 
 ## Claude Code Rules
 
@@ -249,7 +251,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 
 | Command | Module | Purpose |
 | ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ocd` | `ocd.cli:main` | Container init, shell, and format — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix |
+| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, and routing — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
 | `ocd-format` | `ocd.format:main` | Run all formatters with auto-fix |
@@ -260,6 +262,8 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd-pre-compact` | `ocd.hooks.pre_compact:main` | Pre-compaction context save |
 | `ocd-lint-work` | `ocd.hooks.lint_work:main` | Real-time file linting on edit/commit |
 | `ocd-format-work` | `ocd.hooks.format_work:main` | Real-time file auto-formatting on edit |
+| `ocd-kb-query` | `ocd.relevance:main` | TF-IDF relevance query against KB index |
+| `ocd-route` | `ocd.router:main` | Route user request to optimal agent(s) |
 
 All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
 
@@ -394,6 +398,8 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Min turns (pre-compact) | 5 | `ocd.config` |
 | Flush dedup window | 60 seconds | `ocd.flush` |
 | Auto-compile trigger time | 18:00+ local | `ocd.config` |
+| KB injection count | 3 | `ocd.config` |
+| Max relevant context chars | 8,000 | `ocd.config` |
 
 ## Pipeline Commands
 
@@ -401,9 +407,14 @@ The sandbox restricts Claude's filesystem access at the process level:
 ocd-compile                              # compile new/changed logs
 ocd-compile --all                         # force recompile
 ocd-compile --file .agent/daily/<date>.md # compile specific log
+ocd-compile --manifest                   # rebuild agent manifest after compile
 ocd-lint-kb                              # full lint (structural + LLM)
 ocd-lint-kb --structural-only             # skip LLM checks
 ocd-query "question"                     # query the KB
 ocd-query "q" --file-back                # query + file answer
 ocd format                                # run all formatters with auto-fix
+ocd kb query --relevant-to "auth redirect" # TF-IDF relevance query (3-5 articles)
+ocd-kb-query --build-index               # rebuild KB search index
+ocd route "find dead code"               # route request to optimal agent(s)
+ocd-route --build-manifest               # rebuild agent manifest
 ```
