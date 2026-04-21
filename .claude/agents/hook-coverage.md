@@ -1,6 +1,6 @@
 ---
 name: hook-coverage
-description: 'Verify git hook coverage: symlink targets exist, scripts executable, CI parity'
+description: "Verify git hook coverage: symlink targets exist, scripts executable, CI parity"
 tools: Bash, Read, Glob
 model: haiku
 ---

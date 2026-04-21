@@ -1,6 +1,6 @@
 ---
 name: oop-auditor
-description: 'Find OOP design issues: god classes, improper inheritance, missing encapsulation, leaked internals'
+description: "Find OOP design issues: god classes, improper inheritance, missing encapsulation, leaked internals"
 tools: Glob, Grep, Read
 model: haiku
 ---

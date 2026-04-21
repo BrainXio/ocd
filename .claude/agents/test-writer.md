@@ -1,6 +1,6 @@
 ---
 name: test-writer
-description: 'Test generation: identify uncovered code, generate test cases, enforce coverage gates'
+description: "Test generation: identify uncovered code, generate test cases, enforce coverage gates"
 tools: Glob, Grep, Read, Bash
 model: haiku
 ---

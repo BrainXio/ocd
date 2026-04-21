@@ -1,6 +1,6 @@
 ---
 name: accessibility-auditor
-description: 'A11y review: semantic HTML, ARIA attributes, keyboard navigation, screen reader compatibility'
+description: "A11y review: semantic HTML, ARIA attributes, keyboard navigation, screen reader compatibility"
 tools: Glob, Grep, Read
 model: haiku
 ---

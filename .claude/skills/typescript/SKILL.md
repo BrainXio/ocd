@@ -1,4 +1,4 @@
-______________________________________________________________________
+---
 
 ## name: typescript description: "Write, refactor, and debug TypeScript and Node.js code with strict types and modern patterns. Use when creating, reviewing, or fixing TypeScript, JavaScript, or Node.js files, packages, or configs." argument-hint: "[file path or 'audit' or 'lint']"
 

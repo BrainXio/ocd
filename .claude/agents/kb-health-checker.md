@@ -1,6 +1,6 @@
 ---
 name: kb-health-checker
-description: 'Verify knowledge base structural health: broken wikilinks, orphan pages, stale articles, sparse content, missing backlinks'
+description: "Verify knowledge base structural health: broken wikilinks, orphan pages, stale articles, sparse content, missing backlinks"
 tools: Glob, Grep, Read
 model: haiku
 ---

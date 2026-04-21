@@ -1,4 +1,4 @@
-______________________________________________________________________
+---
 
 ## name: html description: "Write, refactor, and audit HTML with semantic markup, accessibility, and modern standards. Use when creating, reviewing, or fixing HTML files, templates, or component markup." argument-hint: "[file path or 'audit' or 'accessibility']"
 

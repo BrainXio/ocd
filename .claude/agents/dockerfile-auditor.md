@@ -1,6 +1,6 @@
 ---
 name: dockerfile-auditor
-description: 'Docker review: layer ordering, security best practices, multi-stage builds, pinned digests'
+description: "Docker review: layer ordering, security best practices, multi-stage builds, pinned digests"
 tools: Glob, Grep, Read, Bash
 model: haiku
 ---

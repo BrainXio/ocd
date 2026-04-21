@@ -1,4 +1,4 @@
-______________________________________________________________________
+---
 
 ## name: kubernetes description: "Write, audit, and debug Kubernetes manifests, Helm charts, and kubectl workflows. Use when creating, reviewing, or fixing Kubernetes YAML, Helm templates, Kustomize overlays, or cluster operations." argument-hint: "[manifest path or 'audit' or 'debug']"
 

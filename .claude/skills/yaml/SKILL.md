@@ -1,4 +1,4 @@
-______________________________________________________________________
+---
 
 ## name: yaml description: "Write, refactor, and audit YAML with consistent formatting, strict typing, and yamllint gates. Use when creating, reviewing, or fixing .yml/.yaml files, configs, CI workflows, or data definitions." argument-hint: "[file path or 'audit' or 'lint']"
 

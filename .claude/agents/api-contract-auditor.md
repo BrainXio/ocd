@@ -1,6 +1,6 @@
 ---
 name: api-contract-auditor
-description: 'API review: REST conventions, error response consistency, endpoint naming, HTTP semantics'
+description: "API review: REST conventions, error response consistency, endpoint naming, HTTP semantics"
 tools: Glob, Grep, Read
 model: haiku
 ---

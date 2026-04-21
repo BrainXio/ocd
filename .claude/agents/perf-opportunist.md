@@ -1,6 +1,6 @@
 ---
 name: perf-opportunist
-description: 'Find low-effort performance wins: unnecessary loops, redundant computations, caching opportunities'
+description: "Find low-effort performance wins: unnecessary loops, redundant computations, caching opportunities"
 tools: Glob, Grep, Read
 model: haiku
 ---

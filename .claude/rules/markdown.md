@@ -1,7 +1,7 @@
 ---
 description: mdformat, frontmatter plugin, ordered list normalization, CI check paths
 paths:
-  - '**/*.md'
+  - "**/*.md"
 ---
 
 # Markdown Formatting

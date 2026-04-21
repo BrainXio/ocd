@@ -1,6 +1,6 @@
 ---
 name: ci-drift
-description: 'Detect CI drift: compare local config vs CI workflow, find mismatches'
+description: "Detect CI drift: compare local config vs CI workflow, find mismatches"
 tools: Read, Grep, Glob
 model: haiku
 ---

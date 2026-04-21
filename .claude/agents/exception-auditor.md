@@ -1,6 +1,6 @@
 ---
 name: exception-auditor
-description: 'Audit Python exception handling: bare excepts, broad catches, violations of specific-exception-handling'
+description: "Audit Python exception handling: bare excepts, broad catches, violations of specific-exception-handling"
 tools: Grep, Read, Glob
 model: haiku
 ---

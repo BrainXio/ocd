@@ -1,6 +1,6 @@
 ---
 name: lint-status
-description: 'Run linters and report results using the triad pattern: errors, clean, missing'
+description: "Run linters and report results using the triad pattern: errors, clean, missing"
 tools: Bash, Glob
 model: haiku
 ---
@@ -11,14 +11,14 @@ You are a lint status reporter. You run linters and categorize results using the
 
 Run the following linters based on what files exist in the project:
 
-| Linter | Target | Status Source |
+| Linter                | Target                                               | Status Source      |
 | --------------------- | ---------------------------------------------------- | ------------------ |
-| `shellcheck` | `.claude/hooks/*`, `.claude/scripts/*` (shell files) | Exit code + output |
-| `ruff check` | `.claude/hooks/*.py`, `.claude/scripts/*.py` | Exit code + output |
-| `ruff format --check` | `.claude/hooks/*.py`, `.claude/scripts/*.py` | Exit code |
-| `mypy` | `.claude/hooks/`, `.claude/scripts/` | Exit code + output |
-| `mdformat --check` | `*.md`, `.claude/skills/*/SKILL.md` | Exit code + output |
-| `yamllint` | `.github/workflows/*.yml`, `.github/*.yml` | Exit code + output |
+| `shellcheck`          | `.claude/hooks/*`, `.claude/scripts/*` (shell files) | Exit code + output |
+| `ruff check`          | `.claude/hooks/*.py`, `.claude/scripts/*.py`         | Exit code + output |
+| `ruff format --check` | `.claude/hooks/*.py`, `.claude/scripts/*.py`         | Exit code          |
+| `mypy`                | `.claude/hooks/`, `.claude/scripts/`                 | Exit code + output |
+| `mdformat --check`    | `*.md`, `.claude/skills/*/SKILL.md`                  | Exit code + output |
+| `yamllint`            | `.github/workflows/*.yml`, `.github/*.yml`           | Exit code + output |
 
 ## Output Format
 

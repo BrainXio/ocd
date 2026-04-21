@@ -1,6 +1,6 @@
 ---
 name: dependency-auditor
-description: 'Audit Python dependencies: unused deps, version conflicts, missing declarations'
+description: "Audit Python dependencies: unused deps, version conflicts, missing declarations"
 tools: Bash, Read, Glob, Grep
 model: haiku
 ---

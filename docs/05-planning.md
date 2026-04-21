@@ -122,7 +122,7 @@ Integration points:
 | What | Part A: Generate `manifest.json` (~4 KB) at session start, replacing 97 KB of agent `.md` definitions. Part B: Auto-generate 200-300 token session state card after every file modification, replacing full history replay after compaction. |
 | Why | All 25 agent files total 97 KB (~24,286 tokens). After compaction, the LLM loses most context and must reconstruct state. A 300-token session card captures essential state: what changed, what passed, what's pending. |
 | Est. Savings | ~23,000 tokens from manifest; ~15,000-20,000 per post-compaction context rebuild |
-| Status | Planned |
+| Status | Done |
 
 Acceptance criteria:
 

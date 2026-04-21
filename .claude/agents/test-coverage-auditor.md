@@ -1,6 +1,6 @@
 ---
 name: test-coverage-auditor
-description: 'Audit test coverage: find untested modules, missing test files, and untested public functions'
+description: "Audit test coverage: find untested modules, missing test files, and untested public functions"
 tools: Glob, Grep, Read
 model: haiku
 ---

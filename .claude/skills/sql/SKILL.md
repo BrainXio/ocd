@@ -1,4 +1,4 @@
-______________________________________________________________________
+---
 
 ## name: sql description: "Write, refactor, and audit SQL with strict query hygiene, parameterized queries, and explicit joins. Use when creating, reviewing, or optimizing database queries, migrations, or schema definitions." argument-hint: "[file path or 'audit' or 'optimize']"
 
