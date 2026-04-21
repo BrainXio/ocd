@@ -42,6 +42,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "ocd-format-work --edit",
+            "timeout": 15
+          },
+          {
+            "type": "command",
             "command": "ocd-lint-work --edit",
             "timeout": 10
           }
@@ -64,6 +69,8 @@
   },
   "permissions": {
     "deny": [
+      "Edit(src/ocd/hooks/format_work.py)",
+      "Write(src/ocd/hooks/format_work.py)",
       "Read(**/.env*)",
       "Read(**/*.pem)",
       "Read(**/*.key)",

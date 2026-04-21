@@ -42,4 +42,19 @@ else
     echo "  Install: https://github.com/hadolint/hadolint#installing" >&2
 fi
 
+# --- Markdown formatting (mdformat) ---
+if command -v mdformat >/dev/null 2>&1; then
+    changed_md_files="$(git diff --cached --name-only --diff-filter=ACM -- '*.md')"
+    if [ -n "$changed_md_files" ]; then
+        if ! echo "$changed_md_files" | xargs mdformat; then
+            echo "error: mdformat failed on one or more markdown files" >&2
+            exit 1
+        fi
+        echo "$changed_md_files" | xargs git add
+    fi
+else
+    echo "warning: mdformat not installed, skipping markdown formatting" >&2
+    echo "  Install: uv add mdformat mdformat-frontmatter" >&2
+fi
+
 exit 0
