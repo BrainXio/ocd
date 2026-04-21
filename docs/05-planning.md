@@ -45,7 +45,7 @@ Integration points:
 | What | External Python router replaces main LLM agent-selection reasoning. `ocd-route "<request>"` scores request against `manifest.json` keywords and returns optimal 1-3 agent names. |
 | Why | Main LLM currently reads all 25 agent names/descriptions (~1,200 tokens always present) and reasons about which to call (~500-800 tokens per delegation). A keyword matcher does this in \<50ms with zero tokens. |
 | Est. Savings | ~500-800 tokens per delegation + ~1,200 tokens from system prompt |
-| Status | Planned |
+| Status | Done |
 
 Acceptance criteria:
 

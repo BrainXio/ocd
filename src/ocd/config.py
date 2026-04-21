@@ -33,6 +33,7 @@ def _find_project_root() -> Path:
 
 PROJECT_ROOT = _find_project_root()
 AGENT_DIR = PROJECT_ROOT / ".agent"
+AGENTS_DIR = PROJECT_ROOT / ".claude" / "agents"
 VENV_BIN = Path(sys.executable).parent
 
 DAILY_DIR = AGENT_DIR / "daily"
@@ -72,6 +73,9 @@ COMPILE_AFTER_HOUR = 18
 KB_INDEX_JSON = STATE_DIR / "kb-index.json"
 KB_INJECTION_COUNT = 3
 MAX_RELEVANT_CONTEXT_CHARS = 8000
+
+# Agent routing
+MANIFEST_FILE = STATE_DIR / "manifest.json"
 
 
 def now_iso() -> str:
