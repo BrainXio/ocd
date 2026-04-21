@@ -94,12 +94,12 @@ model: haiku
 ## Claude Code Hooks
 
 | Hook | Entry Point | Trigger | Purpose |
-| ------------- | ------------------------ | ----------------------------- | ----------------------------------------------- | ----------------------------------------- |
+| ------------- | ------------------------ | ----------------------------- | -------------------------------------------------------------------------- | -------------------------------------------- |
 | SessionStart | `ocd-session-start` | SessionStart | Inject relevant KB articles + health card + standards reference as context |
 | PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
 | SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
-| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write|Edit) | Lint edited files, report missing linters |
-| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write|Edit) | Auto-format edited files, capture violations |
+| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write | Edit) | Lint edited files, report missing linters |
+| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write | Edit) | Auto-format edited files, capture violations |
 | Lint (commit) | `ocd-lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
 
 All Python hooks are installed as entry points via `pyproject.toml` `[project.scripts]`. Source code lives in `src/ocd/hooks/`.
@@ -109,7 +109,7 @@ All Python hooks are installed as entry points via `pyproject.toml` `[project.sc
 Hooks are declared in `.claude/settings.json` under the `hooks` key:
 
 | Field | Required | Description |
-| --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `matcher` | yes | Tool event pattern (e.g., `Write&#124;Edit`, `Bash`) |
 | `if` | no | Conditional filter (e.g., `Bash(git commit*)`). Note: `if` is a YAML reserved word — some parsers require quoting |
 | `type` | yes | Currently only `command` |
@@ -140,7 +140,7 @@ Hooks receive a JSON object on stdin:
 ### State Files
 
 | File | Purpose |
-| ---- | ------- |
+| --------------------------------------- | ----------------------------------------------------------------------------- |
 | `.agent/.state/format-violations.jsonl` | Per-line JSON records of auto-format corrections (file, formatter, timestamp) |
 | `.agent/.state/flush.log` | Background flush process log |
 | `.agent/.state/state.json` | Session state |
@@ -168,7 +168,7 @@ Path-scoped rules load only when matching files are read; unconditional rules lo
 ## Git Hooks
 
 | Hook | Purpose |
-| ------------ | ------------------------------------------------------------------------------------------------------- |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks); lint Dockerfiles (hadolint); auto-format markdown (mdformat) |
 | `pre-push` | Run `pytest` before push; abort if tests fail |
 | `commit-msg` | Reject AI attribution in commit messages |
@@ -251,8 +251,8 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 ## Package Entry Points
 
 | Command | Module | Purpose |
-| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, and standards — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, standards, and fix — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference; `ocd fix-cycle <file>` runs closed-loop detect-fix-verify |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
 | `ocd-format` | `ocd.format:main` | Run all formatters with auto-fix |
@@ -266,6 +266,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd-kb-query` | `ocd.relevance:main` | TF-IDF relevance query against KB index |
 | `ocd-route` | `ocd.router:main` | Route user request to optimal agent(s) |
 | `ocd-standards` | `ocd.standards:main` | Manage standards hash reference (verify, update) |
+| `ocd-fix-cycle` | `ocd.fix:main` | Closed-loop fix commands: fix-cycle, lint-and-fix, test-and-fix, security-scan-and-patch |
 
 All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
 
@@ -391,7 +392,7 @@ The sandbox restricts Claude's filesystem access at the process level:
 ## Pipeline Constants
 
 | Constant | Value | Where |
-| --------------------------------- | ------------ | ------------ |
+| --------------------------------- | --------------------------------- | ------------ |
 | Max context chars (session start) | 20,000 | `ocd.config` |
 | Max log lines (session start) | 30 | `ocd.config` |
 | Max flush turns | 30 | `ocd.config` |
@@ -423,4 +424,8 @@ ocd-route --build-manifest               # rebuild agent manifest
 ocd standards                            # print current standards reference
 ocd-standards --verify                    # verify hash matches content
 ocd-standards --update                   # recompute and update hash in frontmatter
+ocd fix-cycle <file>                    # detect-fix-verify cycle on a single file
+ocd lint-and-fix <path>                 # fix all matching files under path
+ocd test-and-fix                         # fix + verify tests still pass
+ocd security-scan-and-patch              # semgrep scan + categorize findings
 ```
