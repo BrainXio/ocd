@@ -15,7 +15,7 @@ Highest-priority initiative. Goal: eliminate repetitive, high-token-cost work fr
 ### TP-1: Smart KB Injection Tool (Priority: Highest)
 
 | Field | Detail |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What | Replace naive KB context dump with intelligent relevance-ranked injection. `ocd kb query --relevant-to "<request>"` returns 3-5 most relevant articles + 50-token KB health card instead of full index. |
 | Why | SessionStart currently injects up to 20,000 chars (~4,356 tokens) of undifferentiated KB index regardless of what the user is about to work on. Only 3-5 articles are typically relevant. |
 | Est. Savings | ~3,500-4,000 tokens per session start |
@@ -41,7 +41,7 @@ Integration points:
 ### TP-2: Lightweight Task Router (Priority: High)
 
 | Field | Detail |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What | External Python router replaces main LLM agent-selection reasoning. `ocd-route "<request>"` scores request against `manifest.json` keywords and returns optimal 1-3 agent names. |
 | Why | Main LLM currently reads all 25 agent names/descriptions (~1,200 tokens always present) and reasons about which to call (~500-800 tokens per delegation). A keyword matcher does this in \<50ms with zero tokens. |
 | Est. Savings | ~500-800 tokens per delegation + ~1,200 tokens from system prompt |
@@ -66,7 +66,7 @@ Integration points:
 ### TP-3: Standards-as-Reference System (Priority: High)
 
 | Field | Detail |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What | Extract Eight Standards text into versioned `standards.md` with hash reference. Agents receive only `ocd-standards:v1.0 [hash]` instead of full ~1,919-token text. System auto-injects full text on demand via `Read`. |
 | Why | Every `/ocd` invocation loads the full Eight Standards (~7,678 chars). Most agent invocations never need the standards text. A hash reference costs ~15 tokens. |
 | Est. Savings | ~1,919 tokens per invocation that doesn't need standards immediately; ~3,800-5,700 for 2-3 invocations per session |
@@ -91,11 +91,11 @@ Integration points:
 ### TP-4: Closed-Loop Fix Family (Priority: Medium)
 
 | Field | Detail |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What | Expand `ocd format` into `ocd fix-cycle`, `ocd lint-and-fix`, `ocd test-and-fix`, `ocd security-scan-and-patch`. Each runs full detect-fix-verify cycle externally, returning structured JSON. LLM says "run ocd-fix-cycle on X" and gets the result. |
 | Why | Current fix loops cost ~500-1,300 tokens per iteration (read error → propose fix → apply → re-read error). Typical 2-3 iteration cycle = ~1,500-3,900 tokens. External command replaces entire loop with one tool call. |
 | Est. Savings | ~2,000-5,000 tokens per fix cycle; ~6,000-15,000 for 3-5 cycles per session |
-| Status | Planned |
+| Status | Done |
 
 Acceptance criteria:
 
@@ -118,7 +118,7 @@ Integration points:
 ### TP-5: Pre-compiled Agent Manifest + Session State Card (Priority: Medium)
 
 | Field | Detail |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What | Part A: Generate `manifest.json` (~4 KB) at session start, replacing 97 KB of agent `.md` definitions. Part B: Auto-generate 200-300 token session state card after every file modification, replacing full history replay after compaction. |
 | Why | All 25 agent files total 97 KB (~24,286 tokens). After compaction, the LLM loses most context and must reconstruct state. A 300-token session card captures essential state: what changed, what passed, what's pending. |
 | Est. Savings | ~23,000 tokens from manifest; ~15,000-20,000 per post-compaction context rebuild |
@@ -146,7 +146,7 @@ Integration points:
 ### TP Execution Roadmap (7-10 Days)
 
 | Day | Scope |
-| --- | --- |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | 1-2 | TP-1: Smart KB Injection — `relevance.py`, `kb-index.json`, modified `session_start.py` |
 | 3-4 | TP-2: Task Router — `router.py`, `manifest.json`, `ocd route` command. TP-3: Standards Reference — `standards.md`, modified `SKILL.md` |
 | 5-6 | TP-4: Closed-Loop Fix Family — `fix.py`, 4 new CLI commands, `FixResult` dataclass |
@@ -157,7 +157,7 @@ Integration points:
 ### TP Risks & Mitigation
 
 | Risk | Mitigation |
-| --- | --- |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
 | TF-IDF relevance poor for short queries | Fallback to 3 most-recently-updated articles when confidence below threshold |
 | `kb-index.json` stale after updates | Session start checks hash against current articles, triggers re-index on mismatch |
 | Agent manifest keywords insufficient for routing | Include `scope_summary` for disambiguation; log routing decisions; allow `ocd-route --force <agent>` |

@@ -54,6 +54,8 @@ def main() -> None:
         _route()
     elif sys.argv[1] == "standards":
         _standards()
+    elif sys.argv[1] in ("fix-cycle", "lint-and-fix", "test-and-fix", "security-scan-and-patch"):
+        _fix()
     else:
         print(f"Unknown command: {sys.argv[1]}", file=sys.stderr)
         sys.exit(1)
@@ -93,6 +95,15 @@ def _standards() -> None:
     standards_args = sys.argv[2:]
     sys.argv = [sys.argv[0], *standards_args]
     standards_main()
+
+
+def _fix() -> None:
+    """Handle fix subcommands — delegate to ocd.fix."""
+    from ocd.fix import main as fix_main
+
+    fix_args = sys.argv[1:]
+    sys.argv = [sys.argv[0], *fix_args]
+    fix_main()
 
 
 def _shell() -> None:
