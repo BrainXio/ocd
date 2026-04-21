@@ -20,6 +20,7 @@ sql = ["sqlfluff>=3.0"]
 [project.scripts]
 ocd = "ocd.cli:main"
 ocd-compile = "ocd.compile:main"
+ocd-kb-query = "ocd.relevance:main"
 ocd-flush = "ocd.flush:main"
 ocd-format = "ocd.format:main"
 ocd-query = "ocd.query:main"

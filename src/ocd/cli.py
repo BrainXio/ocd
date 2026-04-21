@@ -48,8 +48,28 @@ def main() -> None:
         _shell()
     elif sys.argv[1] == "format":
         sys.exit(run_formatters())
+    elif sys.argv[1] == "kb":
+        _kb()
     else:
         print(f"Unknown command: {sys.argv[1]}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _kb() -> None:
+    """Handle kb subcommands."""
+    if len(sys.argv) < 3:
+        print("Usage: ocd kb query --relevant-to <query>", file=sys.stderr)
+        sys.exit(1)
+    sub = sys.argv[2]
+    if sub == "query":
+        from ocd.relevance import main as relevance_main
+
+        # Rebuild sys.argv for relevance CLI parsing
+        kb_args = sys.argv[3:]
+        sys.argv = [sys.argv[0], *kb_args]
+        relevance_main()
+    else:
+        print(f"Unknown kb subcommand: {sub}", file=sys.stderr)
         sys.exit(1)
 
 
