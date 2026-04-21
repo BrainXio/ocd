@@ -41,16 +41,16 @@ This separation means you can share the project and source code without exposing
 
 ## The Eight Standards
 
-| Standard                   | Meaning                                                         | How It Applies                                                                         |
+| Standard | Meaning | How It Applies |
 | -------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Consistent Defaults        | Every tool and config has a sensible zero-config starting point | Skills ship with default rules; no configuration needed to get started                 |
-| Defense in Depth           | Multiple independent protections against each failure mode      | Deny rules + git hooks + CI gates all enforce the same constraints independently       |
-| Deterministic Ordering     | Same inputs always produce same outputs                         | Ordered lists, sorted tables, consistent commit message format                         |
-| Minimal Surface Area       | Fewer moving parts means fewer failures                         | Skills are declarative rules, not frameworks; agents are scoped to single concerns     |
-| No Dead Code               | Every line must earn its existence                              | The `dead-code-hunter` agent finds unused functions, variables, and configs            |
-| Progressive Simplification | Start strict, relax only when justified                         | Skills begin with hard prohibitions; exemptions require explicit justification         |
-| Single Source of Truth     | Each fact lives in exactly one place                            | AI patterns in `ai-patterns.txt` (shared by hook + CI); config in `pyproject.toml`     |
-| Structural Honesty         | The structure reflects the reality, not a facade                | Root is the project, `.agent/` is data, `src/ocd/` is automation, `.claude/` is config |
+| Consistent Defaults | Every tool and config has a sensible zero-config starting point | Skills ship with default rules; no configuration needed to get started |
+| Defense in Depth | Multiple independent protections against each failure mode | Deny rules + git hooks + CI gates all enforce the same constraints independently |
+| Deterministic Ordering | Same inputs always produce same outputs | Ordered lists, sorted tables, consistent commit message format |
+| Minimal Surface Area | Fewer moving parts means fewer failures | Skills are declarative rules, not frameworks; agents are scoped to single concerns |
+| No Dead Code | Every line must earn its existence | The `dead-code-hunter` agent finds unused functions, variables, and configs |
+| Progressive Simplification | Start strict, relax only when justified | Skills begin with hard prohibitions; exemptions require explicit justification |
+| Single Source of Truth | Each fact lives in exactly one place | AI patterns in `ai-patterns.txt` (shared by hook + CI); config in `pyproject.toml` |
+| Structural Honesty | The structure reflects the reality, not a facade | Root is the project, `.agent/` is data, `src/ocd/` is automation, `.claude/` is config |
 
 ## Why an Installable Package
 
