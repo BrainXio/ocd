@@ -19,7 +19,7 @@ Highest-priority initiative. Goal: eliminate repetitive, high-token-cost work fr
 | What | Replace naive KB context dump with intelligent relevance-ranked injection. `ocd kb query --relevant-to "<request>"` returns 3-5 most relevant articles + 50-token KB health card instead of full index. |
 | Why | SessionStart currently injects up to 20,000 chars (~4,356 tokens) of undifferentiated KB index regardless of what the user is about to work on. Only 3-5 articles are typically relevant. |
 | Est. Savings | ~3,500-4,000 tokens per session start |
-| Status | Planned |
+| Status | Done |
 
 Acceptance criteria:
 
