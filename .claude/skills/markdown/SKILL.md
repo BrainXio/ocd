@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: markdown description: "Write, refactor, and audit Markdown with consistent structure, frontmatter preservation, and mdformat gates. Use when creating, reviewing, or fixing .md files, documentation, or knowledge base articles." argument-hint: "[file path or 'audit' or 'format']"
+---
+name: markdown
+description: Write, refactor, and audit Markdown with consistent structure, frontmatter preservation, and mdformat gates. Use when creating, reviewing, or fixing .md files, documentation, or knowledge base articles.
+argument-hint: "[file path or 'audit' or 'format']"
+---
 
 # Markdown Skill
 

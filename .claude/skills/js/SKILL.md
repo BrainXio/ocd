@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: js description: "Write, refactor, and audit JavaScript with modern syntax, strict equality, and ESLint gates. Use when creating, reviewing, or fixing .js/.mjs/.cjs files, Node.js modules, or browser scripts." argument-hint: "[file path or 'audit' or 'lint']"
+---
+name: js
+description: Write, refactor, and audit JavaScript with modern syntax, strict equality, and ESLint gates. Use when creating, reviewing, or fixing .js/.mjs/.cjs files, Node.js modules, or browser scripts.
+argument-hint: "[file path or 'audit' or 'lint']"
+---
 
 # JavaScript Skill
 

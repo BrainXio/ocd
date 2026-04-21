@@ -1,6 +1,6 @@
 ---
 name: docstring-enforcer
-description: 'Check Python docstring coverage: missing docstrings, format consistency, public API documentation'
+description: "Check Python docstring coverage: missing docstrings, format consistency, public API documentation"
 tools: Grep, Read, Glob
 model: haiku
 ---

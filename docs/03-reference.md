@@ -94,12 +94,12 @@ model: haiku
 ## Claude Code Hooks
 
 | Hook | Entry Point | Trigger | Purpose |
-| ------------- | ------------------------ | ----------------------------- | -------------------------------------------------------------------------- | -------------------------------------------- |
-| SessionStart | `ocd-session-start` | SessionStart | Inject relevant KB articles + health card + standards reference as context |
+| ------------- | ------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| SessionStart | `ocd-session-start` | SessionStart | Inject relevant KB articles + health card + standards reference + session card as context |
 | PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
 | SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
 | Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write | Edit) | Lint edited files, report missing linters |
-| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write | Edit) | Auto-format edited files, capture violations |
+| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write | Edit) | Auto-format edited files, capture violations, update session card |
 | Lint (commit) | `ocd-lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
 
 All Python hooks are installed as entry points via `pyproject.toml` `[project.scripts]`. Source code lives in `src/ocd/hooks/`.
@@ -147,6 +147,7 @@ Hooks receive a JSON object on stdin:
 | `.agent/.state/last-flush.json` | Last flush metadata |
 | `.agent/.state/kb-index.json` | TF-IDF search index for KB relevance queries |
 | `.agent/.state/manifest.json` | Agent keyword manifest for task routing |
+| `.agent/.state/session-card.md` | Session state card for post-compaction recovery (FIFO, 1,200 char cap) |
 | `.claude/skills/ocd/standards.md` | Eight Standards full text with version + hash frontmatter |
 
 ## Claude Code Rules
@@ -251,7 +252,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 ## Package Entry Points
 
 | Command | Module | Purpose |
-| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, standards, and fix — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference; `ocd fix-cycle <file>` runs closed-loop detect-fix-verify |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
@@ -262,7 +263,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd-session-end` | `ocd.hooks.session_end:main` | Session end transcript capture |
 | `ocd-pre-compact` | `ocd.hooks.pre_compact:main` | Pre-compaction context save |
 | `ocd-lint-work` | `ocd.hooks.lint_work:main` | Real-time file linting on edit/commit |
-| `ocd-format-work` | `ocd.hooks.format_work:main` | Real-time file auto-formatting on edit |
+| `ocd-format-work` | `ocd.hooks.format_work:main` | Real-time file auto-formatting on edit, session card updates |
 | `ocd-kb-query` | `ocd.relevance:main` | TF-IDF relevance query against KB index |
 | `ocd-route` | `ocd.router:main` | Route user request to optimal agent(s) |
 | `ocd-standards` | `ocd.standards:main` | Manage standards hash reference (verify, update) |
@@ -404,6 +405,8 @@ The sandbox restricts Claude's filesystem access at the process level:
 | KB injection count | 3 | `ocd.config` |
 | Max relevant context chars | 8,000 | `ocd.config` |
 | Standards file | `.claude/skills/ocd/standards.md` | `ocd.config` |
+| Max session card chars | 1,200 | `ocd.config` |
+| Session card file | `.agent/.state/session-card.md` | `ocd.config` |
 
 ## Pipeline Commands
 

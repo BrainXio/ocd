@@ -19,6 +19,7 @@ import ocd.hooks.session_end
 import ocd.hooks.session_start
 import ocd.relevance
 import ocd.router
+import ocd.session_card
 import ocd.standards
 import ocd.utils
 
@@ -97,6 +98,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "MANIFEST_FILE": state_dir / "manifest.json",
         "SKILLS_DIR": tmp_agent_dir.parent / ".claude" / "skills" / "ocd",
         "STANDARDS_FILE": tmp_agent_dir.parent / ".claude" / "skills" / "ocd" / "standards.md",
+        "SESSION_CARD_FILE": state_dir / "session-card.md",
     }
 
     # Patch the canonical source
@@ -113,6 +115,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         ocd.hooks.pre_compact,
         ocd.hooks.lint_work,
         ocd.relevance,
+        ocd.session_card,
         ocd.standards,
     ):
         for name, value in patches.items():

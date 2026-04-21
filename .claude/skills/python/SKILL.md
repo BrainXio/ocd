@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: python description: "Write, refactor, and debug Python code with strict typing, modern idioms, and safety. Use when creating, reviewing, or fixing Python files, packages, scripts, or type annotations." argument-hint: "[script path or 'audit' or 'typecheck']"
+---
+name: python
+description: Write, refactor, and debug Python code with strict typing, modern idioms, and safety. Use when creating, reviewing, or fixing Python files, packages, scripts, or type annotations.
+argument-hint: "[script path or 'audit' or 'typecheck']"
+---
 
 # Python Skill
 

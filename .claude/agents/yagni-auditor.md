@@ -1,6 +1,6 @@
 ---
 name: yagni-auditor
-description: 'Find over-engineered code: unused abstractions, premature generalizations, speculative features'
+description: "Find over-engineered code: unused abstractions, premature generalizations, speculative features"
 tools: Glob, Grep, Read
 model: haiku
 ---

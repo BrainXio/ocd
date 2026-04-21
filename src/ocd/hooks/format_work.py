@@ -18,6 +18,7 @@ from typing import Any
 
 from ocd.config import PROJECT_ROOT, STATE_DIR, VENV_BIN
 from ocd.hooks.hookslib import parse_stdin_json
+from ocd.session_card import update_session_card
 
 VIOLATIONS_LOG = STATE_DIR / "format-violations.jsonl"
 
@@ -211,6 +212,8 @@ def edit_mode() -> None:
 
     if not file_path:
         return
+
+    update_session_card(file_path)
 
     result = format_file(file_path)
     if result is not None:

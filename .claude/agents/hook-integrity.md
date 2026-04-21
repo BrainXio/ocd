@@ -1,6 +1,6 @@
 ---
 name: hook-integrity
-description: 'Verify git hook chain integrity: symlinks, scripts, patterns, CI parity'
+description: "Verify git hook chain integrity: symlinks, scripts, patterns, CI parity"
 tools: Bash, Read, Glob
 model: haiku
 ---

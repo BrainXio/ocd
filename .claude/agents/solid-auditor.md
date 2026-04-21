@@ -1,6 +1,6 @@
 ---
 name: solid-auditor
-description: 'Find SOLID principle violations: SRP, OCP, LSP, ISP, DIP'
+description: "Find SOLID principle violations: SRP, OCP, LSP, ISP, DIP"
 tools: Glob, Grep, Read
 model: haiku
 ---

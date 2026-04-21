@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: java description: "Write, refactor, and debug Java code with modern idioms, immutability, and safety. Use when creating, reviewing, or fixing Java files, Maven/Gradle projects, or JVM applications." argument-hint: "[file path or 'audit' or 'lint']"
+---
+name: java
+description: Write, refactor, and debug Java code with modern idioms, immutability, and safety. Use when creating, reviewing, or fixing Java files, Maven/Gradle projects, or JVM applications.
+argument-hint: "[file path or 'audit' or 'lint']"
+---
 
 # Java Skill
 

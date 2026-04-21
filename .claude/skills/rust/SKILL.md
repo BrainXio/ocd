@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: rust description: "Write, refactor, and debug Rust code with ownership safety, zero-cost abstractions, and idiomatic patterns. Use when creating, reviewing, or fixing Rust files, crates, or Cargo projects." argument-hint: "[file path or 'audit' or 'clippy']"
+---
+name: rust
+description: Write, refactor, and debug Rust code with ownership safety, zero-cost abstractions, and idiomatic patterns. Use when creating, reviewing, or fixing Rust files, crates, or Cargo projects.
+argument-hint: "[file path or 'audit' or 'clippy']"
+---
 
 # Rust Skill
 

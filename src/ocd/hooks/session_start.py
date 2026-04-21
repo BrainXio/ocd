@@ -2,8 +2,8 @@
 
 Uses TF-IDF relevance scoring to inject only the most pertinent articles
 instead of the full KB index. Falls back to most recently updated articles
-when no query is available. Also includes a standards hash reference for
-on-demand access to the full Eight Standards text.
+when no query is available. Also includes standards hash reference and
+session state card for post-compaction recovery.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ import sys
 
 from ocd.config import MAX_RELEVANT_CONTEXT_CHARS
 from ocd.relevance import build_relevant_context
+from ocd.session_card import load_session_card
 from ocd.standards import get_standards_reference, verify_standards_hash
 
 
@@ -25,7 +26,6 @@ def main() -> None:
     # Verify standards hash and add reference line
     verification = verify_standards_hash()
     if verification.get("error"):
-        # standards.md doesn't exist yet — skip reference
         pass
     elif not verification["match"]:
         print(
@@ -39,6 +39,11 @@ def main() -> None:
         ref = get_standards_reference()
         if ref:
             context = f"{context}\n\n---\n\n{ref}"
+
+    # Inject last session card for post-compaction recovery
+    card = load_session_card()
+    if card:
+        context = f"{context}\n\n---\n\n## Last Session\n{card}"
 
     output = {
         "hookSpecificOutput": {

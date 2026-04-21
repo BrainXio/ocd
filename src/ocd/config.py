@@ -81,6 +81,10 @@ MANIFEST_FILE = STATE_DIR / "manifest.json"
 SKILLS_DIR = PROJECT_ROOT / ".claude" / "skills" / "ocd"
 STANDARDS_FILE = SKILLS_DIR / "standards.md"
 
+# Session state card
+SESSION_CARD_FILE = STATE_DIR / "session-card.md"
+MAX_SESSION_CARD_CHARS = 1200
+
 
 def now_iso() -> str:
     """Current time in ISO 8601 format."""

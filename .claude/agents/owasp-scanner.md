@@ -1,6 +1,6 @@
 ---
 name: owasp-scanner
-description: 'Security review: OWASP Top 10 patterns (XSS, injection, CSRF, insecure deserialization)'
+description: "Security review: OWASP Top 10 patterns (XSS, injection, CSRF, insecure deserialization)"
 tools: Glob, Grep, Read
 model: haiku
 ---

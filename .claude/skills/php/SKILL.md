@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: php description: "Write, refactor, and debug PHP code with strict types, modern syntax, and PSR standards. Use when creating, reviewing, or fixing PHP files, Composer projects, or Laravel applications." argument-hint: "[file path or 'audit' or 'stan']"
+---
+name: php
+description: Write, refactor, and debug PHP code with strict types, modern syntax, and PSR standards. Use when creating, reviewing, or fixing PHP files, Composer projects, or Laravel applications.
+argument-hint: "[file path or 'audit' or 'stan']"
+---
 
 # PHP Skill
 

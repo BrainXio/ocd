@@ -1,5 +1,5 @@
 ---
-version: '1.0'
+version: "1.0"
 hash: 2968c2aa9e6c9924
 ---
 

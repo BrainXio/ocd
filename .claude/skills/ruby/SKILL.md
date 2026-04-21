@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: ruby description: "Write, refactor, and debug Ruby code with idiomatic patterns, immutability, and safety. Use when creating, reviewing, or fixing Ruby files, Gemfile projects, or Rails applications." argument-hint: "[file path or 'audit' or 'lint']"
+---
+name: ruby
+description: Write, refactor, and debug Ruby code with idiomatic patterns, immutability, and safety. Use when creating, reviewing, or fixing Ruby files, Gemfile projects, or Rails applications.
+argument-hint: "[file path or 'audit' or 'lint']"
+---
 
 # Ruby Skill
 
