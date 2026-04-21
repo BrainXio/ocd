@@ -17,6 +17,7 @@ import ocd.hooks.lint_work
 import ocd.hooks.pre_compact
 import ocd.hooks.session_end
 import ocd.hooks.session_start
+import ocd.relevance
 import ocd.utils
 
 # flush.py sets CLAUDE_INVOKED_BY at import time — clear again so
@@ -89,6 +90,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "FLUSH_STATE_FILE": state_dir / "last-flush.json",
         "FLUSH_LOG_FILE": state_dir / "flush.log",
         "INDEX_FILE": knowledge_dir / "index.md",
+        "KB_INDEX_JSON": state_dir / "kb-index.json",
     }
 
     # Patch the canonical source
@@ -104,6 +106,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         ocd.hooks.session_end,
         ocd.hooks.pre_compact,
         ocd.hooks.lint_work,
+        ocd.relevance,
     ):
         for name, value in patches.items():
             if hasattr(module, name):

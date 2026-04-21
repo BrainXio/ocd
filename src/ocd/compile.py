@@ -263,6 +263,14 @@ def main() -> None:
     print(f"\nCompilation complete. Total cost: ${total_cost:.2f}")
     print(f"Knowledge base: {len(articles)} articles")
 
+    # Rebuild the KB search index after compilation
+    from ocd.relevance import build_kb_index_json, save_kb_index
+
+    print("Rebuilding KB search index...")
+    index = build_kb_index_json()
+    save_kb_index(index)
+    print(f"Index saved: {len(index['articles'])} articles indexed")
+
 
 if __name__ == "__main__":
     main()

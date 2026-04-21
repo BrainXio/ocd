@@ -68,6 +68,11 @@ MAX_LOG_LINES = 30
 # Compilation trigger
 COMPILE_AFTER_HOUR = 18
 
+# Relevance-based KB injection
+KB_INDEX_JSON = STATE_DIR / "kb-index.json"
+KB_INJECTION_COUNT = 3
+MAX_RELEVANT_CONTEXT_CHARS = 8000
+
 
 def now_iso() -> str:
     """Current time in ISO 8601 format."""
