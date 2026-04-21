@@ -52,6 +52,8 @@ def main() -> None:
         _kb()
     elif sys.argv[1] == "route":
         _route()
+    elif sys.argv[1] == "standards":
+        _standards()
     else:
         print(f"Unknown command: {sys.argv[1]}", file=sys.stderr)
         sys.exit(1)
@@ -82,6 +84,15 @@ def _route() -> None:
     route_args = sys.argv[2:]
     sys.argv = [sys.argv[0], *route_args]
     router_main()
+
+
+def _standards() -> None:
+    """Handle standards subcommand — delegate to ocd.standards."""
+    from ocd.standards import main as standards_main
+
+    standards_args = sys.argv[2:]
+    sys.argv = [sys.argv[0], *standards_args]
+    standards_main()
 
 
 def _shell() -> None:

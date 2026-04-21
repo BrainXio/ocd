@@ -77,6 +77,10 @@ MAX_RELEVANT_CONTEXT_CHARS = 8000
 # Agent routing
 MANIFEST_FILE = STATE_DIR / "manifest.json"
 
+# Standards-as-reference
+SKILLS_DIR = PROJECT_ROOT / ".claude" / "skills" / "ocd"
+STANDARDS_FILE = SKILLS_DIR / "standards.md"
+
 
 def now_iso() -> str:
     """Current time in ISO 8601 format."""

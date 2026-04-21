@@ -215,6 +215,11 @@ def main() -> None:
     parser.add_argument(
         "--manifest", action="store_true", help="Rebuild agent manifest after compilation"
     )
+    parser.add_argument(
+        "--update-standards-hash",
+        action="store_true",
+        help="Recompute and update the standards.md hash",
+    )
     args = parser.parse_args()
 
     state = load_state()
@@ -282,6 +287,17 @@ def main() -> None:
         manifest = build_manifest()
         save_manifest(manifest)
         print(f"Manifest saved: {len(manifest['agents'])} agents")
+
+    # Update standards hash if requested
+    if args.update_standards_hash:
+        from ocd.standards import update_standards_hash
+
+        print("Updating standards hash...")
+        new_hash = update_standards_hash()
+        if new_hash:
+            print(f"Standards hash updated: {new_hash}")
+        else:
+            print("Warning: standards.md not found", file=sys.stderr)
 
 
 if __name__ == "__main__":

@@ -70,7 +70,7 @@ Integration points:
 | What | Extract Eight Standards text into versioned `standards.md` with hash reference. Agents receive only `ocd-standards:v1.0 [hash]` instead of full ~1,919-token text. System auto-injects full text on demand via `Read`. |
 | Why | Every `/ocd` invocation loads the full Eight Standards (~7,678 chars). Most agent invocations never need the standards text. A hash reference costs ~15 tokens. |
 | Est. Savings | ~1,919 tokens per invocation that doesn't need standards immediately; ~3,800-5,700 for 2-3 invocations per session |
-| Status | Planned |
+| Status | Done |
 
 Acceptance criteria:
 
