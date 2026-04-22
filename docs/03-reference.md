@@ -11,7 +11,7 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 ## Skill Registry
 
 | Skill | Description |
-| ------------ | ---------------------------------------------------------------------------------------------------------------- |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
 | `bash` | `set -euo pipefail` mandatory, `shellcheck` zero-warnings gate. No unquoted expansions. |
 | `cpp` | C++17 minimum, smart pointers only, `#pragma once` headers, CMake. No raw `new`/`delete`. |
 | `csharp` | C# 10+ / .NET 8+, nullable reference types, file-scoped namespaces. No legacy collections. |
@@ -26,7 +26,7 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 | `json` | RFC 8259 compliance, 2-space indent, schema validation. No trailing commas, no comments in `.json`. |
 | `kubernetes` | Resource limits, liveness/readiness probes, `runAsNonRoot`, `readOnlyRootFilesystem`. No unbounded pods. |
 | `markdown` | CommonMark spec, `mdformat` gate, frontmatter preservation. No inline HTML for layout. |
-| `ocd` | Meta-standard: reviews, refactors, creates code against the Eight Standards. Every line must earn its existence. |
+| `ocd` | Meta-standard: reviews, refactors, creates code against the Nine Standards. Every line must earn its existence. |
 | `php` | PHP 8.1+, `declare(strict_types=1)`, Composer, PSR-12. No legacy patterns. |
 | `python` | Python 3.12+, strict type hints, `uv` packaging, `ruff` commit gate. No bare `except`, no `Any`. |
 | `ruby` | Ruby 3.1+, `frozen_string_literal: true`, Bundler, `rubocop` zero-offense gate. No unfrozen strings. |
@@ -148,7 +148,7 @@ Hooks receive a JSON object on stdin:
 | `.agent/.state/kb-index.json` | TF-IDF search index for KB relevance queries |
 | `.agent/.state/manifest.json` | Agent keyword manifest for task routing |
 | `.agent/.state/session-card.md` | Session state card for post-compaction recovery (FIFO, 1,200 char cap) |
-| `.claude/skills/ocd/standards.md` | Eight Standards full text with version + hash frontmatter |
+| `.claude/skills/ocd/standards.md` | Nine Standards full text with version + hash frontmatter |
 
 ## Claude Code Rules
 
@@ -281,6 +281,7 @@ Stages 3–4 run only when Python code changes.
 | ------------ | ----------------------- | ---------------------------------------- | ---------------------- |
 | 1 (detect) | `changes` | `dorny/paths-filter` | always |
 | 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | always |
+| 1 (gate) | `verify-standards` | `ocd-standards --verify` | always |
 | 2 (parallel) | `lint-yaml` | yamllint | YAML/workflow changes |
 | 2 (parallel) | `lint-shell` | shellcheck | `git_hooks/**` changes |
 | 2 (parallel) | `lint-markdown` | mdformat | `**/*.md` changes |

@@ -1,4 +1,4 @@
-"""Standards-as-Reference — hash-gated access to the Eight Standards.
+"""Standards-as-Reference — hash-gated access to the Nine Standards.
 
 Replaces full standards text (~7,678 chars / ~1,919 tokens) with a short
 version+hash reference (~15 tokens). The full text lives in

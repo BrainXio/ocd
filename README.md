@@ -24,11 +24,12 @@ bash git_hooks/setup-hooks.sh
 uv sync
 ```
 
-## Eight Standards
+## Nine Standards
 
 1. Consistent Defaults
 1. Defense in Depth
 1. Deterministic Ordering
+1. Inconsistent Elimination
 1. Minimal Surface Area
 1. No Dead Code
 1. Progressive Simplification

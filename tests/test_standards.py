@@ -1,4 +1,4 @@
-"""Tests for standards — hash-gated access to the Eight Standards."""
+"""Tests for standards — hash-gated access to the Nine Standards."""
 
 from pathlib import Path
 

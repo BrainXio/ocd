@@ -39,13 +39,14 @@ git_hooks/          Shell git hooks (commit-msg, pre-commit) + setup script
 
 This separation means you can share the project and source code without exposing conversation data, and you can reset `.agent/` without losing the automation infrastructure.
 
-## The Eight Standards
+## The Nine Standards
 
 | Standard | Meaning | How It Applies |
-| -------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| -------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Consistent Defaults | Every tool and config has a sensible zero-config starting point | Skills ship with default rules; no configuration needed to get started |
 | Defense in Depth | Multiple independent protections against each failure mode | Deny rules + git hooks + CI gates all enforce the same constraints independently |
 | Deterministic Ordering | Same inputs always produce same outputs | Ordered lists, sorted tables, consistent commit message format |
+| Inconsistent Elimination | Conflicting sources are resolved, not tolerated side by side | Standards hash verification in CI and pre-commit; mdformat normalization eliminates format drift |
 | Minimal Surface Area | Fewer moving parts means fewer failures | Skills are declarative rules, not frameworks; agents are scoped to single concerns |
 | No Dead Code | Every line must earn its existence | The `dead-code-hunter` agent finds unused functions, variables, and configs |
 | Progressive Simplification | Start strict, relax only when justified | Skills begin with hard prohibitions; exemptions require explicit justification |
