@@ -1,23 +1,15 @@
 #!/usr/bin/env bash
-# Git pre-push hook: run diff-aware tests before pushing.
+# Git pre-push hook: run diff-aware CI checks before pushing.
+# Delegates to ocd ci-check --fast for standards, lints, and delta tests.
 # Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
-# Delegate to the Python diff-aware test runner
-if command -v ocd-pre-push >/dev/null 2>&1; then
-    exec ocd-pre-push
+if command -v ocd-ci-check >/dev/null 2>&1; then
+    exec ocd-ci-check --fast
 elif command -v uv >/dev/null 2>&1; then
-    exec uv run ocd-pre-push
+    exec uv run ocd ci-check --fast
 else
-    # Fallback: run full suite if ocd-pre-push is unavailable
-    if ! command -v pytest >/dev/null 2>&1; then
-        echo "warning: neither ocd-pre-push nor pytest found, skipping pre-push tests" >&2
-        exit 0
-    fi
-    echo "warning: ocd-pre-push not found, running full test suite" >&2
-    if ! pytest -q; then
-        echo "error: tests failed — push aborted" >&2
-        exit 1
-    fi
+    echo "warning: neither ocd-ci-check nor uv found, skipping pre-push checks" >&2
+    exit 0
 fi

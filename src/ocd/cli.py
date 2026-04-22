@@ -70,6 +70,28 @@ def main() -> None:
         _standards()
     elif sys.argv[1] in ("fix-cycle", "lint-and-fix", "test-and-fix", "security-scan-and-patch"):
         _fix()
+    elif sys.argv[1] == "check":
+        from ocd.check import run_check
+
+        sys.exit(run_check())
+    elif sys.argv[1] == "ci-check":
+        from ocd.ci_check import main as ci_check_main
+
+        ci_check_args = sys.argv[2:]
+        sys.argv = [sys.argv[0], *ci_check_args]
+        ci_check_main()
+    elif sys.argv[1] == "verify-commit":
+        from ocd.verify_commit import main as verify_commit_main
+
+        verify_commit_args = sys.argv[2:]
+        sys.argv = [sys.argv[0], *verify_commit_args]
+        verify_commit_main()
+    elif sys.argv[1] == "scan-secrets":
+        from ocd.scan_secrets import main as scan_secrets_main
+
+        scan_secrets_args = sys.argv[2:]
+        sys.argv = [sys.argv[0], *scan_secrets_args]
+        scan_secrets_main()
     else:
         print(f"Unknown command: {sys.argv[1]}", file=sys.stderr)
         sys.exit(1)

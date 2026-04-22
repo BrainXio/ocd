@@ -1,34 +1,17 @@
 #!/usr/bin/env bash
 # Git commit-msg hook: reject AI attribution in commit messages.
+# Delegates to ocd verify-commit for single-source-of-truth checking.
 # Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
 msg_file="$1"
-msg=$(cat "$msg_file")
 
-# Patterns that indicate AI attribution (checked against each line).
-# Single source of truth: git_hooks/ai-patterns.txt
-resolved="$(readlink -f "$0")"
-patterns_file="$(dirname "$resolved")"/ai-patterns.txt
-ai_patterns=()
-while IFS= read -r pattern; do
-    ai_patterns+=("$pattern")
-done < "$patterns_file"
-
-while IFS= read -r line; do
-    for pattern in "${ai_patterns[@]}"; do
-        if echo "$line" | grep -qiE "$pattern"; then
-            echo "error: commit message contains AI attribution, which is prohibited:" >&2
-            echo "  $line" >&2
-            echo "" >&2
-            echo "Remove the attribution line and retry. The project policy prohibits:" >&2
-            echo "  - Co-Authored-By lines" >&2
-            echo "  - 'Generated with/by/using' attribution" >&2
-            echo "  - [AI] or [AI-generated] tags" >&2
-            exit 1
-        fi
-    done
-done <<< "$msg"
-
-exit 0
+if command -v ocd-verify-commit >/dev/null 2>&1; then
+    exec ocd-verify-commit "$msg_file"
+elif command -v uv >/dev/null 2>&1; then
+    exec uv run ocd verify-commit "$msg_file"
+else
+    echo "error: neither ocd-verify-commit nor uv found" >&2
+    exit 1
+fi

@@ -1,68 +1,16 @@
 #!/usr/bin/env bash
-# Git pre-commit hook: prevent commits on main branch and scan for secrets.
+# Git pre-commit hook: fast local quality gate.
+# Delegates to ocd check for branch protection, standards verify,
+# staged secret scan, staged mdformat check, and staged ruff check.
 # Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
-# --- Branch protection ---
-branch=$(git symbolic-ref --short HEAD 2>/dev/null)
-if [ "$branch" = "main" ]; then
-    echo "error: commits on main are prohibited. Create a feature branch first:" >&2
-    echo "  git checkout -b feat/<description>" >&2
+if command -v ocd >/dev/null 2>&1; then
+    exec ocd check
+elif command -v uv >/dev/null 2>&1; then
+    exec uv run ocd check
+else
+    echo "error: neither ocd nor uv found — cannot run pre-commit checks" >&2
     exit 1
 fi
-
-# --- Secret scanning (gitleaks) ---
-resolved="$(readlink -f "$0")"
-hooks_dir="$(dirname "$resolved")"
-project_root="$(dirname "$hooks_dir")"
-
-if command -v gitleaks >/dev/null 2>&1; then
-    if ! gitleaks protect --staged -c "$project_root/.gitleaks.toml"; then
-        echo "error: gitleaks detected potential secrets in staged changes" >&2
-        echo "  If this is a false positive, add an allowlist entry to .gitleaks.toml" >&2
-        exit 1
-    fi
-else
-    echo "warning: gitleaks not installed, skipping secret scanning" >&2
-    echo "  Install: https://github.com/gitleaks/gitleaks#installing" >&2
-fi
-
-# --- Dockerfile linting (hadolint) ---
-if command -v hadolint >/dev/null 2>&1; then
-    changed_dockerfiles="$(git diff --cached --name-only --diff-filter=ACM -- 'containers/*/Dockerfile')"
-    if [ -n "$changed_dockerfiles" ]; then
-        if ! echo "$changed_dockerfiles" | xargs hadolint; then
-            echo "error: hadolint found Dockerfile issues" >&2
-            exit 1
-        fi
-    fi
-else
-    echo "warning: hadolint not installed, skipping Dockerfile linting" >&2
-    echo "  Install: https://github.com/hadolint/hadolint#installing" >&2
-fi
-
-# --- Markdown formatting (mdformat) ---
-if command -v mdformat >/dev/null 2>&1; then
-    changed_md_files="$(git diff --cached --name-only --diff-filter=ACM -- '*.md')"
-    if [ -n "$changed_md_files" ]; then
-        if ! echo "$changed_md_files" | xargs mdformat; then
-            echo "error: mdformat failed on one or more markdown files" >&2
-            exit 1
-        fi
-        echo "$changed_md_files" | xargs git add
-    fi
-else
-    echo "warning: mdformat not installed, skipping markdown formatting" >&2
-    echo "  Install: uv add mdformat mdformat-frontmatter" >&2
-fi
-
-# --- Standards hash verification ---
-if command -v ocd-standards >/dev/null 2>&1; then
-    if ! ocd-standards --verify 2>/dev/null; then
-        echo "error: standards hash mismatch — run 'ocd-standards --update' and commit the result" >&2
-        exit 1
-    fi
-fi
-
-exit 0
