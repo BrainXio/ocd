@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from ocd.config import (
+    AGENT_DIR,
     CONCEPTS_DIR,
     CONNECTIONS_DIR,
     DAILY_DIR,
@@ -29,7 +30,7 @@ AGENT_DIRS = [
 ]
 
 AGENT_GITIGNORE = """\
-# Ignore everything in .agent (runtime data)
+# Ignore everything in runtime dir (generated data)
 *
 # Except .gitkeep files (preserve directory structure)
 !.gitkeep
@@ -148,8 +149,8 @@ def _detect_project(project_dir: Path) -> dict[str, bool]:
 
 
 def _init_agent_dir(project_dir: Path) -> None:
-    """Scaffold .agent/ directory structure for the knowledge pipeline."""
-    agent_dir = project_dir / ".agent"
+    """Scaffold runtime directory structure for the knowledge pipeline."""
+    agent_dir = project_dir / AGENT_DIR.relative_to(PROJECT_ROOT)
     gitignore = agent_dir / ".gitignore"
 
     if gitignore.exists():
@@ -180,7 +181,7 @@ def _init_agent_dir(project_dir: Path) -> None:
         created = True
 
     if created:
-        print("Created .agent/ knowledge pipeline structure.")
+        print(f"Created {AGENT_DIR.name}/ knowledge pipeline structure.")
 
 
 def _init() -> None:

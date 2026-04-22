@@ -37,12 +37,16 @@ from ocd.config import (
 )
 from ocd.utils import file_hash
 
-# Ensure state directory exists before writing logs
-STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+def _ensure_state_dir() -> None:
+    """Ensure STATE_DIR exists. Safe to call repeatedly."""
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # Set up file-based logging so we can verify the background process ran.
 # The parent process sends stdout/stderr to DEVNULL (to avoid the inherited
 # file handle bug on Windows), so this is our only observability channel.
+_ensure_state_dir()
 logging.basicConfig(
     filename=str(FLUSH_LOG_FILE),
     level=logging.INFO,
@@ -62,6 +66,7 @@ def load_flush_state() -> dict[str, Any]:
 
 
 def save_flush_state(state: dict[str, Any]) -> None:
+    _ensure_state_dir()
     FLUSH_STATE_FILE.write_text(json.dumps(state), encoding="utf-8")
 
 

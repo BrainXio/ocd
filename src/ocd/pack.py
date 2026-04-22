@@ -18,20 +18,11 @@ import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
-
-def _find_project_root() -> Path:
-    """Find project root by walking up from this file or CWD."""
-    for start in [Path(__file__).resolve(), Path.cwd()]:
-        for parent in [start, *start.parents]:
-            if (parent / ".git").is_dir():
-                return parent
-    return Path.cwd()
-
-
 try:
-    from ocd.config import PROJECT_ROOT
+    from ocd.config import _CLAUDE_DIR_NAME, PROJECT_ROOT
 except ImportError:
-    PROJECT_ROOT = _find_project_root()
+    PROJECT_ROOT = Path.cwd()
+    _CLAUDE_DIR_NAME = ".claude"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS agents (
@@ -237,7 +228,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    source = Path(args.source) if args.source else PROJECT_ROOT / ".claude"
+    source = Path(args.source) if args.source else PROJECT_ROOT / _CLAUDE_DIR_NAME
     output = Path(args.output)
 
     counts = compile_db(source, output)

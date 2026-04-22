@@ -18,20 +18,10 @@ import argparse
 import sqlite3
 from pathlib import Path
 
-
-def _find_project_root() -> Path:
-    """Find project root by walking up from this file or CWD."""
-    for start in [Path(__file__).resolve(), Path.cwd()]:
-        for parent in [start, *start.parents]:
-            if (parent / ".git").is_dir():
-                return parent
-    return Path.cwd()
-
-
 try:
     from ocd.config import PROJECT_ROOT
 except ImportError:
-    PROJECT_ROOT = _find_project_root()
+    PROJECT_ROOT = Path.cwd()
 
 
 def _find_bundled_db() -> Path:
