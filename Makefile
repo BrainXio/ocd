@@ -7,7 +7,7 @@ GPU_FLAG := $(shell docker info 2>/dev/null | grep -q 'nvidia' && echo '--gpus=a
 # without pushing anything.
 # GPU_FLAG is set to --gpus=all when an NVIDIA runtime is available (harmless no-op otherwise).
 
-.PHONY: all base python node ollama ocd test clean
+.PHONY: all base python node ollama ocd test clean check ci-check ci-check-fast verify-commit scan-secrets verify-standards
 
 all: ocd
 
@@ -56,3 +56,23 @@ clean:
 		ocd-ollama:$(TAG) $(REGISTRY)/ocd-ollama:$(TAG) \
 		ocd-base:$(TAG) $(REGISTRY)/ocd-base:$(TAG) \
 		2>/dev/null || true
+
+# ── Quality gates (single source of truth, same as hooks & CI) ──────────
+
+check:
+	uv run ocd check
+
+ci-check:
+	uv run ocd ci-check
+
+ci-check-fast:
+	uv run ocd ci-check --fast
+
+verify-commit:
+	uv run ocd verify-commit
+
+scan-secrets:
+	uv run ocd scan-secrets
+
+verify-standards:
+	uv run ocd-standards --verify

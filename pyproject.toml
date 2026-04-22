@@ -37,6 +37,9 @@ ocd-pre-compact = "ocd.hooks.pre_compact:main"
 ocd-compile-db = "ocd.pack:main"
 ocd-materialize = "ocd.materialize:main"
 ocd-pre-push = "ocd.pre_push:main"
+ocd-verify-commit = "ocd.verify_commit:main"
+ocd-scan-secrets = "ocd.scan_secrets:main"
+ocd-ci-check = "ocd.ci_check:main"
 
 [project.entry-points."mdformat.parser_extension"]
 frontmatter = "mdformat_frontmatter_preserve"
