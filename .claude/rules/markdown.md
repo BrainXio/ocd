@@ -43,7 +43,7 @@ Do not fight the normalization by writing manual numbers.
 The CI lint-markdown job checks these paths:
 
 ```
-mdformat --check README.md docs/*.md .claude/skills/*/SKILL.md .claude/agents/*.md .claude/rules/*.md
+mdformat --check README.md docs/*.md docs/project/*.md .claude/skills/*/SKILL.md .claude/agents/*.md .claude/rules/*.md
 ```
 
 Run the same command locally before pushing.
