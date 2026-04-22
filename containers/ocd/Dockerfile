@@ -69,9 +69,13 @@ RUN apt-get update \
 # PATH puts OCD entry points before the project venv.
 COPY pyproject.toml uv.lock /tmp/ocd-build/
 COPY src/ocd/ /tmp/ocd-build/src/ocd/
-RUN uv venv /opt/ocd/venv \
+COPY .claude/ /tmp/ocd-source/.claude/
+RUN python /tmp/ocd-build/src/ocd/pack.py \
+        --source /tmp/ocd-source/.claude \
+        --output /tmp/ocd-build/src/ocd/data/content.db \
+    && uv venv /opt/ocd/venv \
     && uv pip install --python /opt/ocd/venv/bin/python /tmp/ocd-build \
-    && rm -rf /tmp/ocd-build
+    && rm -rf /tmp/ocd-build /tmp/ocd-source
 
 # ── User-level Claude Code config ───────────────────────────────────
 # Skills, agents, rules, and settings at ~/.claude/ are available

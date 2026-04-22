@@ -268,8 +268,35 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd-route` | `ocd.router:main` | Route user request to optimal agent(s) |
 | `ocd-standards` | `ocd.standards:main` | Manage standards hash reference (verify, update) |
 | `ocd-fix-cycle` | `ocd.fix:main` | Closed-loop fix commands: fix-cycle, lint-and-fix, test-and-fix, security-scan-and-patch |
+| `ocd-compile-db` | `ocd.pack:main` | Compile `.claude/` content into bundled SQLite database (`content.db`) |
+| `ocd-materialize` | `ocd.materialize:main` | Reconstruct markdown files from `content.db` to target directory |
 
 All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
+
+## Bundled Content Database
+
+The `content.db` SQLite database ships inside the Python wheel. It is compiled
+at build time by `ocd-compile-db` from `.claude/` source files and
+force-included via hatch config. At runtime, `ocd-materialize` reconstructs
+markdown files to any target directory.
+
+### Database Schema
+
+| Table | Columns | Primary Key |
+| ----------- | -------------------------------------------------------------------- | ----------- |
+| `agents` | `name`, `frontmatter`, `body`, `created`, `updated` | `name` |
+| `rules` | `name`, `description`, `paths`, `body`, `created`, `updated` | `name` |
+| `skills` | `name`, `description`, `argument_hint`, `body`, `created`, `updated` | `name` |
+| `standards` | `id`, `version`, `hash`, `body`, `created`, `updated` | `id` (= 1) |
+
+### Build/Deploy Flow
+
+```bash
+ocd-compile-db                          # compile .claude/ → content.db
+ocd-materialize                         # materialize content.db → .claude/
+ocd-materialize -t /path/.cursor       # materialize to any agent directory
+ocd-materialize -t /path/.copilot -f    # overwrite existing files
+```
 
 ## CI Pipeline
 
@@ -291,8 +318,8 @@ Stages 3–4 run only when Python code changes.
 | 2 (parallel) | `lint-sql` | sqlfluff | SQL changes |
 | 2 (parallel) | `scan-deps` | trivy fs (reads `trivy.yaml`) | Python changes |
 | 2 (parallel) | `sast-scan` | semgrep (reads `.semgrep.yml`) | Python changes |
-| 3 (after 2) | `lint-python` | ruff + mypy | Python changes |
-| 4 (after 3) | `test-python` | pytest | Python changes |
+| 3 (after 2) | `lint-python` | `ocd-compile-db` + ruff + mypy | Python changes |
+| 4 (after 3) | `test-python` | `ocd-compile-db` + pytest | Python changes |
 
 Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` only. Branch protection on `main` requires passing CI, signed commits, and resolved conversations.
 
@@ -433,4 +460,8 @@ ocd fix-cycle <file>                    # detect-fix-verify cycle on a single fi
 ocd lint-and-fix <path>                 # fix all matching files under path
 ocd test-and-fix                         # fix + verify tests still pass
 ocd security-scan-and-patch              # semgrep scan + categorize findings
+ocd-compile-db                           # compile .claude/ → content.db
+ocd-materialize                          # materialize content.db → .claude/
+ocd-materialize -t /path/.cursor        # materialize to custom target
+ocd-materialize -f                       # overwrite existing files
 ```

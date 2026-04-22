@@ -40,7 +40,7 @@ Linear dependency chain. Each item builds on the one before it. Complete in orde
 | --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------- |
 | 2.1 | Semantic versioning | Automated version bumps from conventional commits | — | Planned |
 | 2.2 | Changelog generation | Auto-generate CHANGELOG.md from commit history | 2.1 | Planned |
-| 2.3 | Release package composition | Define which artifacts go into a GitHub Release and how they are assembled | — | Planned |
+| 2.3 | Release package composition | Bundled SQLite database inside the wheel; `ocd-compile-db` at build time, `ocd-materialize` at runtime | — | Done |
 | 2.4 | GitHub Release packaging | Build and attach the `brainxio-ocd` sdist/wheel to GitHub Releases alongside container images | 2.3 | Planned |
 | 2.5 | Release automation | CI job that composes release artifacts, creates a GitHub Release with composed package content, and uploads assets | 2.1, 2.2, 2.4 | Planned |
 | 2.6 | `AGENTS.md` | Instruction file for external agents on which packages and assets to download from this repo and how to set them up in foreign environments | 2.3 | Planned |
@@ -48,35 +48,22 @@ Linear dependency chain. Each item builds on the one before it. Complete in orde
 
 ### Release Package Composition
 
-A GitHub Release should contain three tiers of artifacts:
+All `.claude/` content (agents, rules, skills, standards) is compiled into a
+bundled SQLite database (`content.db`) at build time and shipped inside the
+Python wheel via hatch `force-include`. At runtime, `ocd-materialize`
+reconstructs the markdown files to any target directory (`.claude/`, `.cursor/`,
+`.copilot/`, etc.), letting consumers select only the content they need.
 
-**Essential** (minimum viable OCD — knowledge pipeline + hooks):
+A GitHub Release contains:
 
 | Artifact | Contents |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `brainxio_ocd-<version>-py3-none-any.whl` | Python package (all modules, 15 entry points) |
+| ----------------------------------------- | ----------------------------------------------------------- |
+| `brainxio_ocd-<version>-py3-none-any.whl` | Python package (all modules, entry points, `content.db`) |
 | `brainxio_ocd-<version>.tar.gz` | Source distribution |
-| `ocd-config.zip` | `.claude/settings.json`, `.claude/rules/commit-hygiene.md`, `.claude/rules/infrastructure.md`, `.claude/skills/ocd/SKILL.md` |
-| `ocd-templates.zip` | `git_hooks/setup-hooks.sh`, `git_hooks/ai-patterns.txt`, `.gitleaks.toml`, `package.json`, `package-lock.json` |
-
-**Recommended** (adds enforcement + core skills + audit agents):
-
-| Artifact | Contents |
-| --------------------- | ------------------------------------------------------------------------------- |
-| `ocd-hooks.zip` | `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/pre-push` |
-| `ocd-skills-core.zip` | `.claude/skills/{git,bash,python,docker}/SKILL.md` |
-| `ocd-rules-core.zip` | `.claude/rules/{markdown,doc-sync,pr-workflow}.md` |
-| `ocd-agents-core.zip` | `.claude/agents/{lint-status,hook-integrity,hook-coverage,dead-code-hunter}.md` |
-
-**Optional** (language-specific skills, remaining agents, containers):
-
-| Artifact | Contents |
-| ---------------------- | -------------------------------------------------------------------- |
-| `ocd-skills-extra.zip` | All remaining `.claude/skills/*/SKILL.md` (15 language/infra skills) |
-| `ocd-agents-extra.zip` | All remaining `.claude/agents/*.md` (21 audit agents) |
 | Container images | Published to GHCR (`ghcr.io/brainxio/ocd-<name>:<version>`) |
 
-The `AGENTS.md` file should document these tiers and provide setup instructions for each.
+The `AGENTS.md` file should document how to install the wheel and run
+`ocd-materialize` to deploy the configuration.
 
 ## Phase 3: Knowledge Pipeline Extensions
 

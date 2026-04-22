@@ -100,6 +100,8 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
+      - name: Compile content database
+        run: python src/ocd/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Verify standards hash
@@ -248,6 +250,8 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
+      - name: Compile content database
+        run: python src/ocd/pack.py
       - name: Install dependencies
         run: uv sync
       - name: ruff check
@@ -266,6 +270,8 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
+      - name: Compile content database
+        run: python src/ocd/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Run tests
