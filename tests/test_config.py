@@ -13,14 +13,17 @@ class TestPathConstants:
     def test_project_root_contains_git(self):
         assert (config.PROJECT_ROOT / ".git").is_dir()
 
-    def test_agent_dir_under_project_root(self):
-        assert config.AGENT_DIR == config.PROJECT_ROOT / ".agent"
+    def test_user_dir_under_project_root(self):
+        assert config.USER_DIR == config.PROJECT_ROOT / "USER"
 
-    def test_state_dir_under_agent_dir(self):
-        assert config.STATE_DIR.parent == config.AGENT_DIR
+    def test_agent_dir_aliases_user_dir(self):
+        assert config.AGENT_DIR == config.USER_DIR
 
-    def test_knowledge_dir_under_agent_dir(self):
-        assert config.KNOWLEDGE_DIR.parent == config.AGENT_DIR
+    def test_state_dir_under_user_dir(self):
+        assert config.STATE_DIR.parent == config.USER_DIR
+
+    def test_knowledge_dir_under_user_dir(self):
+        assert config.KNOWLEDGE_DIR.parent == config.USER_DIR
 
     def test_subdirs_under_knowledge_dir(self):
         assert config.CONCEPTS_DIR.parent == config.KNOWLEDGE_DIR

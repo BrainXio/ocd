@@ -32,13 +32,14 @@ os.environ.pop("CLAUDE_INVOKED_BY", None)
 
 @pytest.fixture
 def tmp_agent_dir(tmp_path):
-    """Create a temporary .agent/ directory tree matching production layout."""
-    (tmp_path / ".state").mkdir()
-    (tmp_path / "daily").mkdir()
+    """Create a temporary USER/ directory tree matching production layout."""
+    (tmp_path / "state").mkdir()
+    (tmp_path / "logs" / "daily").mkdir(parents=True)
     knowledge = tmp_path / "knowledge"
     (knowledge / "concepts").mkdir(parents=True)
     (knowledge / "connections").mkdir(parents=True)
     (knowledge / "qa").mkdir(parents=True)
+    (knowledge / "raw").mkdir(parents=True)
     (knowledge / "index.md").write_text(
         "# Knowledge Base Index\n\n"
         "| Article | Summary | Compiled From | Updated |\n"
@@ -46,13 +47,17 @@ def tmp_agent_dir(tmp_path):
     )
     (knowledge / "log.md").write_text("# Build Log\n")
     (tmp_path / "reports").mkdir()
+    (tmp_path / "cache").mkdir()
+    (tmp_path / "worktrees").mkdir()
+    (tmp_path / "agents" / "tasks").mkdir(parents=True)
+    (tmp_path / "agents" / "runtime").mkdir(parents=True)
     return tmp_path
 
 
 @pytest.fixture
 def state_file(tmp_agent_dir):
     """Path to a temporary state.json with default content."""
-    sf = tmp_agent_dir / ".state" / "state.json"
+    sf = tmp_agent_dir / "state" / "state.json"
     sf.write_text(
         json.dumps({"ingested": {}, "query_count": 0, "last_lint": None, "total_cost": 0.0})
     )
@@ -62,7 +67,7 @@ def state_file(tmp_agent_dir):
 @pytest.fixture
 def flush_state_file(tmp_agent_dir):
     """Path to a temporary last-flush.json."""
-    fsf = tmp_agent_dir / ".state" / "last-flush.json"
+    fsf = tmp_agent_dir / "state" / "last-flush.json"
     fsf.write_text("{}")
     return fsf
 
@@ -78,12 +83,13 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
     so that monkeypatch actually affects the code under test.
     """
     knowledge_dir = tmp_agent_dir / "knowledge"
-    state_dir = tmp_agent_dir / ".state"
+    state_dir = tmp_agent_dir / "state"
 
     patches = {
+        "USER_DIR": tmp_agent_dir,
         "AGENT_DIR": tmp_agent_dir,
-        "AGENTS_DIR": tmp_agent_dir / ".claude" / "agents",
-        "DAILY_DIR": tmp_agent_dir / "daily",
+        "AGENTS_DIR": tmp_agent_dir.parent / ".claude" / "agents",
+        "DAILY_DIR": tmp_agent_dir / "logs" / "daily",
         "KNOWLEDGE_DIR": knowledge_dir,
         "CONCEPTS_DIR": knowledge_dir / "concepts",
         "CONNECTIONS_DIR": knowledge_dir / "connections",
@@ -149,7 +155,7 @@ def daily_log(tmp_agent_dir, mock_config_paths):
     """Factory fixture that creates a daily log file on disk."""
 
     def _create(date_str: str, content: str) -> Path:
-        path = tmp_agent_dir / "daily" / f"{date_str}.md"
+        path = tmp_agent_dir / "logs" / "daily" / f"{date_str}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
         return path

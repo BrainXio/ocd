@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # ── Top-level directory names (change ONE place only) ─────────────────────
-_RUNTIME_DIR_NAME: str = ".agent"
+_RUNTIME_DIR_NAME: str = "USER"
 _CLAUDE_DIR_NAME: str = ".claude"
 
 
@@ -42,18 +42,18 @@ def _find_project_root() -> Path:
 PROJECT_ROOT: Path = _find_project_root()
 
 # ── Core paths (built from the single source above) ───────────────────────
-AGENT_DIR: Path = PROJECT_ROOT / _RUNTIME_DIR_NAME
+USER_DIR: Path = PROJECT_ROOT / _RUNTIME_DIR_NAME
 AGENTS_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "agents"
 VENV_BIN: Path = Path(sys.executable).parent
 
-DAILY_DIR: Path = AGENT_DIR / "daily"
-KNOWLEDGE_DIR: Path = AGENT_DIR / "knowledge"
+DAILY_DIR: Path = USER_DIR / "logs" / "daily"
+KNOWLEDGE_DIR: Path = USER_DIR / "knowledge"
 CONCEPTS_DIR: Path = KNOWLEDGE_DIR / "concepts"
 CONNECTIONS_DIR: Path = KNOWLEDGE_DIR / "connections"
 QA_DIR: Path = KNOWLEDGE_DIR / "qa"
-REPORTS_DIR: Path = AGENT_DIR / "reports"
+REPORTS_DIR: Path = USER_DIR / "reports"
 
-STATE_DIR: Path = AGENT_DIR / ".state"
+STATE_DIR: Path = USER_DIR / "state"
 STATE_FILE: Path = STATE_DIR / "state.json"
 FLUSH_STATE_FILE: Path = STATE_DIR / "last-flush.json"
 FLUSH_LOG_FILE: Path = STATE_DIR / "flush.log"
@@ -97,6 +97,10 @@ BUNDLED_DB_PATH: Path = Path(__file__).parent / "data" / "content.db"
 # Session state card
 SESSION_CARD_FILE: Path = STATE_DIR / "session-card.md"
 MAX_SESSION_CARD_CHARS = 1200
+
+# Keep AGENT_DIR as an alias for USER_DIR for backward compatibility
+# during migration (will be removed in a future release)
+AGENT_DIR: Path = USER_DIR
 
 
 def now_iso() -> str:

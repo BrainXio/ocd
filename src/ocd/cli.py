@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 
 from ocd.config import (
-    AGENT_DIR,
     CONCEPTS_DIR,
     CONNECTIONS_DIR,
     DAILY_DIR,
@@ -19,21 +18,35 @@ from ocd.config import (
     PROJECT_ROOT,
     QA_DIR,
     REPORTS_DIR,
+    STATE_DIR,
+    USER_DIR,
 )
 from ocd.format import run_formatters
 
 TEMPLATES_DIR = Path("/opt/ocd/templates")
 
-AGENT_DIRS = [
+USER_DIRS = [
     str(p.relative_to(PROJECT_ROOT))
-    for p in [DAILY_DIR, CONCEPTS_DIR, CONNECTIONS_DIR, QA_DIR, REPORTS_DIR]
+    for p in [
+        DAILY_DIR,
+        CONCEPTS_DIR,
+        CONNECTIONS_DIR,
+        QA_DIR,
+        REPORTS_DIR,
+        STATE_DIR,
+        USER_DIR / "logs",
+        USER_DIR / "agents" / "tasks",
+        USER_DIR / "agents" / "runtime",
+        USER_DIR / "cache",
+        USER_DIR / "worktrees",
+        KNOWLEDGE_DIR / "raw",
+        KNOWLEDGE_DIR / "archive",
+    ]
 ]
 
-AGENT_GITIGNORE = """\
-# Ignore everything in runtime dir (generated data)
+USER_GITIGNORE = """\
+# Ignore everything in USER/ (private runtime data)
 *
-# Except .gitkeep files (preserve directory structure)
-!.gitkeep
 # Except this .gitignore itself
 !.gitignore
 # And subdirectories (so git can traverse into them)
@@ -149,26 +162,23 @@ def _detect_project(project_dir: Path) -> dict[str, bool]:
 
 
 def _init_agent_dir(project_dir: Path) -> None:
-    """Scaffold runtime directory structure for the knowledge pipeline."""
-    agent_dir = project_dir / AGENT_DIR.relative_to(PROJECT_ROOT)
-    gitignore = agent_dir / ".gitignore"
+    """Scaffold USER/ directory structure for the knowledge pipeline."""
+    user_dir = project_dir / USER_DIR.relative_to(PROJECT_ROOT)
+    gitignore = user_dir / ".gitignore"
 
     if gitignore.exists():
         return
 
     created = False
-    for dir_path in AGENT_DIRS:
+    for dir_path in USER_DIRS:
         full = project_dir / dir_path
         if not full.exists():
             full.mkdir(parents=True, exist_ok=True)
-            (full / ".gitkeep").touch()
             created = True
 
     # Knowledge index
     local_knowledge_dir = project_dir / KNOWLEDGE_DIR.relative_to(PROJECT_ROOT)
     local_knowledge_dir.mkdir(parents=True, exist_ok=True)
-    if not (local_knowledge_dir / ".gitkeep").exists():
-        (local_knowledge_dir / ".gitkeep").touch()
 
     local_index_file = project_dir / INDEX_FILE.relative_to(PROJECT_ROOT)
     if not local_index_file.exists():
@@ -177,11 +187,11 @@ def _init_agent_dir(project_dir: Path) -> None:
 
     # .gitignore
     if not gitignore.exists():
-        gitignore.write_text(AGENT_GITIGNORE)
+        gitignore.write_text(USER_GITIGNORE)
         created = True
 
     if created:
-        print(f"Created {AGENT_DIR.name}/ knowledge pipeline structure.")
+        print(f"Created {USER_DIR.name}/ knowledge pipeline structure.")
 
 
 def _init() -> None:
@@ -189,7 +199,7 @@ def _init() -> None:
     project_dir = Path.cwd()
     project = _detect_project(project_dir)
 
-    # Scaffold .agent/ for knowledge pipeline
+    # Scaffold USER/ for knowledge pipeline
     _init_agent_dir(project_dir)
 
     # Seed templates from /opt/ocd/templates/
