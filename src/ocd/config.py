@@ -1,4 +1,8 @@
-"""Path constants and configuration for the personal knowledge base."""
+"""Path constants and configuration.
+
+Single source of truth for all directory layout.  Changing a top-level
+name here propagates everywhere.
+"""
 
 from __future__ import annotations
 
@@ -7,15 +11,19 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+# ── Top-level directory names (change ONE place only) ─────────────────────
+_RUNTIME_DIR_NAME: str = "USER"
+_CLAUDE_DIR_NAME: str = ".claude"
+
 
 def _find_project_root() -> Path:
     """Find project root by walking up from package location or CWD.
 
-    Strategy order:
-    1. OCD_PROJECT_ROOT env var (set in devcontainer)
-    2. Walk up from __file__ looking for .git/ (works in dev; fails silently
-       when package is installed in /opt/ocd/venv/ since no .git/ above site-packages)
-    3. Walk up from CWD looking for .git/ (works when CWD is inside the project)
+    Strategy order (works for both dev and installed-package use cases):
+    1. OCD_PROJECT_ROOT env var (highest priority, set in devcontainer or by host project)
+    2. Walk up from __file__ looking for .git/ (works in dev or editable install)
+    3. Walk up from CWD looking for .git/ (works when running inside a host project)
+    4. Fallback to CWD
     """
     env_root = os.environ.get("OCD_PROJECT_ROOT")
     if env_root:
@@ -28,29 +36,31 @@ def _find_project_root() -> Path:
     for parent in [current, *current.parents]:
         if (parent / ".git").is_dir():
             return parent
-    return Path.cwd()
+    return current
 
 
-PROJECT_ROOT = _find_project_root()
-AGENT_DIR = PROJECT_ROOT / ".agent"
-AGENTS_DIR = PROJECT_ROOT / ".claude" / "agents"
-VENV_BIN = Path(sys.executable).parent
+PROJECT_ROOT: Path = _find_project_root()
 
-DAILY_DIR = AGENT_DIR / "daily"
-KNOWLEDGE_DIR = AGENT_DIR / "knowledge"
-CONCEPTS_DIR = KNOWLEDGE_DIR / "concepts"
-CONNECTIONS_DIR = KNOWLEDGE_DIR / "connections"
-QA_DIR = KNOWLEDGE_DIR / "qa"
-REPORTS_DIR = AGENT_DIR / "reports"
+# ── Core paths (built from the single source above) ───────────────────────
+USER_DIR: Path = PROJECT_ROOT / _RUNTIME_DIR_NAME
+AGENTS_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "agents"
+VENV_BIN: Path = Path(sys.executable).parent
 
-STATE_DIR = AGENT_DIR / ".state"
-STATE_FILE = STATE_DIR / "state.json"
-FLUSH_STATE_FILE = STATE_DIR / "last-flush.json"
-FLUSH_LOG_FILE = STATE_DIR / "flush.log"
+DAILY_DIR: Path = USER_DIR / "logs" / "daily"
+KNOWLEDGE_DIR: Path = USER_DIR / "knowledge"
+CONCEPTS_DIR: Path = KNOWLEDGE_DIR / "concepts"
+CONNECTIONS_DIR: Path = KNOWLEDGE_DIR / "connections"
+QA_DIR: Path = KNOWLEDGE_DIR / "qa"
+REPORTS_DIR: Path = USER_DIR / "reports"
 
-INDEX_FILE = KNOWLEDGE_DIR / "index.md"
+STATE_DIR: Path = USER_DIR / "state"
+STATE_FILE: Path = STATE_DIR / "state.json"
+FLUSH_STATE_FILE: Path = STATE_DIR / "last-flush.json"
+FLUSH_LOG_FILE: Path = STATE_DIR / "flush.log"
 
-DEFAULT_INDEX_CONTENT = (
+INDEX_FILE: Path = KNOWLEDGE_DIR / "index.md"
+
+DEFAULT_INDEX_CONTENT: str = (
     "# Knowledge Base Index\n\n"
     "| Article | Summary | Compiled From | Updated |\n"
     "|---------|---------|---------------|---------|"
@@ -70,23 +80,27 @@ MAX_LOG_LINES = 30
 COMPILE_AFTER_HOUR = 18
 
 # Relevance-based KB injection
-KB_INDEX_JSON = STATE_DIR / "kb-index.json"
+KB_INDEX_JSON: Path = STATE_DIR / "kb-index.json"
 KB_INJECTION_COUNT = 3
 MAX_RELEVANT_CONTEXT_CHARS = 8000
 
 # Agent routing
-MANIFEST_FILE = STATE_DIR / "manifest.json"
+MANIFEST_FILE: Path = STATE_DIR / "manifest.json"
 
 # Standards-as-reference
-SKILLS_DIR = PROJECT_ROOT / ".claude" / "skills" / "ocd"
-STANDARDS_FILE = SKILLS_DIR / "standards.md"
+SKILLS_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "skills" / "ocd"
+STANDARDS_FILE: Path = SKILLS_DIR / "standards.md"
 
 # Bundled content database (for release packaging)
-BUNDLED_DB_PATH = Path(__file__).parent / "data" / "content.db"
+BUNDLED_DB_PATH: Path = Path(__file__).parent / "data" / "content.db"
 
 # Session state card
-SESSION_CARD_FILE = STATE_DIR / "session-card.md"
+SESSION_CARD_FILE: Path = STATE_DIR / "session-card.md"
 MAX_SESSION_CARD_CHARS = 1200
+
+# Keep AGENT_DIR as an alias for USER_DIR for backward compatibility
+# during migration (will be removed in a future release)
+AGENT_DIR: Path = USER_DIR
 
 
 def now_iso() -> str:

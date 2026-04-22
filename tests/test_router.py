@@ -61,7 +61,7 @@ class TestExtractKeywords:
 class TestBuildManifest:
     def test_builds_from_agents_dir(self, mock_config_paths, monkeypatch, tmp_path):
         agents_dir = tmp_path / "agents"
-        agents_dir.mkdir()
+        agents_dir.mkdir(exist_ok=True)
         (agents_dir / "dead-code-hunter.md").write_text(
             "---\nname: dead-code-hunter\n"
             "description: 'Find dead code per standard'\n"

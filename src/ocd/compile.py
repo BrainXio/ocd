@@ -36,6 +36,19 @@ from ocd.utils import (
     save_state,
 )
 
+
+def _build_paths_section() -> str:
+    """Single source of truth for all paths fed to the LLM."""
+    return f"""## Paths (Single Source of Truth)
+
+- CONCEPTS_DIR     : {CONCEPTS_DIR}
+- CONNECTIONS_DIR  : {CONNECTIONS_DIR}
+- KNOWLEDGE_INDEX  : {KNOWLEDGE_DIR / "index.md"}
+- KNOWLEDGE_LOG    : {KNOWLEDGE_DIR / "log.md"}
+
+All file writes and updates MUST use exactly these paths. Never assume any other layout."""
+
+
 # ── Inline schema ─────────────────────────────────────────────────────
 SCHEMA = """\
 # Knowledge Base Article Format
@@ -73,7 +86,7 @@ updated: YYYY-MM-DD
 ## Wikilinks
 
 Use `[[concepts/slug]]` format to link between articles. Links must point to
-files that exist under knowledge/concepts/, knowledge/connections/, or knowledge/qa/.
+files that exist under the directories listed in the Paths section.
 """
 
 
@@ -108,12 +121,16 @@ async def compile_daily_log(log_path: Path, state: dict[str, Any]) -> float:
 
     timestamp = now_iso()
 
+    paths_section = _build_paths_section()
+
     prompt = f"""You are a knowledge compiler. Your job is to read a daily conversation log
 and extract knowledge into structured wiki articles.
 
 ## Schema
 
 {SCHEMA}
+
+{paths_section}
 
 ## Current Wiki Index
 
@@ -136,18 +153,20 @@ Read the daily log above and compile it into wiki articles following the schema 
 ### Rules:
 
 1. **Extract key concepts** - Identify 3-7 distinct concepts worth their own article
-2. **Create concept articles** in `knowledge/concepts/` - One .md file per concept
+2. **Create concept articles** - One .md file per concept in the CONCEPTS_DIR from the Paths section
    - Use the exact article format from the Schema above (YAML frontmatter + sections)
    - Include `sources:` in frontmatter pointing to the daily log file
    - Use `[[concepts/slug]]` wikilinks to link to related concepts
    - Write in encyclopedia style - neutral, comprehensive
-3. **Create connection articles** in `knowledge/connections/` if this log reveals non-obvious
-   relationships between 2+ existing concepts
+   relationships between 2+ existing concepts, write to
+   CONNECTIONS_DIR (see Paths section)
 4. **Update existing articles** if this log adds new information to concepts already in the wiki
    - Read the existing article, add the new information, add the source to frontmatter
-5. **Update knowledge/index.md** - Add new entries to the table
+5. **Update the knowledge index** - Add new entries to the
+   KNOWLEDGE_INDEX path (see Paths section)
    - Each entry: `| [[path/slug]] | One-line summary | source-file | {timestamp[:10]} |`
-6. **Append to knowledge/log.md** - Add a timestamped entry:
+6. **Append to the knowledge log** - Add a timestamped entry to the
+   KNOWLEDGE_LOG path (see Paths section):
    ```
    ## [{timestamp}] compile | {log_path.name}
    - Source: daily/{log_path.name}
@@ -155,11 +174,8 @@ Read the daily log above and compile it into wiki articles following the schema 
    - Articles updated: [[concepts/z]] (if any)
    ```
 
-### File paths:
-- Write concept articles to: {CONCEPTS_DIR}
-- Write connection articles to: {CONNECTIONS_DIR}
-- Update index at: {KNOWLEDGE_DIR / "index.md"}
-- Append log at: {KNOWLEDGE_DIR / "log.md"}
+Write ONLY to the directories and files listed in the Paths section above.
+The Paths section is authoritative — do not hardcode or assume any other locations.
 
 ### Quality standards:
 - Every article must have complete YAML frontmatter

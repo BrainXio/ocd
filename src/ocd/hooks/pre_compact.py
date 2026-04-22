@@ -22,22 +22,21 @@ from ocd.hooks.hookslib import (
     write_context_file,
 )
 
-# Set up file-based logging
-
-STATE_DIR.mkdir(parents=True, exist_ok=True)
-
-logging.basicConfig(
-    filename=str(FLUSH_LOG_FILE),
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s [pre-compact] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+_log: logging.Logger = logging.getLogger(__name__)
 
 
 def main() -> None:
     # Recursion guard: if spawned by flush (which calls Agent SDK → Claude Code → hooks)
     if os.environ.get("CLAUDE_INVOKED_BY"):
         return
+
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        filename=str(FLUSH_LOG_FILE),
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s [pre-compact] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     hook_input = parse_stdin_json()
 

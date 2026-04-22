@@ -18,6 +18,17 @@ from ocd.config import KNOWLEDGE_DIR, PROJECT_ROOT, QA_DIR, now_iso
 from ocd.utils import load_state, read_all_wiki_content, save_state
 
 
+def _build_paths_section() -> str:
+    """Single source of truth for all paths fed to the LLM."""
+    return f"""## Paths (Single Source of Truth)
+
+- QA_DIR           : {QA_DIR}
+- KNOWLEDGE_INDEX  : {KNOWLEDGE_DIR / "index.md"}
+- KNOWLEDGE_LOG    : {KNOWLEDGE_DIR / "log.md"}
+
+All file writes and updates MUST use exactly these paths. Never assume any other layout."""
+
+
 async def run_query(question: str, file_back: bool = False) -> str:
     """Query the knowledge base and optionally file the answer back."""
     from claude_agent_sdk import (
@@ -37,17 +48,19 @@ async def run_query(question: str, file_back: bool = False) -> str:
     file_back_instructions = ""
     if file_back:
         timestamp = now_iso()
+        paths_section = _build_paths_section()
         file_back_instructions = f"""
+
+{paths_section}
 
 ## File Back Instructions
 
 After answering, do the following:
-1. Create a Q&A article at {QA_DIR}/ with the filename being a slugified version
-   of the question (e.g., knowledge/qa/how-to-handle-auth-redirects.md)
-2. Use the Q&A article format from the schema (frontmatter with title, question,
-   consulted articles, filed date)
-3. Update {KNOWLEDGE_DIR / "index.md"} with a new row for this Q&A article
-4. Append to {KNOWLEDGE_DIR / "log.md"}:
+1. Create a Q&A article at the QA_DIR path listed in the Paths section.
+   Use a slugified version of the question as filename.
+2. Use the Q&A article format (frontmatter with title, question, consulted articles, filed date)
+3. Update the KNOWLEDGE_INDEX path from the Paths section with a new row for this Q&A article
+4. Append to the KNOWLEDGE_LOG path from the Paths section:
    ## [{timestamp}] query (filed) | question summary
    - Question: {question}
    - Consulted: [[list of articles read]]
@@ -127,7 +140,7 @@ def main() -> None:
     if args.file_back:
         print("\n" + "-" * 60)
         qa_count = len(list(QA_DIR.glob("*.md"))) if QA_DIR.exists() else 0
-        print(f"Answer filed to knowledge/qa/ ({qa_count} Q&A articles total)")
+        print(f"Answer filed to {QA_DIR} ({qa_count} Q&A articles total)")
 
 
 if __name__ == "__main__":
