@@ -57,4 +57,12 @@ else
     echo "  Install: uv add mdformat mdformat-frontmatter" >&2
 fi
 
+# --- Standards hash verification ---
+if command -v ocd-standards >/dev/null 2>&1; then
+    if ! ocd-standards --verify 2>/dev/null; then
+        echo "error: standards hash mismatch — run 'ocd-standards --update' and commit the result" >&2
+        exit 1
+    fi
+fi
+
 exit 0

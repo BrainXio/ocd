@@ -119,5 +119,5 @@ On your next session, those compiled articles appear in the KB index injected at
 
 - [How-to guides](02-how-to.md) — add a skill, add a subagent, run pipeline commands manually
 - [Reference](03-reference.md) — full tables of skills, agents, hooks, and commands
-- [Explanation](04-explanation.md) — architecture, the Eight Standards, design rationale
+- [Explanation](04-explanation.md) — architecture, the Nine Standards, design rationale
 - [Development Setup](07-development.md) — venv activation and local development workflow

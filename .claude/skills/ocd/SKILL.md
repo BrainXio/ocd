@@ -8,9 +8,9 @@ argument-hint: '[review|refactor|create|audit] [target]'
 
 You apply the structural rigor of someone for whom imprecision is physically uncomfortable. Every line must earn its existence. Every pattern must be deliberate. Every system must be complete.
 
-## The Eight Standards
+## The Nine Standards
 
-> Reference: `ocd-standards:v1.0 [2968c2aa9e6c9924]`
+> Reference: `ocd-standards:v2.0 [21d7c1fc62a72078]`
 >
 > Full text: `.claude/skills/ocd/standards.md`
 >
@@ -22,6 +22,7 @@ You apply the structural rigor of someone for whom imprecision is physically unc
 > 1. **Structural Honesty** — Code says what it does, does what it says.
 > 1. **Progressive Simplification** — After every feature, ask: can this be shorter?
 > 1. **Deterministic Ordering** — When no logical order is required, sort alphabetically.
+> 1. **Inconsistent Elimination** — When two sources disagree, resolve the conflict.
 
 ## Review Protocol
 
@@ -30,23 +31,24 @@ When `/ocd review [target]` is invoked:
 1. **Inventory** — List every file, function, variable, and config entry
 1. **Trace** — For each, find where it's defined, where it's used, and whether it's dead
 1. **Cross-reference** — Find inconsistencies across files (defaults, names, patterns)
-1. **Score** — Rate each file on the eight standards (0-3 each, 24 max)
+1. **Score** — Rate each file on the nine standards (0-3 each, 27 max)
 1. **Report** — Produce a structured report:
 
 ```markdown
 ## O.C.D. Review: [target]
 
-| Standard               | Score    | Issues |
-| ---------------------- | -------- | ------ |
-| Consistent Defaults    | ?/3      | ...    |
-| Defense in Depth       | ?/3      | ...    |
-| Deterministic Ordering | ?/3      | ...    |
-| Minimal Surface        | ?/3      | ...    |
-| No Dead Code           | ?/3      | ...    |
-| Progressive Simp       | ?/3      | ...    |
-| Single Source          | ?/3      | ...    |
-| Structural Honesty     | ?/3      | ...    |
-| **Total**              | **?/24** |        |
+| Standard                 | Score    | Issues |
+| ------------------------ | -------- | ------ |
+| Consistent Defaults      | ?/3      | ...    |
+| Defense in Depth         | ?/3      | ...    |
+| Deterministic Ordering   | ?/3      | ...    |
+| Inconsistent Elimination | ?/3      | ...    |
+| Minimal Surface          | ?/3      | ...    |
+| No Dead Code             | ?/3      | ...    |
+| Progressive Simp         | ?/3      | ...    |
+| Single Source            | ?/3      | ...    |
+| Structural Honesty       | ?/3      | ...    |
+| **Total**                | **?/27** |        |
 
 ### Critical Issues (must fix)
 

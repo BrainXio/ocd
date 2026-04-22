@@ -1,6 +1,6 @@
 ---
-version: "1.0"
-hash: 2968c2aa9e6c9924
+version: '2.0'
+hash: 21d7c1fc62a72078
 ---
 
 ### 1. No Dead Code
@@ -95,3 +95,16 @@ find.
 **Check:** For every list, table, or ordered collection, ask: is this in a
 defined order? If not, sort it alphabetically. If the order is intentional but
 non-obvious, add a comment explaining why.
+
+### 9. Inconsistent Elimination
+
+When two sources disagree — formatter output and committed file, config and
+code, docs and behavior — resolve the conflict. Pick the canonical source,
+align everything to it, and verify the alignment holds. Tolerating
+inconsistencies side by side means every edit produces noise and every
+consumer has to guess which source to trust.
+
+**Check:** For each authoritative source (formatter, linter, config, docs,
+code), verify that no other source contradicts it. If a linter normalizes
+quotes, the committed file must match. If docs describe behavior, the code
+must implement it. If two config keys overlap, one must win.
