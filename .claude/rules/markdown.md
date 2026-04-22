@@ -1,7 +1,7 @@
 ---
 description: mdformat, frontmatter plugin, ordered list normalization, CI check paths
 paths:
-  - '**/*.md'
+  - "**/*.md"
 ---
 
 # Markdown Formatting
@@ -10,18 +10,13 @@ Project-specific mdformat conventions. The markdown skill (`.claude/skills/markd
 defines general conventions; this rule captures the mdformat pain points that have
 caused CI failures in this project.
 
-## IMPORTANT: mdformat-frontmatter Plugin
+## IMPORTANT: Frontmatter Plugin
 
-This project uses YAML frontmatter in `docs/*.md` and `.claude/skills/*/SKILL.md`.
-YOU MUST install and use the frontmatter plugin, or mdformat will strip the
-`---` delimiters and break the frontmatter:
-
-```
-pip install mdformat-frontmatter>=2.0.10
-```
-
-The CI lint-markdown job installs both mdformat and mdformat-frontmatter.
-The dependency is declared in `pyproject.toml`.
+This project uses a custom mdformat plugin (`mdformat_frontmatter_preserve`) that
+preserves YAML frontmatter quote styles. It replaces the upstream `mdformat-frontmatter`
+plugin, which normalizes double quotes to single quotes. Always install the project
+(via `uv sync`) so the custom plugin is registered. Do NOT install the upstream
+`mdformat-frontmatter` package — it conflicts with our preserve-quotes plugin.
 
 ## IMPORTANT: Skill File Frontmatter
 
@@ -30,6 +25,12 @@ delimiters — not `## heading` metadata lines and not `______` horizontal rules
 mdformat normalizes thematic breaks (dashes or underscores) to `______`, but
 preserves `---` as frontmatter delimiters when the frontmatter plugin is active.
 Always use YAML frontmatter in skill files.
+
+## Configuration
+
+mdformat settings are pinned in `.mdformat.toml` at the project root. The current
+configuration sets `wrap = "keep"` (preserve existing line wrapping). Do not add
+`--wrap` flags on the command line — let the config file control wrapping behavior.
 
 ## Ordered List Markers
 
@@ -42,7 +43,7 @@ Do not fight the normalization by writing manual numbers.
 The CI lint-markdown job checks these paths:
 
 ```
-mdformat --check README.md docs/*.md .claude/skills/*/SKILL.md
+mdformat --check README.md docs/*.md .claude/skills/*/SKILL.md .claude/agents/*.md .claude/rules/*.md
 ```
 
 Run the same command locally before pushing.
@@ -65,5 +66,6 @@ Skill files use these frontmatter fields:
 
 ## Line Length
 
-mdformat wraps at 80 characters by default. The project ruler is at 100.
-Let mdformat handle wrapping — do not insert hard line breaks in paragraphs.
+mdformat uses `wrap = "keep"` (configured in `.mdformat.toml`), which preserves
+existing line wrapping. Let mdformat handle wrapping — do not insert hard line
+breaks in paragraphs.

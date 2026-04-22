@@ -1,5 +1,5 @@
 ---
-title: 'Planning: Future Expansions'
+title: "Planning: Future Expansions"
 aliases: [planning, future, roadmap]
 tags: [planning]
 created: 2026-04-17
@@ -31,6 +31,10 @@ No external dependencies. These unblock everything that follows.
 | 1.1 | Local dev requirements | Document all prerequisites and setup steps for a local dev environment (system packages, tools, versions) | Done |
 | 1.2 | SQL skill stack investigation | Evaluate `sqlfluff` dialect support, identify formatter companion, assess CI job requirements | Done |
 | 1.3 | `sqlfluff` linter | SQL linting CI job for the `sql` skill (depends on 1.2 results) | Done |
+
+## Completed: Markdown Formatting Consistency
+
+Normalized all tracked `.md` files to mdformat canonical form, added `.mdformat.toml` config, expanded CI and `ocd format` coverage to include `.claude/agents/` and `.claude/rules/`, documented frontmatter quote style convention (single quotes). This eliminates the ghost reformatting cycle where the PostToolUse hook repeatedly changed double-quoted frontmatter to single quotes on every edit.
 
 ## Phase 2: Version & Release Chain
 

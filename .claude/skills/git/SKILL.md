@@ -1,7 +1,7 @@
 ---
 name: git
-description: 'Conventional git workflow: commits, branches, rebases, and hygiene. Use when the user asks to commit, branch, merge, rebase, squash, or manage git history. Invoked for /git or when the user wants version control operations.'
-argument-hint: '[commit|branch|rebase|squash|merge|log|diff|status|fixup] [args]'
+description: "Conventional git workflow: commits, branches, rebases, and hygiene. Use when the user asks to commit, branch, merge, rebase, squash, or manage git history. Invoked for /git or when the user wants version control operations."
+argument-hint: "[commit|branch|rebase|squash|merge|log|diff|status|fixup] [args]"
 ---
 
 # Git Skill
