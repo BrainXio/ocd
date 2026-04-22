@@ -1,28 +1,23 @@
 #!/usr/bin/env bash
-# Git pre-push hook: run tests before pushing.
+# Git pre-push hook: run diff-aware tests before pushing.
 # Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
-# Find the test runner (uv run pytest if uv is available, otherwise pytest)
-if command -v uv >/dev/null 2>&1; then
-    test_cmd=(uv run pytest -q)
+# Delegate to the Python diff-aware test runner
+if command -v ocd-pre-push >/dev/null 2>&1; then
+    exec ocd-pre-push
+elif command -v uv >/dev/null 2>&1; then
+    exec uv run ocd-pre-push
 else
+    # Fallback: run full suite if ocd-pre-push is unavailable
     if ! command -v pytest >/dev/null 2>&1; then
-        echo "warning: neither uv nor pytest found, skipping pre-push tests" >&2
-        echo "  Install uv: https://docs.astral.sh/uv/" >&2
+        echo "warning: neither ocd-pre-push nor pytest found, skipping pre-push tests" >&2
         exit 0
     fi
-    test_cmd=(pytest -q)
+    echo "warning: ocd-pre-push not found, running full test suite" >&2
+    if ! pytest -q; then
+        echo "error: tests failed — push aborted" >&2
+        exit 1
+    fi
 fi
-
-echo "running pre-push tests (${test_cmd[*]})..." >&2
-
-if ! "${test_cmd[@]}"; then
-    echo "error: tests failed — push aborted" >&2
-    echo "  Fix the failures or push with --no-verify to skip this hook" >&2
-    exit 1
-fi
-
-echo "pre-push tests passed" >&2
-exit 0
