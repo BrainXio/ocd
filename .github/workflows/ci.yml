@@ -250,6 +250,8 @@ jobs:
           enable-cache: true
       - name: Install dependencies
         run: uv sync
+      - name: Compile content database
+        run: uv run ocd-compile-db
       - name: ruff check
         run: uv run ruff check src/ocd/ tests/
       - name: ruff format --check
@@ -268,5 +270,7 @@ jobs:
           enable-cache: true
       - name: Install dependencies
         run: uv sync
+      - name: Compile content database
+        run: uv run ocd-compile-db
       - name: Run tests
         run: uv run pytest -v
