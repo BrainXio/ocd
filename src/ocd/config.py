@@ -111,4 +111,3 @@ def now_iso() -> str:
 def today_iso() -> str:
     """Current date in ISO 8601 format."""
     return datetime.now(UTC).astimezone().strftime("%Y-%m-%d")
-
