@@ -57,7 +57,7 @@ reconstructs the markdown files to any target directory (`.claude/`, `.cursor/`,
 A GitHub Release contains:
 
 | Artifact | Contents |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| ----------------------------------------- | ----------------------------------------------------------- |
 | `brainxio_ocd-<version>-py3-none-any.whl` | Python package (all modules, entry points, `content.db`) |
 | `brainxio_ocd-<version>.tar.gz` | Source distribution |
 | Container images | Published to GHCR (`ghcr.io/brainxio/ocd-<name>:<version>`) |

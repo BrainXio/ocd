@@ -283,7 +283,7 @@ markdown files to any target directory.
 ### Database Schema
 
 | Table | Columns | Primary Key |
-| ----------- | ---------------------------------------------------------- | ----------- |
+| ----------- | -------------------------------------------------------------------- | ----------- |
 | `agents` | `name`, `frontmatter`, `body`, `created`, `updated` | `name` |
 | `rules` | `name`, `description`, `paths`, `body`, `created`, `updated` | `name` |
 | `skills` | `name`, `description`, `argument_hint`, `body`, `created`, `updated` | `name` |
