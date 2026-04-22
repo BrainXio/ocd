@@ -156,11 +156,11 @@ Rules in `.claude/rules/` provide advisory instructions to Claude Code sessions.
 Rules are distinct from hooks: hooks enforce deterministically, rules guide behavior.
 
 | Rule File | Scope | Purpose |
-| ------------------- | -------------------- | -------------------------------------------------------- |
+| ------------------- | -------------------- | --------------------------------------------------------------------- |
 | `commit-hygiene.md` | Unconditional | Conventional commits, branch naming, no AI attribution |
 | `pr-workflow.md` | Unconditional | PR labels, body template, merge requirements |
 | `doc-sync.md` | Unconditional | Update reference/planning docs when shipping features |
-| `markdown.md` | `**/*.md` | mdformat, frontmatter plugin, ordered list normalization |
+| `markdown.md` | `**/*.md` | mdformat, frontmatter plugin, quote style, ordered list normalization |
 | `infrastructure.md` | Infrastructure paths | Deny rule modification procedure for protected files |
 
 All rule files live in `.claude/rules/`. The root `CLAUDE.md` serves as the rules index.
@@ -202,10 +202,10 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 ## Linter Configurations
 
 | Linter | Config file | Scope | Install |
-| ---------- | ------------------------------ | ------------------- | --------------------- |
+| ---------- | --------------------------------------------------------- | ------------------- | --------------------- |
 | ruff | `pyproject.toml` `[tool.ruff]` | Python | `uv sync` |
 | mypy | `pyproject.toml` `[tool.mypy]` | Python | `uv sync` |
-| mdformat | `pyproject.toml` (dep) | Markdown | `uv sync` |
+| mdformat | `.mdformat.toml` + `mdformat_frontmatter_preserve` plugin | Markdown | `uv sync` |
 | yamllint | `.yamllint` | YAML | `uv sync` |
 | shellcheck | — | Shell | system package |
 | gitleaks | `.gitleaks.toml` | Secrets | binary install |
@@ -225,10 +225,10 @@ Python linters are installed via `uv sync`. Node.js linters are installed via `n
 `ocd format` runs all available formatters with auto-fix. Each formatter is only run if its tool is installed and its config file exists.
 
 | Formatter | Command | Scope |
-| -------------- | ------------------------------------------ | ----------------- |
+| -------------- | ------------------------------------------------------------------------- | ----------------- |
 | `ruff-format` | `ruff format src/ tests/` | Python |
 | `ruff-fix` | `ruff check --fix src/ tests/` | Python |
-| `mdformat` | `mdformat README.md docs/ .claude/skills/` | Markdown |
+| `mdformat` | `mdformat README.md docs/ .claude/skills/ .claude/agents/ .claude/rules/` | Markdown |
 | `prettier` | `npx prettier --write .` | JSON / CSS / HTML |
 | `stylelint` | `npx stylelint --fix "**/*.css"` | CSS |
 | `sqlfluff-fix` | `sqlfluff fix --force` | SQL |

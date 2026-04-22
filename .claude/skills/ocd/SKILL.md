@@ -1,7 +1,7 @@
 ---
 name: ocd
 description: Apply obsessive-compulsive quality standards to code and configuration. Use when reviewing, refactoring, or creating code that demands perfection in structure, consistency, security, and minimalism. Invoked for /ocd or when the user wants things exact, clean, and airtight.
-argument-hint: '[review|refactor|create|audit] [target]'
+argument-hint: "[review|refactor|create|audit] [target]"
 ---
 
 # O.C.D. Skill — Obsessive Code Discipline

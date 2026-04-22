@@ -1,7 +1,7 @@
 ---
 name: docker
 description: Docker build, run, debug, and optimize commands. Use when the user asks to build, test, inspect, or troubleshoot Docker images and containers, or when working with Dockerfiles or docker-compose files.
-argument-hint: '[build|run|test|logs|shell|clean] [image:tag]'
+argument-hint: "[build|run|test|logs|shell|clean] [image:tag]"
 ---
 
 # Docker Skill

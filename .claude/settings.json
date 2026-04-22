@@ -69,8 +69,6 @@
   },
   "permissions": {
     "deny": [
-      "Edit(src/ocd/hooks/format_work.py)",
-      "Write(src/ocd/hooks/format_work.py)",
       "Read(**/.env*)",
       "Read(**/*.pem)",
       "Read(**/*.key)",

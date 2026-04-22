@@ -120,7 +120,7 @@ FORMATTERS: list[tuple[Any, ...]] = [
     # Markdown
     (
         "mdformat",
-        ["mdformat", "README.md", "docs/", ".claude/skills/"],
+        ["mdformat", "README.md", "docs/", ".claude/skills/", ".claude/agents/", ".claude/rules/"],
         None,
         None,
         15,
