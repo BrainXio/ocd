@@ -3,7 +3,7 @@ title: Getting Started
 aliases: [getting-started, tutorial, setup]
 tags: [tutorial]
 created: 2026-04-17
-updated: 2026-04-17
+updated: 2026-04-23
 ---
 
 Walk through your first 15 minutes with O.C.D. — set up, work a session, commit a change, and see the knowledge pipeline in action.
@@ -81,7 +81,7 @@ Create a feature branch and make an edit:
 git checkout -b feat/my-change
 ```
 
-Edit a file — for example, add a line to `docs/01-getting-started.md`. The `ocd-lint-work --edit` hook runs after every Write/Edit and lints the changed file. If mdformat, ruff, or another linter finds issues, you see the error immediately.
+Edit a file — for example, add a line to `project/01-getting-started.md`. The `ocd-lint-work --edit` hook runs after every Write/Edit and lints the changed file. If mdformat, ruff, or another linter finds issues, you see the error immediately.
 
 ## 4. Commit the Change
 

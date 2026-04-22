@@ -3,7 +3,7 @@ title: How-To Guides
 aliases: [how-to, guides, tasks]
 tags: [how-to]
 created: 2026-04-17
-updated: 2026-04-20
+updated: 2026-04-23
 ---
 
 Task-oriented guides. Each section is independent — jump to what you need.
@@ -57,7 +57,7 @@ Rules are modular markdown files in `.claude/rules/` that provide advisory instr
 - Keep under 60 lines — use positive instructions and add emphasis (`IMPORTANT`, `YOU MUST`) for critical rules
 - Unconditional rules (no `paths`) load every session; path-scoped rules load only when matching files are read
 - Rules are advisory — use hooks for hard enforcement
-- Update `docs/03-reference.md` with the new rule entry
+- Update `project/03-reference.md` with the new rule entry
 
 See [reference](03-reference.md) for the rules registry and [explanation](04-explanation.md) for the rules-vs-hooks-vs-skills hierarchy.
 
