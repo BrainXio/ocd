@@ -81,6 +81,9 @@ MANIFEST_FILE = STATE_DIR / "manifest.json"
 SKILLS_DIR = PROJECT_ROOT / ".claude" / "skills" / "ocd"
 STANDARDS_FILE = SKILLS_DIR / "standards.md"
 
+# Bundled content database (for release packaging)
+BUNDLED_DB_PATH = Path(__file__).parent / "data" / "content.db"
+
 # Session state card
 SESSION_CARD_FILE = STATE_DIR / "session-card.md"
 MAX_SESSION_CARD_CHARS = 1200
