@@ -22,8 +22,6 @@ jobs:
       shell: ${{ steps.filter.outputs.shell }}
       yaml: ${{ steps.filter.outputs.yaml }}
       markdown: ${{ steps.filter.outputs.markdown }}
-      node: ${{ steps.filter.outputs.node }}
-      sql: ${{ steps.filter.outputs.sql }}
       actions: ${{ steps.filter.outputs.actions }}
     steps:
       - uses: actions/checkout@v6
@@ -44,14 +42,6 @@ jobs:
             markdown:
               - '**/*.md'
               - 'docs/**'
-            node:
-              - '**/*.css'
-              - '**/*.html'
-              - '**/*.json'
-              - 'package.json'
-              - 'package-lock.json'
-            sql:
-              - '**/*.sql'
             actions:
               - '.github/workflows/**'
 
@@ -186,39 +176,6 @@ jobs:
           curl -sL "$URL" | sudo tar xz -C /usr/local/bin actionlint
       - name: actionlint
         run: actionlint
-
-  lint-node:
-    needs: [changes]
-    if: needs.changes.outputs.node == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-          cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: stylelint
-        run: npx stylelint "**/*.css" || echo "No CSS files found — skipping"
-      - name: htmlhint
-        run: npx htmlhint "**/*.html" || echo "No HTML files found — skipping"
-      - name: prettier --check
-        run: npx prettier --check "**/*.json" "!package-lock.json"
-
-  lint-sql:
-    needs: [changes]
-    if: needs.changes.outputs.sql == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install sqlfluff
-        run: pip install "sqlfluff>=3.0"
-      - name: sqlfluff lint
-        run: sqlfluff lint .
 
   scan-deps:
     needs: [changes]

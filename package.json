@@ -2,18 +2,12 @@
   "name": "brainxio-ocd-linters",
   "private": true,
   "license": "MIT",
-  "description": "Frontend linters for the OCD project (stylelint, htmlhint, prettier)",
+  "description": "JSON linter/formatter for the OCD project (prettier)",
   "devDependencies": {
-    "stylelint": "^16.0",
-    "stylelint-config-standard": "^36.0",
-    "htmlhint": "^1.1",
     "prettier": "^3.0"
   },
   "scripts": {
-    "lint:css": "stylelint '**/*.css'",
-    "lint:html": "htmlhint '**/*.html'",
-    "lint:json": "prettier --check '**/*.json'",
-    "format:css": "stylelint --fix '**/*.css'",
-    "format:json": "prettier --write '**/*.json'"
+    "lint:json": "prettier --check '**/*.json' '!package-lock.json'",
+    "format:json": "prettier --write '**/*.json' '!package-lock.json'"
   }
 }

@@ -106,6 +106,9 @@ archive/
 .actrc.local
 CLAUDE.md
 
+# === Regeneratable files ===
+AGENTS.md
+
 # === USER (content) ===
 .obsidian
 USER/*
