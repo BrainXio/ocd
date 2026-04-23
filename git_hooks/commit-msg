@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 # Git commit-msg hook: reject AI attribution in commit messages.
-# Delegates to ocd verify-commit for single-source-of-truth checking.
+# Delegates to ocd hook verify-commit for single-source-of-truth checking.
 # Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
 msg_file="$1"
 
-if command -v ocd-verify-commit >/dev/null 2>&1; then
-    exec ocd-verify-commit "$msg_file"
-elif command -v uv >/dev/null 2>&1; then
-    exec uv run ocd verify-commit "$msg_file"
+if command -v uv >/dev/null 2>&1; then
+    exec uv run ocd hook verify-commit "$msg_file"
 else
-    echo "error: neither ocd-verify-commit nor uv found" >&2
+    echo "error: uv not found, cannot run ocd hook verify-commit" >&2
     exit 1
 fi

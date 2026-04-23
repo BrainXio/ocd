@@ -4,9 +4,9 @@ Runs all CI checks locally: standards verify, commit message check,
 secret scan, ruff, mypy, mdformat, yamllint, shellcheck, semgrep, pytest.
 
 Usage:
-    ocd ci-check              # full suite
-    ocd ci-check --fast       # skip full pytest, use diff-aware tests only
-    ocd ci-check --commit-range origin/main..HEAD  # include AI attribution check
+    ocd hook ci-check              # full suite
+    ocd hook ci-check --fast       # skip full pytest, use diff-aware tests only
+    ocd hook ci-check --commit-range origin/main..HEAD  # include AI attribution check
 """
 
 from __future__ import annotations

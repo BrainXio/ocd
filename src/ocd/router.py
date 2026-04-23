@@ -5,9 +5,9 @@ matcher. Scores a user query against agent manifest keywords and returns
 the top 1-3 agents. Zero tokens, zero API calls, <50ms.
 
 Usage:
-    ocd-route "find dead code and unused imports"
-    ocd-route "security scan" --max 3
-    ocd-route --build-manifest
+    ocd route "find dead code and unused imports"
+    ocd route "security scan" --max 3
+    ocd route --build-manifest
 """
 
 from __future__ import annotations
@@ -182,7 +182,7 @@ def route_query(query: str, manifest: dict[str, Any], max_agents: int = 3) -> li
 
 
 def main() -> None:
-    """Entry point for ocd-route command."""
+    """Entry point for ocd route command."""
     parser = argparse.ArgumentParser(description="Route a user request to the optimal agent(s)")
     parser.add_argument("query", nargs="?", help="User request to route")
     parser.add_argument(

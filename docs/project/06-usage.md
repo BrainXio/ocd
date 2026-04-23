@@ -78,7 +78,7 @@ Add a css skill following the same structure as the python skill. Mandatory: mod
 ### Troubleshooting
 
 ```
-The ocd-lint-work hook is failing on commit. Run lint-status to see which linters are failing and on which files.
+The ocd hook lint-work --commit hook is failing on commit. Run lint-status to see which linters are failing and on which files.
 ```
 
 ```
@@ -87,7 +87,7 @@ CI is failing on the check-commit-messages job. Show me the git_hooks/ai-pattern
 
 ## Adding External Knowledge
 
-The pipeline is content-agnostic — anything you can get into a markdown file can be fed to `ocd-flush` or `ocd-compile`.
+The pipeline is content-agnostic — anything you can get into a markdown file can be fed to `ocd flush` or `ocd compile`.
 
 ### Daily Log Entry
 
@@ -95,7 +95,7 @@ Create `USER/logs/daily/YYYY-MM-DD.md` with structured content and compile it. S
 
 ### flush Ingestion
 
-Pass any markdown file directly to `ocd-flush`:
+Pass any markdown file directly to `ocd flush`:
 
 ```bash
 cat > /tmp/external.md << 'EOF'
@@ -104,7 +104,7 @@ Key findings from the Go concurrency docs:
 - Channels are the primary synchronization primitive
 EOF
 
-ocd-flush /tmp/external.md external-ingest
+ocd flush /tmp/external.md external-ingest
 ```
 
 ### URL-Based Knowledge
@@ -116,7 +116,7 @@ Fetch the Rust ownership documentation from doc.rust-lang.org and summarize the 
 ```
 
 ```
-Read https://docs.docker.com/build/cache/ and extract the key caching strategies. Write them to a temp file, then run ocd-flush to ingest them.
+Read https://docs.docker.com/build/cache/ and extract the key caching strategies. Write them to a temp file, then run `ocd flush` to ingest them.
 ```
 
 ## Navigation

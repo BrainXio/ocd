@@ -2,13 +2,13 @@
 
 Reads agents, rules, skills, and standards from the source .claude/ directory
 and compiles them into a single content.db that ships inside the Python
-wheel. The runtime materializer (ocd-materialize) reconstructs the files from
+wheel. The runtime materializer (ocd materialize) reconstructs the files from
 this database into any target directory.
 
 Usage:
-    ocd-compile-db                     # compile to default location
-    ocd-compile-db -o /tmp/ocd.db      # compile to specific path
-    ocd-compile-db --source /path/.claude  # use non-default source
+    ocd compile-db                     # compile to default location
+    ocd compile-db -o /tmp/ocd.db      # compile to specific path
+    ocd compile-db --source /path/.claude  # use non-default source
 """
 
 from __future__ import annotations
@@ -213,7 +213,7 @@ def compile_db(source: Path, output: Path) -> dict[str, int]:
 
 
 def main() -> None:
-    """Entry point for ocd-compile-db."""
+    """Entry point for ocd compile-db command."""
     parser = argparse.ArgumentParser(description="Compile .claude/ content into content.db")
     parser.add_argument(
         "--output",

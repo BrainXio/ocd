@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ocd-session-start",
+            "command": "ocd hook session-start",
             "timeout": 15
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ocd-pre-compact",
+            "command": "ocd hook pre-compact",
             "timeout": 10
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ocd-session-end",
+            "command": "ocd hook session-end",
             "timeout": 10
           }
         ]
@@ -42,12 +42,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ocd-format-work --edit",
+            "command": "ocd hook format-work --edit",
             "timeout": 15
           },
           {
             "type": "command",
-            "command": "ocd-lint-work --edit",
+            "command": "ocd hook lint-work --edit",
             "timeout": 10
           }
         ]
@@ -60,7 +60,7 @@
           {
             "type": "command",
             "if": "Bash(git commit*)",
-            "command": "ocd-lint-work --commit",
+            "command": "ocd hook lint-work --commit",
             "timeout": 30
           }
         ]

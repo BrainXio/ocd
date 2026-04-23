@@ -32,7 +32,7 @@ USER/             Data — daily logs, knowledge base, state (git-ignored)
 ```
 
 - **Project root** — The code being developed. `pyproject.toml`, `src/ocd/`, `tests/`, and `docs/` live here.
-- **`src/ocd/`** — The installable Python package. Entry points (`ocd-compile`, `ocd-flush`, etc.) are defined in `pyproject.toml` and installed by `uv sync`. This replaces the old pattern of running scripts with `uv --directory .claude run python scripts/...`.
+- **`src/ocd/`** — The installable Python package. The `ocd` umbrella CLI (including `ocd hook` subcommands) is defined in `pyproject.toml` and installed by `uv sync`. This replaces the old pattern of running scripts with `uv --directory .claude run python scripts/...`.
 - **`git_hooks/`** — Bash git hooks and their setup script. Symlinks from `.git/hooks/` point here, not to `.claude/hooks/`.
 - **`USER/`** — Conversation data and compiled knowledge. Isolated from git via `.gitignore`. Each instance has its own `USER/` data.
 - **`.claude/`** — Claude Code configuration only: `settings.json` (hooks, permissions), `skills/` (language standards), `agents/` (subagent definitions). No Python code lives here.
@@ -57,16 +57,16 @@ This separation means you can share the project and source code without exposing
 
 The original structure embedded Python code in `.claude/scripts/` and `.claude/hooks/`, requiring `sys.path` hacks, `importlib` for hyphenated filenames, and `uv --directory .claude run` for every invocation. The installable package layout (`src/ocd/`) solves these problems:
 
-- **Entry points** — `ocd-compile`, `ocd-flush`, `ocd-lint-kb`, `ocd-query`, and hook commands are installed as shell commands by `uv sync`. No path manipulation needed.
+- **Entry points** — `ocd compile`, `ocd flush`, `ocd lint-kb`, `ocd query`, and hook commands are installed as a single `ocd` CLI by `uv sync`. No path manipulation needed.
 - **Clean imports** — `from ocd.config import ...` instead of `sys.path.insert(0, ...)`. No `importlib` hacks.
-- **Consistent invocation** — Hooks in `settings.json` use `ocd-session-start` instead of `.claude/.venv/bin/python .claude/hooks/session-start.py`.
+- **Consistent invocation** — Hooks in `settings.json` use `ocd hook session-start` instead of `.claude/.venv/bin/python .claude/hooks/session-start.py`.
 - **Standard tooling** — `ruff`, `mypy`, `pytest` all work from project root with no `--config-file` or `--directory` flags.
 
 ## Why Symlinks Not core.hooksPath
 
 Git's `core.hooksPath` redirects all hook lookups to a single directory. This would expose Claude Code's Python hooks (which expect Claude-specific JSON on stdin) to git, causing cryptic failures when git runs them as regular shell scripts.
 
-Symlinks provide selective exposure — only the bash hooks (`pre-commit`, `commit-msg`) are installed into `.git/hooks/`, while Python hooks are invoked via installed entry points (`ocd-session-start`, `ocd-lint-work`, etc.) in the settings.json hook system. Each hook type runs in the environment it was designed for.
+Symlinks provide selective exposure — only the bash hooks (`pre-commit`, `commit-msg`) are installed into `.git/hooks/`, while Python hooks are invoked via the `ocd hook` CLI (`ocd hook session-start`, `ocd hook lint-work`, etc.) in the settings.json hook system. Each hook type runs in the environment it was designed for.
 
 ## Why Deny Rules and Protected Files
 

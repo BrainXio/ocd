@@ -4,10 +4,10 @@ This is the "LLM compiler" - it reads daily logs (source code) and produces
 organized knowledge articles (the executable).
 
 Usage:
-    ocd-compile                    # compile new/changed logs only
-    ocd-compile --all              # force recompile everything
-    ocd-compile --file daily/2026-04-01.md  # compile a specific log
-    ocd-compile --dry-run          # show what would be compiled
+    ocd compile                    # compile new/changed logs only
+    ocd compile --all              # force recompile everything
+    ocd compile --file daily/2026-04-01.md  # compile a specific log
+    ocd compile --dry-run          # show what would be compiled
 """
 
 from __future__ import annotations

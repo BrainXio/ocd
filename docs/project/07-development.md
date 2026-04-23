@@ -84,8 +84,8 @@ dependencies, and git hooks.
 
 ## Local Setup
 
-O.C.D. hooks (`ocd-session-start`, `ocd-lint-work`, `ocd-pre-compact`, etc.)
-are Python entry points installed by `uv sync`. They live in `.venv/bin/`.
+O.C.D. hooks (`ocd hook session-start`, `ocd hook lint-work`, `ocd hook pre-compact`, etc.)
+are subcommands of the `ocd` CLI, installed by `uv sync`. They live in `.venv/bin/ocd`.
 Claude Code runs these hooks as subprocesses — if the virtual environment isn't
 on `PATH`, the hooks won't be found and every session will start without
 knowledge injection, linting, or flush.
@@ -124,13 +124,13 @@ ollama launch claude
 
 ## Verifying Hooks Are Available
 
-After activating the venv, confirm the entry points are on PATH:
+After activating the venv, confirm the CLI is on PATH:
 
 ```bash
-which ocd-session-start ocd-lint-work ocd-pre-compact ocd-session-end
+which ocd
 ```
 
-All four should resolve to paths inside `.venv/bin/`. If any are missing,
+It should resolve to `.venv/bin/ocd`. If missing,
 re-run `uv sync`.
 
 ## Common Mistakes

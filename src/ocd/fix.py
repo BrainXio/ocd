@@ -395,7 +395,7 @@ def security_scan_and_patch() -> FixResult:
 
 
 def main() -> None:
-    """Entry point for ocd-fix-cycle command."""
+    """Entry point for ocd fix-cycle command."""
     parser = argparse.ArgumentParser(description="Closed-loop fix commands")
     sub = parser.add_subparsers(dest="command", required=True)
 

@@ -2,6 +2,8 @@
 
 Single source of truth for AI pattern checks, used by both
 the commit-msg hook and CI check-commit-messages job.
+
+Invoked via `ocd hook verify-commit`.
 """
 
 from __future__ import annotations

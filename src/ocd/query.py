@@ -5,8 +5,8 @@ No vector database, no embeddings, no chunking - just structured markdown
 and an index the LLM can reason over.
 
 Usage:
-    ocd-query "How should I handle auth redirects?"
-    ocd-query "What patterns do I use for API design?" --file-back
+    ocd query "How should I handle auth redirects?"
+    ocd query "What patterns do I use for API design?" --file-back
 """
 
 from __future__ import annotations

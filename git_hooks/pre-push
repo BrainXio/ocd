@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 # Git pre-push hook: run diff-aware CI checks before pushing.
-# Delegates to ocd ci-check --fast for standards, lints, and delta tests.
+# Delegates to ocd hook ci-check --fast for standards, lints, and delta tests.
 # Installed by: bash git_hooks/setup-hooks.sh
 
 set -euo pipefail
 
-if command -v ocd-ci-check >/dev/null 2>&1; then
-    exec ocd-ci-check --fast
-elif command -v uv >/dev/null 2>&1; then
-    exec uv run ocd ci-check --fast
+if command -v uv >/dev/null 2>&1; then
+    exec uv run ocd hook ci-check --fast
 else
-    echo "warning: neither ocd-ci-check nor uv found, skipping pre-push checks" >&2
+    echo "warning: uv not found, skipping pre-push checks" >&2
     exit 0
 fi

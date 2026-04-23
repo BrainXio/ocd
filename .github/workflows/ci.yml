@@ -94,7 +94,7 @@ jobs:
       - name: Install dependencies
         run: uv sync
       - name: Verify standards hash
-        run: uv run ocd-standards --verify
+        run: uv run ocd standards --verify
 
   # ── Stage 2: Fast lints (parallel, path-conditioned) ─────────────────────
   # All checks below are mirrored by: uv run ocd ci-check

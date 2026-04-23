@@ -3,6 +3,8 @@
 Runs formatters in fix mode on the file just written/edited, preventing
 formatting drift before the lint hook checks the file. Captures violations
 to a JSONL log for knowledge base learning.
+
+Invoked via `ocd hook format-work --edit`.
 """
 
 from __future__ import annotations

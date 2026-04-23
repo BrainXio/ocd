@@ -93,16 +93,16 @@ model: haiku
 
 ## Claude Code Hooks
 
-| Hook | Entry Point | Trigger | Purpose |
-| ------------- | ------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| SessionStart | `ocd-session-start` | SessionStart | Inject relevant KB articles + health card + standards reference + session card as context |
-| PreCompact | `ocd-pre-compact` | PreCompact | Save context before auto-compaction discards it |
-| SessionEnd | `ocd-session-end` | SessionEnd | Capture transcript → spawn flush |
-| Lint (edit) | `ocd-lint-work --edit` | PostToolUse (Write | Edit) | Lint edited files, report missing linters |
-| Format (edit) | `ocd-format-work --edit` | PostToolUse (Write | Edit) | Auto-format edited files, capture violations, update session card |
-| Lint (commit) | `ocd-lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
+| Hook | Command | Trigger | Purpose |
+| ------------- | ----------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| SessionStart | `ocd hook session-start` | SessionStart | Inject relevant KB articles + health card + standards reference + session card as context |
+| PreCompact | `ocd hook pre-compact` | PreCompact | Save context before auto-compaction discards it |
+| SessionEnd | `ocd hook session-end` | SessionEnd | Capture transcript → spawn flush |
+| Lint (edit) | `ocd hook lint-work --edit` | PostToolUse (Write | Edit) | Lint edited files, report missing linters |
+| Format (edit) | `ocd hook format-work --edit` | PostToolUse (Write | Edit) | Auto-format edited files, capture violations, update session card |
+| Lint (commit) | `ocd hook lint-work --commit` | PreToolUse (Bash: git commit) | Lint staged files before commit |
 
-All Python hooks are installed as entry points via `pyproject.toml` `[project.scripts]`. Source code lives in `src/ocd/hooks/`.
+All hook commands route through the `ocd` umbrella CLI. Source code lives in `src/ocd/hooks/`.
 
 ### Hook Configuration Schema
 
@@ -113,7 +113,7 @@ Hooks are declared in `.claude/settings.json` under the `hooks` key:
 | `matcher` | yes | Tool event pattern (e.g., `Write&#124;Edit`, `Bash`) |
 | `if` | no | Conditional filter (e.g., `Bash(git commit*)`). Note: `if` is a YAML reserved word — some parsers require quoting |
 | `type` | yes | Currently only `command` |
-| `command` | yes | Shell command to run (entry point name) |
+| `command` | yes | Shell command to run (e.g., `ocd hook session-start`) |
 | `timeout` | yes | Maximum execution time in seconds |
 
 ### Hook Stdin JSON
@@ -134,7 +134,7 @@ Hooks receive a JSON object on stdin:
 | ------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `parse_stdin_json()` | Parse JSON from stdin (includes Windows backslash fix) |
 | `extract_conversation_context(path)` | Read JSONL transcript, extract last 30 turns as markdown, capped at 15,000 chars |
-| `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
+| `spawn_flush(context_file, session_id)` | Launch `ocd flush` as detached background process |
 | `write_context_file(session_id, context, prefix)` | Write context to `USER/state/{prefix}-{session_id}-{timestamp}.md` |
 
 ### State Files
@@ -218,7 +218,7 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | trivy | `trivy.yaml` + `.trivyignore` | Vulnerabilities | binary install |
 | semgrep | `.semgrep.yml` | SAST (OWASP Top 10) | pip install |
 
-Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd-lint-work` hook reports missing linters gracefully — it does not block edits when a linter is unavailable.
+Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd hook lint-work` reports missing linters gracefully — it does not block edits when a linter is unavailable.
 
 ## Formatter Registry
 
@@ -251,34 +251,57 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 
 ## Package Entry Points
 
-| Command | Module | Purpose |
-| ------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, standards, and fix — `ocd init` scaffolds `USER/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference; `ocd fix-cycle <file>` runs closed-loop detect-fix-verify |
-| `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
-| `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
-| `ocd-format` | `ocd.format:main` | Run all formatters with auto-fix |
-| `ocd-lint-kb` | `ocd.lint:main` | Structural + LLM contradiction checks on knowledge base |
-| `ocd-query` | `ocd.query:main` | Index-guided knowledge base search |
-| `ocd-session-start` | `ocd.hooks.session_start:main` | Session start context injection |
-| `ocd-session-end` | `ocd.hooks.session_end:main` | Session end transcript capture |
-| `ocd-pre-compact` | `ocd.hooks.pre_compact:main` | Pre-compaction context save |
-| `ocd-lint-work` | `ocd.hooks.lint_work:main` | Real-time file linting on edit/commit |
-| `ocd-format-work` | `ocd.hooks.format_work:main` | Real-time file auto-formatting on edit, session card updates |
-| `ocd-kb-query` | `ocd.relevance:main` | TF-IDF relevance query against KB index |
-| `ocd-route` | `ocd.router:main` | Route user request to optimal agent(s) |
-| `ocd-standards` | `ocd.standards:main` | Manage standards hash reference (verify, update) |
-| `ocd-fix-cycle` | `ocd.fix:main` | Closed-loop fix commands: fix-cycle, lint-and-fix, test-and-fix, security-scan-and-patch |
-| `ocd-compile-db` | `ocd.pack:main` | Compile `.claude/` content into bundled SQLite database (`content.db`) |
-| `ocd-materialize` | `ocd.materialize:main` | Reconstruct markdown files from `content.db` to target directory; `--vendor` flag materializes to vendor-specific formats (aider, cursor, copilot, windsurf, amazonq, all, agents-md) |
-| `ocd-vendors` | `ocd.materialize:main` | Alias for `ocd-materialize` — vendor format adapter entry point |
+### Umbrella CLI (`ocd <subcommand>`)
 
-All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
+All user-facing commands are available through the `ocd` umbrella CLI. The
+`ocd` command dispatches to the appropriate module based on the subcommand.
+
+| Subcommand | Module | Purpose |
+| ----------------------------- | ------------------- | ------------------------------------------------------------------ |
+| `ocd init` | `ocd.cli` | Scaffold `USER/`, seed templates, install deps/hooks |
+| `ocd shell` | `ocd.cli` | Start interactive shell with OCD environment |
+| `ocd format` | `ocd.format` | Run all formatters with auto-fix |
+| `ocd kb query` | `ocd.relevance` | TF-IDF relevance query against KB index |
+| `ocd route` | `ocd.router` | Route user request to optimal agent(s) |
+| `ocd standards` | `ocd.standards` | Manage standards hash reference (verify, update) |
+| `ocd fix-cycle` | `ocd.fix` | Closed-loop fix: format → ruff fix → re-lint → verify |
+| `ocd lint-and-fix` | `ocd.fix` | Batch lint-and-fix for all matching files |
+| `ocd test-and-fix` | `ocd.fix` | Run pytest, apply fixes only if baseline passes |
+| `ocd security-scan-and-patch` | `ocd.fix` | Semgrep scan with safe auto-fixes |
+| `ocd check` | `ocd.check` | Fast local quality gate (standards + secrets) |
+| `ocd ci-check` | `ocd.ci_check` | Full local CI mirror (lints + tests) |
+| `ocd verify-commit` | `ocd.verify_commit` | Verify commit messages for AI attribution |
+| `ocd scan-secrets` | `ocd.scan_secrets` | Scan for secrets using gitleaks |
+| `ocd materialize` | `ocd.materialize` | Reconstruct files from `content.db`; `--vendor` for vendor formats |
+| `ocd compile` | `ocd.compile` | Daily logs → knowledge articles (LLM compiler) |
+| `ocd flush` | `ocd.flush` | Extract knowledge from session context |
+| `ocd query` | `ocd.query` | Index-guided knowledge base search |
+| `ocd lint-kb` | `ocd.lint` | Structural + LLM contradiction checks on KB |
+| `ocd compile-db` | `ocd.pack` | Compile `.claude/` content into bundled SQLite database |
+| `ocd pre-push` | `ocd.pre_push` | Diff-aware pre-push test runner |
+
+### Hook Subcommands
+
+Hook commands route through the `ocd` umbrella CLI via `ocd hook <name>`.
+They are invoked by Claude Code hooks (`.claude/settings.json`) and git hooks (`git_hooks/`).
+
+| Command | Module | Invoked by |
+| ------------------------ | ------------------------- | ------------------------------------------ |
+| `ocd hook session-start` | `ocd.hooks.session_start` | Claude Code SessionStart hook |
+| `ocd hook session-end` | `ocd.hooks.session_end` | Claude Code SessionEnd hook |
+| `ocd hook pre-compact` | `ocd.hooks.pre_compact` | Claude Code PreCompact hook |
+| `ocd hook format-work` | `ocd.hooks.format_work` | Claude Code PostToolUse hook |
+| `ocd hook lint-work` | `ocd.hooks.lint_work` | Claude Code PostToolUse + PreToolUse hooks |
+| `ocd hook verify-commit` | `ocd.verify_commit` | Git commit-msg hook |
+| `ocd hook ci-check` | `ocd.ci_check` | Git pre-push hook |
+
+The single `ocd` entry point is defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
 
 ## Bundled Content Database
 
 The `content.db` SQLite database ships inside the Python wheel. It is compiled
-at build time by `ocd-compile-db` from `.claude/` source files and
-force-included via hatch config. At runtime, `ocd-materialize` reconstructs
+at build time by `ocd compile-db` from `.claude/` source files and
+force-included via hatch config. At runtime, `ocd materialize` reconstructs
 markdown files to any target directory.
 
 ### Database Schema
@@ -293,10 +316,10 @@ markdown files to any target directory.
 ### Build/Deploy Flow
 
 ```bash
-ocd-compile-db                          # compile .claude/ → content.db
-ocd-materialize                         # materialize content.db → .claude/
-ocd-materialize -t /path/.cursor       # materialize to any agent directory
-ocd-materialize -t /path/.copilot -f    # overwrite existing files
+ocd compile-db                          # compile .claude/ → content.db
+ocd materialize                         # materialize content.db → .claude/
+ocd materialize -t /path/.cursor       # materialize to any agent directory
+ocd materialize -t /path/.copilot -f    # overwrite existing files
 ```
 
 ## CI Pipeline
@@ -309,7 +332,7 @@ Stages 3–4 run only when Python code changes.
 | ------------ | ----------------------- | ---------------------------------------- | ---------------------- |
 | 1 (detect) | `changes` | `dorny/paths-filter` | always |
 | 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | always |
-| 1 (gate) | `verify-standards` | `ocd-standards --verify` | always |
+| 1 (gate) | `verify-standards` | `ocd standards --verify` | always |
 | 2 (parallel) | `lint-yaml` | yamllint | YAML/workflow changes |
 | 2 (parallel) | `lint-shell` | shellcheck | `git_hooks/**` changes |
 | 2 (parallel) | `lint-markdown` | mdformat | `**/*.md` changes |
@@ -319,8 +342,8 @@ Stages 3–4 run only when Python code changes.
 | 2 (parallel) | `lint-sql` | sqlfluff | SQL changes |
 | 2 (parallel) | `scan-deps` | trivy fs (reads `trivy.yaml`) | Python changes |
 | 2 (parallel) | `sast-scan` | semgrep (reads `.semgrep.yml`) | Python changes |
-| 3 (after 2) | `lint-python` | `ocd-compile-db` + ruff + mypy | Python changes |
-| 4 (after 3) | `test-python` | `ocd-compile-db` + pytest | Python changes |
+| 3 (after 2) | `lint-python` | `ocd compile-db` + ruff + mypy | Python changes |
+| 4 (after 3) | `test-python` | `ocd compile-db` + pytest | Python changes |
 
 Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` only. Branch protection on `main` requires passing CI, signed commits, and resolved conversations.
 
@@ -441,28 +464,28 @@ The sandbox restricts Claude's filesystem access at the process level:
 ## Pipeline Commands
 
 ```bash
-ocd-compile                              # compile new/changed logs
-ocd-compile --all                         # force recompile
-ocd-compile --file USER/logs/daily/<date>.md # compile specific log
-ocd-compile --manifest                   # rebuild agent manifest after compile
-ocd-lint-kb                              # full lint (structural + LLM)
-ocd-lint-kb --structural-only             # skip LLM checks
-ocd-query "question"                     # query the KB
-ocd-query "q" --file-back                # query + file answer
+ocd compile                              # compile new/changed logs
+ocd compile --all                         # force recompile
+ocd compile --file USER/logs/daily/<date>.md # compile specific log
+ocd compile --manifest                   # rebuild agent manifest after compile
+ocd lint-kb                              # full lint (structural + LLM)
+ocd lint-kb --structural-only             # skip LLM checks
+ocd query "question"                     # query the KB
+ocd query "q" --file-back                # query + file answer
 ocd format                                # run all formatters with auto-fix
 ocd kb query --relevant-to "auth redirect" # TF-IDF relevance query (3-5 articles)
-ocd-kb-query --build-index               # rebuild KB search index
+ocd kb query --build-index               # rebuild KB search index
 ocd route "find dead code"               # route request to optimal agent(s)
-ocd-route --build-manifest               # rebuild agent manifest
+ocd route --build-manifest               # rebuild agent manifest
 ocd standards                            # print current standards reference
-ocd-standards --verify                    # verify hash matches content
-ocd-standards --update                   # recompute and update hash in frontmatter
+ocd standards --verify                    # verify hash matches content
+ocd standards --update                   # recompute and update hash in frontmatter
 ocd fix-cycle <file>                    # detect-fix-verify cycle on a single file
 ocd lint-and-fix <path>                 # fix all matching files under path
 ocd test-and-fix                         # fix + verify tests still pass
 ocd security-scan-and-patch              # semgrep scan + categorize findings
-ocd-compile-db                           # compile .claude/ → content.db
-ocd-materialize                          # materialize content.db → .claude/
-ocd-materialize -t /path/.cursor        # materialize to custom target
-ocd-materialize -f                       # overwrite existing files
+ocd compile-db                           # compile .claude/ → content.db
+ocd materialize                          # materialize content.db → .claude/
+ocd materialize -t /path/.cursor        # materialize to custom target
+ocd materialize -f                       # overwrite existing files
 ```

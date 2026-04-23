@@ -1,8 +1,10 @@
-"""SessionEnd hook - captures conversation transcript for memory extraction.
+"""SessionEnd hook — captures conversation transcript for memory extraction.
 
 When a Claude Code session ends, this hook reads the transcript path from
 stdin, extracts conversation context, and spawns flush as a background
 process to extract knowledge into the daily log.
+
+Invoked via `ocd hook session-end`.
 
 The hook itself does NO API calls - only local file I/O for speed (<10s).
 """

@@ -5,7 +5,7 @@ pre-extracted conversation context from a .md file, uses the Claude Agent SDK
 to decide what's worth saving, and appends the result to today's daily log.
 
 Usage:
-    ocd-flush <context_file.md> <session_id>
+    ocd flush <context_file.md> <session_id>
 """
 
 from __future__ import annotations

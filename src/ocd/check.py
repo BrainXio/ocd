@@ -39,7 +39,7 @@ def _standards_verify() -> tuple[bool, str]:
         return True, f"standards: v{result['version']} [{result['computed_hash']}]"
     return False, (
         f"standards: hash mismatch (stored={result['stored_hash']}, "
-        f"computed={result['computed_hash']}) — run 'ocd-standards --update'"
+        f"computed={result['computed_hash']}) — run 'ocd standards --update'"
     )
 
 

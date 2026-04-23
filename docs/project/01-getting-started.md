@@ -39,8 +39,8 @@ Verify the entry points and hooks are installed:
 ```bash
 source .venv/bin/activate
 
-which ocd-session-start ocd-lint-work
-# Should resolve to .venv/bin/ocd-session-start, etc.
+which ocd
+# Should resolve to .venv/bin/ocd
 
 ls -la .git/hooks/pre-commit .git/hooks/commit-msg
 # Both should be symlinks pointing to git_hooks/
@@ -65,7 +65,7 @@ claude
 
 The venv must be active before starting Claude — otherwise the hook commands won't be on PATH and sessions will start without knowledge injection or lint checks. See [development setup](07-development.md) for details.
 
-The `ocd-session-start` hook runs automatically and injects:
+The `ocd hook session-start` hook runs automatically and injects:
 
 - The current date
 - The full knowledge base index from `USER/knowledge/index.md`
@@ -81,7 +81,7 @@ Create a feature branch and make an edit:
 git checkout -b feat/my-change
 ```
 
-Edit a file — for example, add a line to `project/01-getting-started.md`. The `ocd-lint-work --edit` hook runs after every Write/Edit and lints the changed file. If mdformat, ruff, or another linter finds issues, you see the error immediately.
+Edit a file — for example, add a line to `project/01-getting-started.md`. The `ocd hook lint-work --edit` hook runs after every Write/Edit and lints the changed file. If mdformat, ruff, or another linter finds issues, you see the error immediately.
 
 ## 4. Commit the Change
 
@@ -93,7 +93,7 @@ git commit -m "feat: describe what changed"
 Two hooks fire:
 
 - **pre-commit** — confirms you're not on `main` and scans staged changes for secrets (gitleaks)
-- **ocd-lint-work --commit** — lints all staged files
+- **ocd hook lint-work --commit** — lints all staged files
 
 If the commit message contains AI attribution (`Co-Authored-By:`, `Generated with`, `[AI]`), the `commit-msg` hook rejects it.
 
@@ -109,9 +109,9 @@ The `pre-push` hook runs `pytest -q` before allowing the push. If tests fail, th
 
 ## 6. End the Session
 
-When the session ends, `ocd-session-end` captures the transcript and spawns `ocd-flush` as a background process. Flush extracts structured knowledge and appends it to `USER/logs/daily/YYYY-MM-DD.md`.
+When the session ends, `ocd hook session-end` captures the transcript and spawns `ocd flush` as a background process. Flush extracts structured knowledge and appends it to `USER/logs/daily/YYYY-MM-DD.md`.
 
-After 18:00 local time, flush automatically triggers `ocd-compile` if today's log hasn't been compiled yet. Compile transforms daily log entries into persistent knowledge articles in `USER/knowledge/`.
+After 18:00 local time, flush automatically triggers `ocd compile` if today's log hasn't been compiled yet. Compile transforms daily log entries into persistent knowledge articles in `USER/knowledge/`.
 
 On your next session, those compiled articles appear in the KB index injected at startup. The cycle continues.
 
