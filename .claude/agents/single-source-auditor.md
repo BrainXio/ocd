@@ -69,10 +69,10 @@ Report findings in this structure:
 
 ### Duplicated Path Patterns
 
-| Path Fragment       | Occurrences | Should Be Constant               |
-| ------------------- | ----------- | -------------------------------- |
-| `USER/logs/daily/`     | 4 files     | YES — use `config.DAILY_DIR`     |
-| `USER/knowledge/` | 3 files     | YES — use `config.KNOWLEDGE_DIR` |
+| Path Fragment      | Occurrences | Should Be Constant               |
+| ------------------ | ----------- | -------------------------------- |
+| `USER/logs/daily/` | 4 files     | YES — use `config.DAILY_DIR`     |
+| `USER/knowledge/`  | 3 files     | YES — use `config.KNOWLEDGE_DIR` |
 
 ### Duplicated Config (CI vs Local)
 
