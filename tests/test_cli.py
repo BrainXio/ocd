@@ -27,7 +27,6 @@ class TestInitAgentDir:
         assert (user / "agents" / "tasks").is_dir()
         assert (user / "agents" / "runtime").is_dir()
         assert (user / "cache").is_dir()
-        assert (user / "worktrees").is_dir()
 
     def test_idempotent(self, tmp_path):
         _init_agent_dir(tmp_path)

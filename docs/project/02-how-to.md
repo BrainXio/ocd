@@ -231,3 +231,25 @@ docker run --rm --entrypoint="" ghcr.io/brainxio/ocd:1.2.3 whoami  # ocd
 ```
 
 See [containers](09-containers.md) for the full pipeline documentation.
+
+## Run Autonomous Fix Loops
+
+The `ocd autofix` command wraps the existing fix-cycle commands inside an iterative engine that runs in isolated Git worktrees. It detects violations, applies deterministic fixes, and verifies convergence — without ever modifying the main working tree directly.
+
+```bash
+# Fix a single file (fix-cycle strategy)
+ocd autofix src/ocd/config.py
+
+# Fix all files under a path (lint-and-fix strategy)
+ocd autofix src/ocd/ --batch
+
+# Limit iterations (default: 5)
+ocd autofix src/ocd/config.py --max-iterations 3
+
+# Report only — no merge, worktree is cleaned up
+ocd autofix src/ocd/config.py --dry-run
+```
+
+The loop iterates detect-fix-verify until no violations remain or max iterations is reached. On convergence, it validates the worktree and merges the fix branch. If convergence fails or validation fails, the worktree is preserved under `.claude/worktrees/` for manual review.
+
+All loop iterations are logged to `USER/state/autofix-loop.jsonl`.

@@ -10,6 +10,7 @@ import pytest
 # so the recursion guard in main() doesn't skip hook logic during tests.
 os.environ.pop("CLAUDE_INVOKED_BY", None)
 
+import ocd.autofix
 import ocd.config
 import ocd.flush
 import ocd.hooks.hookslib
@@ -49,7 +50,6 @@ def tmp_agent_dir(tmp_path):
     (knowledge / "log.md").write_text("# Build Log\n")
     (tmp_path / "reports").mkdir()
     (tmp_path / "cache").mkdir()
-    (tmp_path / "worktrees").mkdir()
     (tmp_path / "agents" / "tasks").mkdir(parents=True)
     (tmp_path / "agents" / "runtime").mkdir(parents=True)
     return tmp_path
@@ -105,6 +105,8 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "SKILLS_DIR": tmp_agent_dir.parent / ".claude" / "skills" / "ocd",
         "STANDARDS_FILE": tmp_agent_dir.parent / ".claude" / "skills" / "ocd" / "standards.md",
         "SESSION_CARD_FILE": state_dir / "session-card.md",
+        "WORKTREES_DIR": tmp_agent_dir.parent / ".claude" / "worktrees",
+        "AUTOFIX_LOG": state_dir / "autofix-loop.jsonl",
         "VISION_FILE": tmp_agent_dir / "VISION.md",
         "USER_STANDARDS_FILE": tmp_agent_dir / "STANDARDS.md",
         "VISION_LOG_FILE": tmp_agent_dir / "logs" / "vision.log",
@@ -116,6 +118,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
 
     # Patch modules that imported these names directly
     for module in (
+        ocd.autofix,
         ocd.utils,
         ocd.hooks.hookslib,
         ocd.flush,
@@ -189,6 +192,40 @@ def sample_transcript(tmp_path):
     path = tmp_path / "transcript.jsonl"
     path.write_text("\n".join(lines))
     return path
+
+
+# ── Git repo fixture ───────────────────────────────────────────────────────
+
+
+@pytest.fixture
+def tmp_git_repo(tmp_path):
+    """Create a minimal git repo with one commit, for worktree tests."""
+    import subprocess
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init"], cwd=str(repo), check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@test.com"],
+        cwd=str(repo),
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=str(repo),
+        check=True,
+        capture_output=True,
+    )
+    (repo / "README.md").write_text("# test\n")
+    subprocess.run(["git", "add", "README.md"], cwd=str(repo), check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "initial"],
+        cwd=str(repo),
+        check=True,
+        capture_output=True,
+    )
+    return repo
 
 
 # ── Recursion guard ─────────────────────────────────────────────────────

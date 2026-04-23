@@ -156,7 +156,7 @@ Systematic incorporation of best practices from Aider, Superpowers, and top Clau
 **Implementation approach:**
 
 1. Extend `manifest.json` with a `tasks` array: `{id, status, claimed_by, branch}`. The `ocd route` command already returns top-3 agents; add `ocd claim <task-id>` and `ocd complete <task-id>` subcommands that update the board atomically.
-1. Integrate task board with worktree creation: `ocd claim <task-id>` spins up a worktree in `USER/worktrees/`, `ocd complete` merges and cleans up.
+1. Integrate task board with worktree creation: `ocd claim <task-id>` spins up a worktree in `.claude/worktrees/`, `ocd complete` merges and cleans up.
 1. Quality gate on task completion: before marking a task done, run `ocd fix-cycle` on modified files (O.C.D. already has the closed-loop fix commands).
 
 **Impact:** Medium effort. Item 1 is a manifest schema extension + 2 CLI commands (2–3 days). Item 2 is worktree orchestration (3–5 days). Item 3 is hook integration (1 day).

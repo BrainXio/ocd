@@ -3,7 +3,7 @@ title: Explanation
 aliases: [explanation, concepts, architecture, rationale]
 tags: [explanation]
 created: 2026-04-17
-updated: 2026-04-20
+updated: 2026-04-23
 ---
 
 Why things are the way they are. This is not a guide for what to do — see [how-to](02-how-to.md) for that. This is for understanding the design.
@@ -28,14 +28,14 @@ The project has four distinct areas:
 src/ocd/            Installable Python package (hooks, scripts, config, utils)
 git_hooks/          Shell git hooks (commit-msg, pre-commit) + setup script
 USER/             Data — daily logs, knowledge base, state (git-ignored)
-.claude/            LLM-Processor config — settings.json, skills/, agents/
+.claude/            LLM-Processor config — settings.json, skills/, agents/, worktrees/
 ```
 
 - **Project root** — The code being developed. `pyproject.toml`, `src/ocd/`, `tests/`, and `docs/` live here.
 - **`src/ocd/`** — The installable Python package. The `ocd` umbrella CLI (including `ocd hook` subcommands) is defined in `pyproject.toml` and installed by `uv sync`. This replaces the old pattern of running scripts with `uv --directory .claude run python scripts/...`.
 - **`git_hooks/`** — Bash git hooks and their setup script. Symlinks from `.git/hooks/` point here, not to `.claude/hooks/`.
 - **`USER/`** — Conversation data and compiled knowledge. Isolated from git via `.gitignore`. Each instance has its own `USER/` data.
-- **`.claude/`** — Claude Code configuration only: `settings.json` (hooks, permissions), `skills/` (language standards), `agents/` (subagent definitions). No Python code lives here.
+- **`.claude/`** — Claude Code configuration only: `settings.json` (hooks, permissions), `skills/` (language standards), `agents/` (subagent definitions), `worktrees/` (isolated autofix worktrees). No Python code lives here.
 
 This separation means you can share the project and source code without exposing conversation data, and you can reset `USER/` without losing the automation infrastructure.
 
