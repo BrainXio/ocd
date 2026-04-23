@@ -25,11 +25,11 @@ from ocd.config import (
     KB_INDEX_JSON,
     KB_INJECTION_COUNT,
     KNOWLEDGE_DIR,
-    OCD_DB,
     STATE_DIR,
     VEC_WEIGHT_QUALITY,
     VEC_WEIGHT_TFIDF,
     VEC_WEIGHT_VECTOR,
+    WIKI_DB,
 )
 from ocd.utils import file_hash, list_wiki_articles, load_state
 
@@ -257,16 +257,16 @@ def _extract_details(content: str) -> str:
 
 
 def _build_index_from_db() -> list[dict[str, Any]] | None:
-    """Read articles from ocd.db and return TF-IDF-ready entries.
+    """Read articles from knowledge.db and return TF-IDF-ready entries.
 
     Returns None if the database doesn't exist or has no articles.
     """
     import sqlite3
 
-    if not OCD_DB.exists():
+    if not WIKI_DB.exists():
         return None
 
-    db = sqlite3.connect(str(OCD_DB))
+    db = sqlite3.connect(str(WIKI_DB))
     try:
         rows = db.execute(
             "SELECT path, title, tags, aliases, sources, body, hash, updated FROM articles"
@@ -320,7 +320,7 @@ def _build_index_from_db() -> list[dict[str, Any]] | None:
 def build_kb_index_json(use_db: bool = True) -> dict[str, Any]:
     """Scan all KB articles and build a search index with TF-IDF metadata.
 
-    When use_db is True and ocd.db exists, reads articles from the database
+    When use_db is True and knowledge.db exists, reads articles from the database
     instead of flat files. Falls back to flat files when the database is
     unavailable.
 
@@ -539,7 +539,7 @@ def hybrid_score_articles(
 ) -> list[dict[str, Any]]:
     """Score articles using hybrid TF-IDF + vector + quality weighting.
 
-    When vector support is available and ocd.db exists, combines three
+    When vector support is available and knowledge.db exists, combines three
     signals: TF-IDF cosine similarity, vector semantic similarity, and
     the OCD quality score. Falls back to TF-IDF + quality when vectors
     are unavailable.
@@ -662,24 +662,38 @@ def build_health_card(index: dict[str, Any]) -> str:
 def load_articles_for_injection(scored: list[dict[str, Any]], max_chars: int = 8000) -> str:
     """Load the full text of scored articles for context injection.
 
-    Reads only the article files that were selected by score_articles,
-    not the entire KB. Truncates to max_chars if needed.
+    Reads article content from the wiki database (primary) with flat-file
+    fallback. Truncates to max_chars if needed.
     """
-    parts = []
+    import sqlite3
+
+    # Build a lookup from DB for article bodies
+    db_bodies: dict[str, str] = {}
+    if WIKI_DB.exists():
+        try:
+            db = sqlite3.connect(str(WIKI_DB))
+            rows = db.execute("SELECT path, body FROM articles").fetchall()
+            db_bodies = {r[0]: r[1] for r in rows if r[1]}
+            db.close()
+        except sqlite3.OperationalError:
+            pass
+
+    parts: list[str] = []
     total = 0
 
     for entry in scored:
-        path = KNOWLEDGE_DIR / entry["path"]
-        if not path.exists():
-            # Try adding .md extension
-            path = KNOWLEDGE_DIR / f"{entry['path']}.md"
-        if not path.exists():
-            continue
-
-        try:
-            content = path.read_text(encoding="utf-8")
-        except OSError:
-            continue
+        # Try DB first, then flat file
+        content: str | None = db_bodies.get(entry["path"])
+        if content is None:
+            path = KNOWLEDGE_DIR / entry["path"]
+            if not path.exists():
+                path = KNOWLEDGE_DIR / f"{entry['path']}.md"
+            if not path.exists():
+                continue
+            try:
+                content = path.read_text(encoding="utf-8")
+            except OSError:
+                continue
 
         # Include the article with its path as header
         header = f"## {entry['path'].replace('.md', '')}"
@@ -729,7 +743,7 @@ def build_relevant_context(
 
     # Score articles — use hybrid search if requested
     if use_vectors:
-        scored = hybrid_score_articles(query, index, db_path=OCD_DB, top_k=top_k)
+        scored = hybrid_score_articles(query, index, db_path=WIKI_DB, top_k=top_k)
     else:
         scored = score_articles(query, index, top_k)
 

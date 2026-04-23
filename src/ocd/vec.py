@@ -1,6 +1,6 @@
 """Semantic vector memory for the knowledge base.
 
-Adds sqlite-vec virtual tables and fastembed embeddings to ocd.db,
+Adds sqlite-vec virtual tables and fastembed embeddings to knowledge.db,
 enabling hybrid search (vector + TF-IDF + quality scoring).
 
 Requires optional ``vec`` extras: ``uv sync --extra vec``.
@@ -21,7 +21,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from ocd.config import OCD_DB, VEC_DIMENSIONS, VEC_EMBEDDING_MODEL
+from ocd.config import VEC_DIMENSIONS, VEC_EMBEDDING_MODEL, WIKI_DB
 
 # ── Schema ───────────────────────────────────────────────────────────────────
 
@@ -349,7 +349,7 @@ def main() -> None:
             print("Vector support not available. Install vec extras: uv sync --extra vec")
             sys.exit(1)
         try:
-            count = rebuild_vectors(OCD_DB, force=args.force)
+            count = rebuild_vectors(WIKI_DB, force=args.force)
             print(f"Rebuilt {count} vector embeddings")
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
@@ -359,7 +359,7 @@ def main() -> None:
         if not is_vec_available():
             print("Vector support not available. Install vec extras: uv sync --extra vec")
             sys.exit(1)
-        db = sqlite3.connect(str(OCD_DB))
+        db = sqlite3.connect(str(WIKI_DB))
         try:
             results = search_vectors(db, args.query, top_k=args.top_k)
         except sqlite3.OperationalError:
@@ -374,7 +374,7 @@ def main() -> None:
             print("No results found.")
 
     elif args.vec_command == "status":
-        info = vec_status(OCD_DB)
+        info = vec_status(WIKI_DB)
         print(f"Vector support: {'available' if info['available'] else 'not installed'}")
         if info.get("db_exists"):
             print(f"  Embeddings: {info.get('embedding_count', 0)}")

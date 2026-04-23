@@ -42,8 +42,7 @@ def tmp_agent_dir(tmp_path):
     knowledge = tmp_path / "knowledge"
     (knowledge / "concepts").mkdir(parents=True)
     (knowledge / "connections").mkdir(parents=True)
-    (knowledge / "qa").mkdir(parents=True)
-    (knowledge / "raw").mkdir(parents=True)
+    (knowledge / "resources").mkdir(parents=True)
     (knowledge / "index.md").write_text(
         "# Knowledge Base Index\n\n"
         "| Article | Summary | Compiled From | Updated |\n"
@@ -96,14 +95,14 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "CONCEPTS_DIR": knowledge_dir / "concepts",
         "CONNECTIONS_DIR": knowledge_dir / "connections",
         "QA_DIR": knowledge_dir / "qa",
+        "RESOURCES_DIR": knowledge_dir / "resources",
+        "WIKI_DB": tmp_agent_dir / "knowledge.db",
         "REPORTS_DIR": tmp_agent_dir / "reports",
         "STATE_DIR": state_dir,
         "STATE_FILE": state_dir / "state.json",
         "FLUSH_STATE_FILE": state_dir / "last-flush.json",
         "FLUSH_LOG_FILE": state_dir / "flush.log",
         "INDEX_FILE": knowledge_dir / "index.md",
-        "RAW_DIR": knowledge_dir / "raw",
-        "OCD_DB": knowledge_dir / "ocd.db",
         "VEC_DIMENSIONS": 384,
         "VEC_EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
         "VEC_WEIGHT_TFIDF": 0.4,
@@ -170,10 +169,10 @@ def wiki_article(tmp_agent_dir, mock_config_paths):
 
 @pytest.fixture
 def tmp_raw_kb(tmp_agent_dir, mock_config_paths):
-    """Factory fixture that creates sample raw articles in knowledge/raw/."""
+    """Factory fixture that creates sample wiki articles in knowledge/ subdirs."""
 
     def _create(subdir: str, name: str, content: str) -> Path:
-        path = tmp_agent_dir / "knowledge" / "raw" / subdir / f"{name}.md"
+        path = tmp_agent_dir / "knowledge" / subdir / f"{name}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
         return path

@@ -7,7 +7,7 @@ this database into any target directory.
 
 Usage:
     ocd compile-db                     # compile to default location
-    ocd compile-db -o /tmp/ocd.db      # compile to specific path
+    ocd compile-db -o /tmp/content.db    # compile to specific path
     ocd compile-db --source /path/.claude  # use non-default source
 """
 
