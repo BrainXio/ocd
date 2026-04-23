@@ -140,7 +140,7 @@ Hooks receive a JSON object on stdin:
 ### State Files
 
 | File | Purpose |
-| ------------------------------------ | ----------------------------------------------------------------------------- |
+| ------------------------------------ | ------------------------------------------------------------------------------ |
 | `USER/state/format-violations.jsonl` | Per-line JSON records of auto-format corrections (file, formatter, timestamp) |
 | `USER/state/flush.log` | Background flush process log |
 | `USER/state/state.json` | Session state |
@@ -148,6 +148,7 @@ Hooks receive a JSON object on stdin:
 | `USER/state/kb-index.json` | TF-IDF search index for KB relevance queries |
 | `USER/state/manifest.json` | Agent keyword manifest for task routing |
 | `USER/state/session-card.md` | Session state card for post-compaction recovery (FIFO, 1,200 char cap) |
+| `USER/state/autofix-loop.jsonl` | Per-line JSON records of autofix loop iterations (intent, branch, convergence) |
 | `.claude/skills/ocd/standards.md` | Nine Standards full text with version + hash frontmatter |
 
 ## Claude Code Rules
@@ -279,6 +280,7 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 | `ocd lint-kb` | `ocd.lint` | Structural + LLM contradiction checks on KB |
 | `ocd compile-db` | `ocd.pack` | Compile `.claude/` content into bundled SQLite database |
 | `ocd pre-push` | `ocd.pre_push` | Diff-aware pre-push test runner |
+| `ocd autofix` | `ocd.autofix` | Self-corrective fix loop in isolated worktree |
 
 ### Hook Subcommands
 
@@ -460,6 +462,8 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Standards file | `.claude/skills/ocd/standards.md` | `ocd.config` |
 | Max session card chars | 1,200 | `ocd.config` |
 | Session card file | `USER/state/session-card.md` | `ocd.config` |
+| Worktrees directory | `.claude/worktrees/` | `ocd.config` |
+| Autofix audit log | `USER/state/autofix-loop.jsonl` | `ocd.config` |
 
 ## Pipeline Commands
 
@@ -484,6 +488,10 @@ ocd fix-cycle <file>                    # detect-fix-verify cycle on a single fi
 ocd lint-and-fix <path>                 # fix all matching files under path
 ocd test-and-fix                         # fix + verify tests still pass
 ocd security-scan-and-patch              # semgrep scan + categorize findings
+ocd autofix <target>                    # self-corrective fix loop in isolated worktree
+ocd autofix <target> --batch            # lint-and-fix strategy
+ocd autofix <target> --max-iterations N # override max iterations
+ocd autofix <target> --dry-run          # report only, no merge
 ocd compile-db                           # compile .claude/ → content.db
 ocd materialize                          # materialize content.db → .claude/
 ocd materialize -t /path/.cursor        # materialize to custom target

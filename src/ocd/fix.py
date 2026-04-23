@@ -56,15 +56,23 @@ def _env_with_venv() -> dict[str, str]:
     return env
 
 
+def _resolve_root(project_root: Path | None = None) -> Path:
+    """Return the effective project root, falling back to PROJECT_ROOT."""
+    return project_root if project_root is not None else PROJECT_ROOT
+
+
 def _tool_available(binary: str) -> bool:
     """Check if a tool binary exists in venv or on PATH."""
     return (VENV_BIN / binary).exists() or shutil.which(binary) is not None
 
 
-def _run_formatters() -> tuple[list[str], list[str]]:
+def _run_formatters(
+    project_root: Path | None = None,
+) -> tuple[list[str], list[str]]:
     """Run all safe auto-fix formatters. Returns (fixed, errors)."""
     from ocd.format import FORMATTERS, _config_present, _has_matching_files, _tool_available
 
+    root = _resolve_root(project_root)
     fixed: list[str] = []
     errors: list[str] = []
     env = _env_with_venv()
@@ -81,7 +89,7 @@ def _run_formatters() -> tuple[list[str], list[str]]:
 
         # Resolve callable commands
         if callable(command):
-            args = command(str(PROJECT_ROOT))
+            args = command(str(root))
             if not args:
                 continue
         elif isinstance(command, list):
@@ -95,7 +103,7 @@ def _run_formatters() -> tuple[list[str], list[str]]:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=str(PROJECT_ROOT),
+                cwd=str(root),
                 env=env,
             )
             if result.returncode == 0:
@@ -111,8 +119,9 @@ def _run_formatters() -> tuple[list[str], list[str]]:
     return fixed, errors
 
 
-def _run_ruff_fix_on_file(file_path: str) -> tuple[bool, str]:
+def _run_ruff_fix_on_file(file_path: str, *, project_root: Path | None = None) -> tuple[bool, str]:
     """Run ruff check --fix on a single file. Returns (success, output)."""
+    root = _resolve_root(project_root)
     if not _tool_available("ruff"):
         return False, "ruff not installed"
     env = _env_with_venv()
@@ -122,7 +131,7 @@ def _run_ruff_fix_on_file(file_path: str) -> tuple[bool, str]:
             capture_output=True,
             text=True,
             timeout=15,
-            cwd=str(PROJECT_ROOT),
+            cwd=str(root),
             env=env,
         )
         output = (result.stderr + result.stdout).strip()
@@ -131,8 +140,9 @@ def _run_ruff_fix_on_file(file_path: str) -> tuple[bool, str]:
         return False, str(e)
 
 
-def _run_lint_check(file_path: str) -> tuple[bool, str]:
+def _run_lint_check(file_path: str, *, project_root: Path | None = None) -> tuple[bool, str]:
     """Run ruff check on a single file (no fix). Returns (clean, output)."""
+    root = _resolve_root(project_root)
     if not _tool_available("ruff"):
         return True, "ruff not installed — skipping lint check"
     env = _env_with_venv()
@@ -142,7 +152,7 @@ def _run_lint_check(file_path: str) -> tuple[bool, str]:
             capture_output=True,
             text=True,
             timeout=10,
-            cwd=str(PROJECT_ROOT),
+            cwd=str(root),
             env=env,
         )
         output = (result.stderr + result.stdout).strip()
@@ -151,8 +161,9 @@ def _run_lint_check(file_path: str) -> tuple[bool, str]:
         return True, str(e)
 
 
-def _run_mypy_check(paths: list[str]) -> tuple[bool, str]:
+def _run_mypy_check(paths: list[str], *, project_root: Path | None = None) -> tuple[bool, str]:
     """Run mypy on given paths. Returns (clean, output)."""
+    root = _resolve_root(project_root)
     if not _tool_available("mypy"):
         return True, "mypy not installed"
     env = _env_with_venv()
@@ -162,7 +173,7 @@ def _run_mypy_check(paths: list[str]) -> tuple[bool, str]:
             capture_output=True,
             text=True,
             timeout=30,
-            cwd=str(PROJECT_ROOT),
+            cwd=str(root),
             env=env,
         )
         output = (result.stderr + result.stdout).strip()
@@ -171,7 +182,7 @@ def _run_mypy_check(paths: list[str]) -> tuple[bool, str]:
         return True, str(e)
 
 
-def fix_cycle(file_path: str) -> FixResult:
+def fix_cycle(file_path: str, *, project_root: Path | None = None) -> FixResult:
     """Run detect-fix-verify cycle on a single file.
 
     1. Run all formatters (safe auto-fix)
@@ -182,11 +193,11 @@ def fix_cycle(file_path: str) -> FixResult:
     result = FixResult()
 
     # Step 1: Run all formatters
-    fixed_formatters, fmt_errors = _run_formatters()
+    fixed_formatters, fmt_errors = _run_formatters(project_root=project_root)
     result.fixed.extend(fixed_formatters)
 
     # Step 2: Run ruff fix on the specific file
-    ruff_ok, ruff_output = _run_ruff_fix_on_file(file_path)
+    ruff_ok, ruff_output = _run_ruff_fix_on_file(file_path, project_root=project_root)
     if ruff_ok:
         if "fixed" in ruff_output.lower() or ruff_output:
             result.fixed.append(f"ruff-fix:{file_path}")
@@ -199,7 +210,7 @@ def fix_cycle(file_path: str) -> FixResult:
     # Step 3: Re-lint to verify
     ext = Path(file_path).suffix.lstrip(".")
     if ext == "py":
-        clean, lint_output = _run_lint_check(file_path)
+        clean, lint_output = _run_lint_check(file_path, project_root=project_root)
         if not clean:
             result.remaining.append(f"ruff-check:{file_path}: {lint_output}")
 
@@ -208,20 +219,21 @@ def fix_cycle(file_path: str) -> FixResult:
     return result
 
 
-def lint_and_fix(path: str) -> FixResult:
+def lint_and_fix(path: str, *, project_root: Path | None = None) -> FixResult:
     """Run fix cycle on all matching files under a path.
 
     Finds files by extension, applies formatters + safe lint fixes,
     and reports aggregate results.
     """
-    target = PROJECT_ROOT / path
+    root = _resolve_root(project_root)
+    target = root / path
     if not target.exists():
         return FixResult(remaining=[f"path not found: {path}"], exit_code=1)
 
     # Collect Python files (the primary fixable target)
     if target.is_dir():
         py_files = sorted(
-            str(f.relative_to(PROJECT_ROOT))
+            str(f.relative_to(root))
             for f in target.rglob("*.py")
             if ".venv" not in f.parts and "__pycache__" not in f.parts
         )
@@ -231,14 +243,14 @@ def lint_and_fix(path: str) -> FixResult:
         py_files = []
 
     # Run formatters once for all files
-    fixed_formatters, fmt_errors = _run_formatters()
+    fixed_formatters, fmt_errors = _run_formatters(project_root=project_root)
 
     result = FixResult()
     result.fixed.extend(fixed_formatters)
 
     # Run ruff fix on each Python file
     for file_path in py_files:
-        ruff_ok, ruff_output = _run_ruff_fix_on_file(file_path)
+        ruff_ok, ruff_output = _run_ruff_fix_on_file(file_path, project_root=project_root)
         if ruff_ok:
             if ruff_output:
                 result.fixed.append(f"ruff-fix:{file_path}")
@@ -249,7 +261,7 @@ def lint_and_fix(path: str) -> FixResult:
 
     # Re-lint all Python files
     for file_path in py_files:
-        clean, lint_output = _run_lint_check(file_path)
+        clean, lint_output = _run_lint_check(file_path, project_root=project_root)
         if not clean:
             result.remaining.append(f"ruff-check:{file_path}: {lint_output}")
 
@@ -257,12 +269,13 @@ def lint_and_fix(path: str) -> FixResult:
     return result
 
 
-def test_and_fix() -> FixResult:
+def test_and_fix(*, project_root: Path | None = None) -> FixResult:
     """Run formatters + lint fixes, then verify tests still pass.
 
     Only applies auto-fixes if prior tests were green. If prior tests
     fail, reports the failure without modifying files beyond formatters.
     """
+    root = _resolve_root(project_root)
     result = FixResult()
 
     # Step 1: Run prior tests to establish baseline
@@ -276,7 +289,7 @@ def test_and_fix() -> FixResult:
             capture_output=True,
             text=True,
             timeout=60,
-            cwd=str(PROJECT_ROOT),
+            cwd=str(root),
             env=env,
         )
     except (subprocess.TimeoutExpired, Exception) as e:
@@ -292,12 +305,12 @@ def test_and_fix() -> FixResult:
         )
 
     # Step 2: Baseline green — apply formatters + ruff fix
-    fixed_formatters, fmt_errors = _run_formatters()
+    fixed_formatters, fmt_errors = _run_formatters(project_root=project_root)
     result.fixed.extend(fixed_formatters)
 
     # Run ruff fix on src/ and tests/
     if _tool_available("ruff"):
-        ruff_ok, ruff_output = _run_ruff_fix_on_file("src/")
+        ruff_ok, ruff_output = _run_ruff_fix_on_file("src/", project_root=project_root)
         if ruff_ok:
             result.fixed.append("ruff-fix:src/")
         else:
@@ -312,7 +325,7 @@ def test_and_fix() -> FixResult:
             capture_output=True,
             text=True,
             timeout=60,
-            cwd=str(PROJECT_ROOT),
+            cwd=str(root),
             env=env,
         )
     except (subprocess.TimeoutExpired, Exception) as e:
@@ -330,7 +343,7 @@ def test_and_fix() -> FixResult:
     return result
 
 
-def security_scan_and_patch() -> FixResult:
+def security_scan_and_patch(*, project_root: Path | None = None) -> FixResult:
     """Run semgrep scan and categorize findings.
 
     Findings are categorized into:
@@ -340,6 +353,7 @@ def security_scan_and_patch() -> FixResult:
     Currently only categorizes findings — actual auto-patching is limited to
     known safe patterns. Most findings require manual review.
     """
+    root = _resolve_root(project_root)
     result = FixResult()
 
     if not _tool_available("semgrep"):
@@ -354,7 +368,7 @@ def security_scan_and_patch() -> FixResult:
             capture_output=True,
             text=True,
             timeout=120,
-            cwd=str(PROJECT_ROOT),
+            cwd=str(root),
             env=env,
         )
     except subprocess.TimeoutExpired:

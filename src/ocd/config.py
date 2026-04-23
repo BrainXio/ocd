@@ -98,6 +98,10 @@ BUNDLED_DB_PATH: Path = Path(__file__).parent / "data" / "content.db"
 SESSION_CARD_FILE: Path = STATE_DIR / "session-card.md"
 MAX_SESSION_CARD_CHARS = 1200
 
+# Autonomous fix loop
+WORKTREES_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "worktrees"
+AUTOFIX_LOG: Path = STATE_DIR / "autofix-loop.jsonl"
+
 # Vision roadmap
 VISION_FILE: Path = USER_DIR / "VISION.md"
 USER_STANDARDS_FILE: Path = USER_DIR / "STANDARDS.md"

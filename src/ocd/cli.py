@@ -52,7 +52,6 @@ USER_DIRS = [
         USER_DIR / "agents" / "tasks",
         USER_DIR / "agents" / "runtime",
         USER_DIR / "cache",
-        USER_DIR / "worktrees",
         KNOWLEDGE_DIR / "raw",
         KNOWLEDGE_DIR / "archive",
     ]
@@ -302,6 +301,23 @@ def _cmd_pre_push(args: argparse.Namespace) -> None:
     pre_push_main()
 
 
+def _cmd_autofix(args: argparse.Namespace) -> None:
+    """Self-corrective fix loop in isolated worktree."""
+    from ocd.autofix import main as autofix_main
+
+    argv = ["ocd-autofix"]
+    if args.target:
+        argv.append(args.target)
+    if args.batch:
+        argv.append("--batch")
+    if args.max_iterations:
+        argv.extend(["--max-iterations", str(args.max_iterations)])
+    if args.dry_run:
+        argv.append("--dry-run")
+    sys.argv = argv
+    autofix_main()
+
+
 # ── Hook subcommand handlers ──────────────────────────────────────────────────
 
 
@@ -509,6 +525,16 @@ def _build_parser() -> argparse.ArgumentParser:
     # pre-push
     pp_parser = subparsers.add_parser("pre-push", help="Diff-aware pre-push test runner")
     pp_parser.set_defaults(func=_cmd_pre_push)
+
+    # autofix
+    autofix_parser = subparsers.add_parser(
+        "autofix", help="Self-corrective fix loop in isolated worktree"
+    )
+    autofix_parser.add_argument("target", help="File or directory path to fix")
+    autofix_parser.add_argument("--batch", action="store_true", help="Use lint-and-fix strategy")
+    autofix_parser.add_argument("--max-iterations", type=int, default=5, help="Max loop iterations")
+    autofix_parser.add_argument("--dry-run", action="store_true", help="Report only, no merge")
+    autofix_parser.set_defaults(func=_cmd_autofix)
 
     # hook (nested subcommands for Claude Code and git hook dispatch)
     hook_parser = subparsers.add_parser("hook", help="Hook dispatch commands")
