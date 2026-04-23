@@ -172,8 +172,8 @@ Path-scoped rules load only when matching files are read; unconditional rules lo
 ## Git Hooks
 
 | Hook | Purpose |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `pre-commit` | Block commits on `main` branch; scan staged changes for secrets (gitleaks); lint Dockerfiles (hadolint); auto-format markdown (mdformat) |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | Block commits on `main` branch; block local config files (e.g. `settings.local.json`); scan staged changes for secrets (gitleaks); lint Dockerfiles (hadolint); auto-format markdown (mdformat) |
 | `pre-push` | Run `pytest` before push; abort if tests fail |
 | `commit-msg` | Reject AI attribution in commit messages |
 
@@ -271,7 +271,7 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 | `ocd lint-and-fix` | `ocd.fix` | Batch lint-and-fix for all matching files |
 | `ocd test-and-fix` | `ocd.fix` | Run pytest, apply fixes only if baseline passes |
 | `ocd security-scan-and-patch` | `ocd.fix` | Semgrep scan with safe auto-fixes |
-| `ocd check` | `ocd.check` | Fast local quality gate (standards + secrets) |
+| `ocd check` | `ocd.check` | Fast local quality gate (branch, local config, standards, secrets) |
 | `ocd ci-check` | `ocd.ci_check` | Full local CI mirror (lints + tests) |
 | `ocd verify-commit` | `ocd.verify_commit` | Verify commit messages for AI attribution |
 | `ocd scan-secrets` | `ocd.scan_secrets` | Scan for secrets using gitleaks |
@@ -386,6 +386,7 @@ Stages 3–4 run only when Python code changes.
 | 1 (detect) | `changes` | `dorny/paths-filter` | always |
 | 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | always |
 | 1 (gate) | `verify-standards` | `ocd standards --verify` | always |
+| 1 (gate) | `no-local-config` | `git ls-files --error-unmatch` | always |
 | 2 (parallel) | `lint-yaml` | yamllint | YAML/workflow changes |
 | 2 (parallel) | `lint-shell` | shellcheck | `git_hooks/**` changes |
 | 2 (parallel) | `lint-markdown` | mdformat | `**/*.md` changes |
