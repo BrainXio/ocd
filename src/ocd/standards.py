@@ -5,9 +5,9 @@ version+hash reference (~15 tokens). The full text lives in
 .claude/skills/ocd/stand.md and is injected on demand via `Read`.
 
 Usage:
-    ocd-standards              # print the current reference line
-    ocd-standards --verify     # verify hash matches content, warn on mismatch
-    ocd-standards --update     # recompute and update the hash in frontmatter
+    ocd standards              # print the current reference line
+    ocd standards --verify     # verify hash matches content, warn on mismatch
+    ocd standards --update     # recompute and update the hash in frontmatter
 """
 
 from __future__ import annotations
@@ -132,7 +132,7 @@ def update_standards_hash() -> str | None:
 
 
 def main() -> None:
-    """Entry point for ocd-standards command."""
+    """Entry point for ocd standards command."""
     parser = argparse.ArgumentParser(description="Manage OCD standards hash reference")
     parser.add_argument(
         "--verify", action="store_true", help="Verify hash matches content, warn on mismatch"
@@ -165,7 +165,7 @@ def main() -> None:
                 f"Computed: {result['computed_hash']}",
                 file=sys.stderr,
             )
-            print("Run 'ocd-standards --update' to fix.", file=sys.stderr)
+            print("Run 'ocd standards --update' to fix.", file=sys.stderr)
             sys.exit(1)
         return
 

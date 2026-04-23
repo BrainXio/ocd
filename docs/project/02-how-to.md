@@ -33,11 +33,11 @@ Python hooks live in `src/ocd/hooks/` as part of the installable package. Git ho
 ### Python hook (invoked by Claude Code)
 
 - Create the module in `src/ocd/hooks/` (e.g., `my_hook.py`)
-- Add an entry point in `pyproject.toml` under `[project.scripts]`: `ocd-my-hook = "ocd.hooks.my_hook:main"`
+- Add a handler function in `src/ocd/cli.py` under the `hook` subcommand group
 - Add an entry in `.claude/settings.json` under the appropriate event key (`SessionStart`, `PreCompact`, `SessionEnd`, `PostToolUse`, `PreToolUse`)
-- Set the matcher, command (`ocd-my-hook`), and timeout
+- Set the matcher, command (`ocd hook my-hook`), and timeout
 - Add deny rules in `settings.json` to protect the new hook file
-- Run `uv sync` to install the new entry point
+- Run `uv sync` to install the updated CLI
 
 ### Git hook (invoked by git)
 
@@ -89,28 +89,28 @@ The knowledge pipeline runs automatically, but you can control it manually:
 
 ```bash
 # Compile knowledge from new/changed daily logs
-ocd-compile
+ocd compile
 
 # Force recompile all logs
-ocd-compile --all
+ocd compile --all
 
 # Compile a specific log file
-ocd-compile --file USER/logs/daily/2026-04-17.md
+ocd compile --file USER/logs/daily/2026-04-17.md
 
 # Lint the knowledge base (structural checks only)
-ocd-lint-kb --structural-only
+ocd lint-kb --structural-only
 
 # Lint the knowledge base (structural + LLM contradiction checks)
-ocd-lint-kb
+ocd lint-kb
 
 # Query the knowledge base
-ocd-query "how does the flush pipeline work"
+ocd query "how does the flush pipeline work"
 
 # Query and save answer to a file
-ocd-query "flush pipeline" --file-back
+ocd query "flush pipeline" --file-back
 ```
 
-All commands are installed entry points — run them directly or via `uv run ocd-<command>`.
+All commands are installed entry points — run them directly or via `ocd <command>`.
 
 ## Add External Knowledge
 
@@ -144,14 +144,14 @@ Create a markdown file at `USER/logs/daily/YYYY-MM-DD.md` with structured conten
 ```
 
 ```bash
-ocd-compile --file USER/logs/daily/2026-04-18.md
+ocd compile --file USER/logs/daily/2026-04-18.md
 ```
 
 The compiler will extract concepts and create knowledge articles. The format is advisory — the LLM compiler handles any reasonable markdown. See [explanation](04-explanation.md#the-feedback-loop) for why the pipeline is content-agnostic.
 
 ### Via flush
 
-`ocd-flush` accepts any markdown file — it doesn't validate that the content came from a session:
+`ocd flush` accepts any markdown file — it doesn't validate that the content came from a session:
 
 ```bash
 cat > /tmp/external-knowledge.md << 'EOF'
@@ -160,7 +160,7 @@ Key findings from the Go concurrency documentation:
 - Channels are the primary synchronization primitive
 EOF
 
-ocd-flush /tmp/external-knowledge.md external-ingest
+ocd flush /tmp/external-knowledge.md external-ingest
 ```
 
 Flush sends the content to the LLM, extracts structured knowledge, and appends it to today's daily log.
@@ -171,7 +171,7 @@ There is no automated URL fetching. Fetch web content yourself and route it thro
 
 ```bash
 curl -s https://example.com/docs | pandoc -f html -t markdown > /tmp/fetched.md
-ocd-flush /tmp/fetched.md url-ingest
+ocd flush /tmp/fetched.md url-ingest
 ```
 
 ## Build and Test a Container Image

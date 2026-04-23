@@ -75,4 +75,4 @@ scan-secrets:
 	uv run ocd scan-secrets
 
 verify-standards:
-	uv run ocd-standards --verify
+	uv run ocd standards --verify

@@ -6,12 +6,12 @@ enables deploying the OCD configuration to any agent directory, not just
 .claude/ — for example, .cursor/, .copilot/, etc.
 
 Usage:
-    ocd-materialize                        # materialize to .claude/
-    ocd-materialize -t /path/.claude      # materialize to custom target
-    ocd-materialize --vendor aider          # materialize for Aider
-    ocd-materialize --vendor all            # materialize for all vendors
-    ocd-materialize --force                # overwrite existing files
-    ocd-materialize --db /path/to/db       # use custom database
+    ocd materialize                        # materialize to .claude/
+    ocd materialize -t /path/.claude      # materialize to custom target
+    ocd materialize --vendor aider          # materialize for Aider
+    ocd materialize --vendor all            # materialize for all vendors
+    ocd materialize --force                # overwrite existing files
+    ocd materialize --db /path/to/db       # use custom database
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ def _find_bundled_db() -> Path:
     if installed_db.exists():
         return installed_db
     raise FileNotFoundError(
-        "Cannot find content.db. Run 'ocd-compile-db' to generate it, or specify --db path."
+        "Cannot find content.db. Run 'ocd compile-db' to generate it, or specify --db path."
     )
 
 
@@ -239,7 +239,7 @@ def materialize_vendor(db_path: Path, vendor: str, force: bool = False) -> dict[
 
 
 def main() -> None:
-    """Entry point for ocd-materialize."""
+    """Entry point for ocd materialize command."""
     from ocd.vendors import VENDORS
 
     parser = argparse.ArgumentParser(description="Materialize agent config from content.db")

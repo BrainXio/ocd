@@ -4,6 +4,8 @@ Runs in two modes:
   --edit   : PostToolUse mode, lints the file just edited
   --commit : PreToolUse mode, lints all staged files before a git commit
 
+Invoked via `ocd hook lint-work --edit` or `ocd hook lint-work --commit`.
+
 Reports linters that would apply but are missing (not installed or no config)
 so the agent can inform the user about gaps in lint coverage.
 """

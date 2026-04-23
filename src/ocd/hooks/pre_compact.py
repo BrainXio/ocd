@@ -1,9 +1,11 @@
-"""PreCompact hook - captures conversation transcript before auto-compaction.
+"""PreCompact hook — captures conversation transcript before auto-compaction.
 
 When Claude Code's context window fills up, it auto-compacts (summarizes and
 discards detail). This hook fires BEFORE that happens, extracting conversation
 context and spawning flush to extract knowledge that would otherwise
 be lost to summarization.
+
+Invoked via `ocd hook pre-compact`.
 
 The hook itself does NO API calls - only local file I/O for speed (<10s).
 """

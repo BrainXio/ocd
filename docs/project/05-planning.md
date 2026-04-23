@@ -14,10 +14,10 @@ All five TP items shipped (TP-1 through TP-5, 2026-04-17 to 2026-04-21). Project
 
 | ID | Feature | New Module | New Entry Point |
 | ---- | -------------------------------------------- | ----------------- | --------------- |
-| TP-1 | Smart KB Injection (TF-IDF relevance-ranked) | `relevance.py` | `ocd-kb-query` |
-| TP-2 | Lightweight Task Router (keyword matcher) | `router.py` | `ocd-route` |
-| TP-3 | Standards-as-Reference (hash-gated) | `standards.py` | `ocd-standards` |
-| TP-4 | Closed-Loop Fix Family | `fix.py` | `ocd-fix-cycle` |
+| TP-1 | Smart KB Injection (TF-IDF relevance-ranked) | `relevance.py` | `ocd kb query` |
+| TP-2 | Lightweight Task Router (keyword matcher) | `router.py` | `ocd route` |
+| TP-3 | Standards-as-Reference (hash-gated) | `standards.py` | `ocd standards` |
+| TP-4 | Closed-Loop Fix Family | `fix.py` | `ocd fix-cycle` |
 | TP-5 | Session State Card | `session_card.py` | — |
 
 Generated artifacts (all in `USER/state/`, git-ignored): `kb-index.json`, `manifest.json`, `session-card.md`.
@@ -44,7 +44,7 @@ Linear dependency chain. Each item builds on the one before it. Complete in orde
 | --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------- |
 | 2.1 | Semantic versioning | Automated version bumps from conventional commits | — | Planned |
 | 2.2 | Changelog generation | Auto-generate CHANGELOG.md from commit history | 2.1 | Planned |
-| 2.3 | Release package composition | Bundled SQLite database inside the wheel; `ocd-compile-db` at build time, `ocd-materialize` at runtime | — | Done |
+| 2.3 | Release package composition | Bundled SQLite database inside the wheel; `ocd compile-db` at build time, `ocd materialize` at runtime | — | Done |
 | 2.4 | GitHub Release packaging | Build and attach the `brainxio-ocd` sdist/wheel to GitHub Releases alongside container images | 2.3 | Planned |
 | 2.5 | Release automation | CI job that composes release artifacts, creates a GitHub Release with composed package content, and uploads assets | 2.1, 2.2, 2.4 | Planned |
 | 2.6 | `AGENTS.md` | Instruction file for external agents on which packages and assets to download from this repo and how to set them up in foreign environments | 2.3 | Done |
@@ -54,7 +54,7 @@ Linear dependency chain. Each item builds on the one before it. Complete in orde
 
 All `.claude/` content (agents, rules, skills, standards) is compiled into a
 bundled SQLite database (`content.db`) at build time and shipped inside the
-Python wheel via hatch `force-include`. At runtime, `ocd-materialize`
+Python wheel via hatch `force-include`. At runtime, `ocd materialize`
 reconstructs the markdown files to any target directory (`.claude/`, `.cursor/`,
 `.copilot/`, etc.), letting consumers select only the content they need.
 
@@ -67,7 +67,7 @@ A GitHub Release contains:
 | Container images | Published to GHCR (`ghcr.io/brainxio/ocd-<name>:<version>`) |
 
 The `AGENTS.md` file documents how to install the wheel and run
-`ocd-materialize` to deploy the configuration. The `--vendor` flag materializes
+`ocd materialize` to deploy the configuration. The `--vendor` flag materializes
 to vendor-specific formats: `--vendor aider`, `--vendor cursor`,
 `--vendor copilot`, `--vendor windsurf`, `--vendor amazonq`,
 `--vendor agents-md` (project root AGENTS.md), or `--vendor all`.
@@ -134,7 +134,7 @@ Systematic incorporation of best practices from Aider, Superpowers, and top Clau
 **Implementation approach:**
 
 1. Add `ocd review` command that runs the Nine Standards scoring as a structured JSON gate. Returns non-zero exit on critical issues, blockable by hooks or CI.
-1. Add `ocd clarify` command that checks task descriptions against the agent manifest (already has `ocd-route`). If relevance score is below threshold, emits a structured clarification prompt instead of proceeding.
+1. Add `ocd clarify` command that checks task descriptions against the agent manifest (already has `ocd route`). If relevance score is below threshold, emits a structured clarification prompt instead of proceeding.
 1. Enforce review as a PreToolUse hook pattern: before `Write` or `Edit`, run the Nine Standards score on the target file. This closes the loop (currently only PostToolUse lint exists).
 
 **Impact:** Medium effort. Items 1 and 2 are new CLI commands (2–3 days each). Item 3 requires extending the PreToolUse hook pattern (1 day).

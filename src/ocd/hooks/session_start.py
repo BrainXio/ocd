@@ -1,9 +1,11 @@
-"""SessionStart hook - injects relevant knowledge base context into every conversation.
+"""SessionStart hook — injects relevant knowledge base context into every conversation.
 
 Uses TF-IDF relevance scoring to inject only the most pertinent articles
 instead of the full KB index. Falls back to most recently updated articles
 when no query is available. Also includes standards hash reference and
 session state card for post-compaction recovery.
+
+Invoked via `ocd hook session-start`.
 """
 
 from __future__ import annotations
@@ -32,7 +34,7 @@ def main() -> None:
             f"WARNING: Standards hash mismatch! "
             f"Stored: {verification['stored_hash']}, "
             f"Computed: {verification['computed_hash']}. "
-            f"Run 'ocd-standards --update' to fix.",
+            f"Run 'ocd standards --update' to fix.",
             file=sys.stderr,
         )
     else:

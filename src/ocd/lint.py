@@ -4,8 +4,8 @@ Runs 7 checks: broken links, orphan pages, orphan sources, stale articles,
 contradictions (LLM), missing backlinks, and sparse articles.
 
 Usage:
-    ocd-lint-kb                    # all checks
-    ocd-lint-kb --structural-only  # skip LLM checks (faster, cheaper)
+    ocd lint-kb                    # all checks
+    ocd lint-kb --structural-only  # skip LLM checks (faster, cheaper)
 """
 
 from __future__ import annotations

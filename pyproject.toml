@@ -19,28 +19,8 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.24"]
 sql = ["sqlfluff>=3.0"]
 
 [project.scripts]
+# Single entry point — all commands under `ocd <subcommand>`, including hooks via `ocd hook <name>`
 ocd = "ocd.cli:main"
-ocd-compile = "ocd.compile:main"
-ocd-kb-query = "ocd.relevance:main"
-ocd-route = "ocd.router:main"
-ocd-standards = "ocd.standards:main"
-ocd-fix-cycle = "ocd.fix:main"
-ocd-flush = "ocd.flush:main"
-ocd-format = "ocd.format:main"
-ocd-query = "ocd.query:main"
-ocd-lint-kb = "ocd.lint:main"
-ocd-lint-work = "ocd.hooks.lint_work:main"
-ocd-format-work = "ocd.hooks.format_work:main"
-ocd-session-start = "ocd.hooks.session_start:main"
-ocd-session-end = "ocd.hooks.session_end:main"
-ocd-pre-compact = "ocd.hooks.pre_compact:main"
-ocd-compile-db = "ocd.pack:main"
-ocd-materialize = "ocd.materialize:main"
-ocd-vendors = "ocd.materialize:main"
-ocd-pre-push = "ocd.pre_push:main"
-ocd-verify-commit = "ocd.verify_commit:main"
-ocd-scan-secrets = "ocd.scan_secrets:main"
-ocd-ci-check = "ocd.ci_check:main"
 
 [project.entry-points."mdformat.parser_extension"]
 frontmatter = "mdformat_frontmatter_preserve"

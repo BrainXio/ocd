@@ -4,9 +4,9 @@ Replaces the naive full-index dump with intelligent article selection.
 Deterministic, cacheable, zero external dependencies.
 
 Usage:
-    ocd-kb-query --relevant-to "auth redirect"
-    ocd-kb-query --relevant-to "format command" --top-k 5
-    ocd-kb-query --build-index
+    ocd kb query --relevant-to "auth redirect"
+    ocd kb query --relevant-to "format command" --top-k 5
+    ocd kb query --build-index
 """
 
 from __future__ import annotations
@@ -575,7 +575,7 @@ def build_relevant_context(
 
 
 def main() -> None:
-    """Entry point for ocd-kb-query command."""
+    """Entry point for ocd kb query command."""
     parser = argparse.ArgumentParser(
         description="Query the knowledge base using TF-IDF relevance scoring"
     )
