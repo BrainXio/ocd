@@ -253,3 +253,32 @@ ocd autofix src/ocd/config.py --dry-run
 The loop iterates detect-fix-verify until no violations remain or max iterations is reached. On convergence, it validates the worktree and merges the fix branch. If convergence fails or validation fails, the worktree is preserved under `.claude/worktrees/` for manual review.
 
 All loop iterations are logged to `USER/state/autofix-loop.jsonl`.
+
+## Ingest Raw Knowledge Articles
+
+The `ocd ingest` command processes markdown articles from `USER/knowledge/raw/` into the `USER/knowledge/ocd.db` SQLite database. It parses frontmatter, computes quality scores, deduplicates by content hash, and rebuilds the TF-IDF index.
+
+```bash
+# Incremental ingest (only new/changed files)
+ocd ingest
+
+# Force re-ingest all files (ignore hashes)
+ocd ingest --all
+
+# Report what would be ingested without making changes
+ocd ingest --dry-run
+```
+
+Raw articles live in subdirectories under `USER/knowledge/raw/`: `concepts/`, `connections/`, `qa/`, and `resources/`. Each file should have YAML frontmatter with `title`, `tags`, `aliases`, and `sources` fields.
+
+The quality score (0.0–1.0) is based on:
+
+| Criterion | Points |
+| ------------------ | ------ |
+| Has title | 0.2 |
+| Has tags | 0.2 |
+| Has sources | 0.2 |
+| Word count >= 100 | 0.2 |
+| Contains wikilinks | 0.2 |
+
+After ingestion, `relevance.py` automatically reads from `ocd.db` when it exists, falling back to flat files when the database is absent.

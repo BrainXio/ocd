@@ -18,6 +18,7 @@ import ocd.hooks.lint_work
 import ocd.hooks.pre_compact
 import ocd.hooks.session_end
 import ocd.hooks.session_start
+import ocd.ingest
 import ocd.relevance
 import ocd.router
 import ocd.session_card
@@ -100,6 +101,8 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "FLUSH_STATE_FILE": state_dir / "last-flush.json",
         "FLUSH_LOG_FILE": state_dir / "flush.log",
         "INDEX_FILE": knowledge_dir / "index.md",
+        "RAW_DIR": knowledge_dir / "raw",
+        "OCD_DB": knowledge_dir / "ocd.db",
         "KB_INDEX_JSON": state_dir / "kb-index.json",
         "MANIFEST_FILE": state_dir / "manifest.json",
         "SKILLS_DIR": tmp_agent_dir.parent / ".claude" / "skills" / "ocd",
@@ -119,6 +122,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
     # Patch modules that imported these names directly
     for module in (
         ocd.autofix,
+        ocd.ingest,
         ocd.utils,
         ocd.hooks.hookslib,
         ocd.flush,
@@ -152,6 +156,19 @@ def wiki_article(tmp_agent_dir, mock_config_paths):
         path = tmp_agent_dir / "knowledge" / f"{rel_path}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(full)
+        return path
+
+    return _create
+
+
+@pytest.fixture
+def tmp_raw_kb(tmp_agent_dir, mock_config_paths):
+    """Factory fixture that creates sample raw articles in knowledge/raw/."""
+
+    def _create(subdir: str, name: str, content: str) -> Path:
+        path = tmp_agent_dir / "knowledge" / "raw" / subdir / f"{name}.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
         return path
 
     return _create

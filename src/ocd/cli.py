@@ -245,6 +245,15 @@ def _cmd_compile(args: argparse.Namespace) -> None:
     compile_main()
 
 
+def _cmd_ingest(args: argparse.Namespace) -> None:
+    """Ingest raw knowledge articles into ocd.db."""
+    from ocd.ingest import ingest_raw
+
+    result = ingest_raw(force_all=args.all, dry_run=args.dry_run)
+    print(result.to_json())
+    sys.exit(1 if result.errors else 0)
+
+
 def _cmd_flush(args: argparse.Namespace) -> None:
     """Flush conversation context to daily log."""
     from ocd.flush import main as flush_main
@@ -498,6 +507,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "compile", help="Compile daily logs into knowledge articles"
     )
     comp_parser.set_defaults(func=_cmd_compile)
+
+    # ingest
+    ingest_parser = subparsers.add_parser(
+        "ingest", help="Ingest raw knowledge articles into ocd.db"
+    )
+    ingest_parser.add_argument("--all", action="store_true", help="Force re-ingest all files")
+    ingest_parser.add_argument("--dry-run", action="store_true", help="Report only, no DB changes")
+    ingest_parser.set_defaults(func=_cmd_ingest)
 
     # flush
     flush_parser = subparsers.add_parser("flush", help="Flush conversation context to daily log")

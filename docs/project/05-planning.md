@@ -80,6 +80,7 @@ Independent of the release chain. Can run in parallel with Phase 2.
 | --- | ----------------------- | --------------------------------------------------- | ---------- | ------- |
 | 3.1 | KB export/sync | Share compiled knowledge between instances | — | Planned |
 | 3.2 | Automated URL ingestion | Fetch URL content and route to flush.py in one step | — | Planned |
+| 3.3 | Raw knowledge ingestion | Ingest raw articles into ocd.db with scoring/dedup | — | Done |
 
 ## Phase 4: CI Extension
 
