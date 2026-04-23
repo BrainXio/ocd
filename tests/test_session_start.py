@@ -10,9 +10,10 @@ from ocd.hooks import session_start
 @pytest.fixture
 def mock_session_start_paths(mock_config_paths, monkeypatch):
     """Patch session_start's module-level imports from config."""
-    from ocd.config import MAX_RELEVANT_CONTEXT_CHARS
+    from ocd.config import MAX_CONTEXT_CHARS, MAX_RELEVANT_CONTEXT_CHARS
 
     monkeypatch.setattr(session_start, "MAX_RELEVANT_CONTEXT_CHARS", MAX_RELEVANT_CONTEXT_CHARS)
+    monkeypatch.setattr(session_start, "MAX_CONTEXT_CHARS", MAX_CONTEXT_CHARS)
     return mock_config_paths
 
 
@@ -56,3 +57,55 @@ class TestMain:
         result = json.loads(output)
         context = result["hookSpecificOutput"]["additionalContext"]
         assert "## Today" in context
+
+
+class TestVisionIntegration:
+    """Tests that vision context is injected into session-start output."""
+
+    def test_vision_context_injected_when_present(self, mock_config_paths, capsys):
+        (mock_config_paths / "VISION.md").write_text(
+            "### 1. Done ✅ DONE\n\nContent.\n\n### 2. Next\n\nNext content.\n",
+            encoding="utf-8",
+        )
+        session_start.main()
+        output = capsys.readouterr().out
+        result = json.loads(output)
+        context = result["hookSpecificOutput"]["additionalContext"]
+        assert "Vision Roadmap" in context
+        assert "Next" in context
+
+    def test_vision_context_absent_when_no_file(self, mock_config_paths, capsys):
+        session_start.main()
+        output = capsys.readouterr().out
+        result = json.loads(output)
+        context = result["hookSpecificOutput"]["additionalContext"]
+        assert "Vision Roadmap" not in context
+
+    def test_total_context_within_hard_cap(self, mock_config_paths, capsys):
+        (mock_config_paths / "VISION.md").write_text(
+            "### 1. Next\n\n" + "x" * 50000 + "\n",
+            encoding="utf-8",
+        )
+        session_start.main()
+        output = capsys.readouterr().out
+        result = json.loads(output)
+        context = result["hookSpecificOutput"]["additionalContext"]
+        from ocd.config import MAX_CONTEXT_CHARS
+
+        assert len(context) <= MAX_CONTEXT_CHARS + len("\n\n...(truncated)")
+
+    def test_user_standards_injected_when_both_exist(self, mock_config_paths, capsys):
+        (mock_config_paths / "VISION.md").write_text(
+            "### 1. Next\n\nNext content.\n",
+            encoding="utf-8",
+        )
+        (mock_config_paths / "STANDARDS.md").write_text(
+            "# Standards\n\nBe strict.",
+            encoding="utf-8",
+        )
+        session_start.main()
+        output = capsys.readouterr().out
+        result = json.loads(output)
+        context = result["hookSpecificOutput"]["additionalContext"]
+        assert "User Standards" in context
+        assert "Be strict" in context
