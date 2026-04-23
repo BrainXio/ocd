@@ -22,6 +22,7 @@ import ocd.router
 import ocd.session_card
 import ocd.standards
 import ocd.utils
+import ocd.vision
 
 # flush.py sets CLAUDE_INVOKED_BY at import time — clear again so
 # tests don't see a stale value.
@@ -104,6 +105,9 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "SKILLS_DIR": tmp_agent_dir.parent / ".claude" / "skills" / "ocd",
         "STANDARDS_FILE": tmp_agent_dir.parent / ".claude" / "skills" / "ocd" / "standards.md",
         "SESSION_CARD_FILE": state_dir / "session-card.md",
+        "VISION_FILE": tmp_agent_dir / "VISION.md",
+        "USER_STANDARDS_FILE": tmp_agent_dir / "STANDARDS.md",
+        "VISION_LOG_FILE": tmp_agent_dir / "logs" / "vision.log",
     }
 
     # Patch the canonical source
@@ -122,6 +126,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         ocd.relevance,
         ocd.session_card,
         ocd.standards,
+        ocd.vision,
     ):
         for name, value in patches.items():
             if hasattr(module, name):

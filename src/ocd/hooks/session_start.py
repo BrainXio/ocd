@@ -2,8 +2,9 @@
 
 Uses TF-IDF relevance scoring to inject only the most pertinent articles
 instead of the full KB index. Falls back to most recently updated articles
-when no query is available. Also includes standards hash reference and
-session state card for post-compaction recovery.
+when no query is available. Also injects vision roadmap + next unfinished
+story, standards hash reference, and session state card for post-compaction
+recovery.
 
 Invoked via `ocd hook session-start`.
 """
@@ -13,10 +14,11 @@ from __future__ import annotations
 import json
 import sys
 
-from ocd.config import MAX_RELEVANT_CONTEXT_CHARS
+from ocd.config import MAX_CONTEXT_CHARS, MAX_RELEVANT_CONTEXT_CHARS
 from ocd.relevance import build_relevant_context
 from ocd.session_card import load_session_card
 from ocd.standards import get_standards_reference, verify_standards_hash
+from ocd.vision import build_vision_context
 
 
 def main() -> None:
@@ -42,10 +44,19 @@ def main() -> None:
         if ref:
             context = f"{context}\n\n---\n\n{ref}"
 
+    # Inject vision roadmap + next unfinished story
+    vision_context = build_vision_context()
+    if vision_context:
+        context = f"{context}\n\n---\n\n{vision_context}"
+
     # Inject last session card for post-compaction recovery
     card = load_session_card()
     if card:
         context = f"{context}\n\n---\n\n## Last Session\n{card}"
+
+    # Hard-cap safety net
+    if len(context) > MAX_CONTEXT_CHARS:
+        context = context[:MAX_CONTEXT_CHARS] + "\n\n...(truncated)"
 
     output = {
         "hookSpecificOutput": {

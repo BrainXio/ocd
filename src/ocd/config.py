@@ -98,6 +98,12 @@ BUNDLED_DB_PATH: Path = Path(__file__).parent / "data" / "content.db"
 SESSION_CARD_FILE: Path = STATE_DIR / "session-card.md"
 MAX_SESSION_CARD_CHARS = 1200
 
+# Vision roadmap
+VISION_FILE: Path = USER_DIR / "VISION.md"
+USER_STANDARDS_FILE: Path = USER_DIR / "STANDARDS.md"
+MAX_VISION_CONTEXT_CHARS = 4000
+VISION_LOG_FILE: Path = USER_DIR / "logs" / "vision.log"
+
 
 def now_iso() -> str:
     """Current time in ISO 8601 format."""
