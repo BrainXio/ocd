@@ -167,7 +167,13 @@ def _cmd_route(args: argparse.Namespace) -> None:
     """Route a task to the best-matching agent."""
     from ocd.router import main as router_main
 
-    sys.argv = ["ocd-route", *args.query]
+    argv = ["ocd-route"]
+    if args.build_manifest:
+        argv.append("--build-manifest")
+    if args.max != 3:
+        argv.extend(["--max", str(args.max)])
+    argv.extend(args.query)
+    sys.argv = argv
     router_main()
 
 
@@ -186,10 +192,26 @@ def _cmd_standards(args: argparse.Namespace) -> None:
 
 def _cmd_fix(args: argparse.Namespace) -> None:
     """Closed-loop fix commands."""
-    from ocd.fix import main as fix_main
+    from ocd.fix import fix_cycle, lint_and_fix, security_scan_and_patch, test_and_fix
 
-    sys.argv = [args.fix_command, *args.files]
-    fix_main()
+    command = args.fix_command
+    if command == "fix-cycle":
+        if not args.files:
+            print("error: fix-cycle requires at least one file", file=sys.stderr)
+            sys.exit(2)
+        r = fix_cycle(args.files[0])
+    elif command == "lint-and-fix":
+        path = args.files[0] if args.files else "src/"
+        r = lint_and_fix(path)
+    elif command == "test-and-fix":
+        r = test_and_fix()
+    elif command == "security-scan-and-patch":
+        r = security_scan_and_patch()
+    else:
+        print(f"error: unknown fix command: {command}", file=sys.stderr)
+        sys.exit(2)
+    print(r.to_json())
+    sys.exit(r.exit_code)
 
 
 def _cmd_check(_args: argparse.Namespace) -> None:
@@ -261,7 +283,18 @@ def _cmd_compile(args: argparse.Namespace) -> None:
     """Compile daily logs into knowledge articles."""
     from ocd.compile import main as compile_main
 
-    sys.argv = ["ocd-compile"]
+    argv = ["ocd-compile"]
+    if args.all:
+        argv.append("--all")
+    if args.file:
+        argv.extend(["--file", args.file])
+    if args.dry_run:
+        argv.append("--dry-run")
+    if args.manifest:
+        argv.append("--manifest")
+    if args.update_standards_hash:
+        argv.append("--update-standards-hash")
+    sys.argv = argv
     compile_main()
 
 
@@ -323,10 +356,10 @@ def _cmd_lint_kb(args: argparse.Namespace) -> None:
     from ocd.lint import main as lint_main
 
     argv = ["ocd-lint-kb"]
-    if args.llm:
-        argv.append("--llm")
+    if args.structural_only:
+        argv.append("--structural-only")
     sys.argv = argv
-    lint_main()
+    sys.exit(lint_main())
 
 
 def _cmd_compile_db(args: argparse.Namespace) -> None:
@@ -478,7 +511,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     # route
     route_parser = subparsers.add_parser("route", help="Route task to best agent")
-    route_parser.add_argument("query", nargs="+", help="Task description")
+    route_parser.add_argument("query", nargs="*", help="Task description")
+    route_parser.add_argument(
+        "--build-manifest", action="store_true", help="Rebuild agent manifest"
+    )
+    route_parser.add_argument("--max", type=int, default=3, help="Max agents to return")
     route_parser.set_defaults(func=_cmd_route)
 
     # standards
@@ -547,6 +584,17 @@ def _build_parser() -> argparse.ArgumentParser:
     comp_parser = subparsers.add_parser(
         "compile", help="Compile daily logs into knowledge articles"
     )
+    comp_parser.add_argument("--all", action="store_true", help="Force recompile all logs")
+    comp_parser.add_argument("--file", type=str, help="Compile a specific daily log")
+    comp_parser.add_argument("--dry-run", action="store_true", help="Show what would be compiled")
+    comp_parser.add_argument(
+        "--manifest", action="store_true", help="Rebuild agent manifest after compilation"
+    )
+    comp_parser.add_argument(
+        "--update-standards-hash",
+        action="store_true",
+        help="Recompute standards.md hash",
+    )
     comp_parser.set_defaults(func=_cmd_compile)
 
     # ingest
@@ -584,7 +632,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     # lint-kb
     lk_parser = subparsers.add_parser("lint-kb", help="Lint the knowledge base")
-    lk_parser.add_argument("--llm", action="store_true", help="Include LLM contradiction check")
+    lk_parser.add_argument(
+        "--structural-only", action="store_true", help="Skip LLM checks (faster, free)"
+    )
     lk_parser.set_defaults(func=_cmd_lint_kb)
 
     # compile-db
