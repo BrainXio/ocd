@@ -6,7 +6,7 @@ created: 2026-04-17
 updated: 2026-04-23
 ---
 
-Why things are the way they are. This is not a guide for what to do — see [how-to](02-how-to.md) for that. This is for understanding the design.
+Why things are the way they are. This is not a guide for what to do — see [how-to](../how-to/README.md) for that. This is for understanding the design.
 
 ## Architecture
 
@@ -17,7 +17,7 @@ O.C.D. has four layers of augmentation:
 - **Persistence** — The knowledge pipeline captures insights at session end and before compaction, compiles them into articles, and feeds them back at the next session start.
 - **Delegation** — Subagents handle bounded analysis tasks (dead code hunting, dependency auditing, lint checking) so you can focus on design and synthesis.
 
-These layers are independent and reinforce each other. Context injection makes enforcement smarter (you know the standards). Persistence makes context richer (previous sessions feed future ones). Delegation keeps enforcement scalable (agents run checks you'd forget to run). For the AI-facing perspective on these layers, see [usage](06-usage.md).
+These layers are independent and reinforce each other. Context injection makes enforcement smarter (you know the standards). Persistence makes context richer (previous sessions feed future ones). Delegation keeps enforcement scalable (agents run checks you'd forget to run). For the AI-facing perspective on these layers, see [usage](../how-to/ai-usage.md).
 
 ## Directory Layout
 
@@ -88,7 +88,7 @@ The system is designed to improve itself:
 - Session ends — transcript is captured and knowledge is extracted
 - Knowledge is compiled into articles and fed back at the next session start
 - New sessions are smarter — they have the context of every previous session
-- Gaps in the system (missing skills, needed agents, uncaught patterns) are recorded in [planning](05-planning.md) and filled
+- Gaps in the system (missing skills, needed agents, uncaught patterns) are recorded in [planning](../planning.md) and filled
 
 This loop means the project accumulates institutional memory. Decisions, lessons, and rationale are not lost at session end — they become part of the context for every future session.
 

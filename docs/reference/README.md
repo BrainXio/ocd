@@ -213,15 +213,13 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | shellcheck | — | Shell | system package |
 | gitleaks | `.gitleaks.toml` | Secrets | binary install |
 | actionlint | — | GitHub Actions | binary install |
-| stylelint | `.stylelintrc.json` | CSS | `npm ci` |
-| htmlhint | `.htmlhintrc` | HTML | `npm ci` |
-| prettier | `.prettierrc` | JSON | `npm ci` |
-| sqlfluff | `.sqlfluff` | SQL | `uv sync --extra sql` |
+| prettier | `package.json` | JSON | `npm ci` |
+| sqlfluff | — | SQL | `uv sync --extra sql` |
 | hadolint | `.hadolint.yaml` | Dockerfile | binary install |
 | trivy | `trivy.yaml` + `.trivyignore` | Vulnerabilities | binary install |
 | semgrep | `.semgrep.yml` | SAST (OWASP Top 10) | pip install |
 
-Python linters are installed via `uv sync`. Node.js linters are installed via `npm ci` (defined in `package.json`). The `ocd hook lint-work` reports missing linters gracefully — it does not block edits when a linter is unavailable.
+Python linters are installed via `uv sync`. Prettier is installed via `npm ci` (defined in `package.json`). The `ocd hook lint-work` reports missing linters gracefully — it does not block edits when a linter is unavailable.
 
 ## Formatter Registry
 
@@ -232,8 +230,7 @@ Python linters are installed via `uv sync`. Node.js linters are installed via `n
 | `ruff-format` | `ruff format src/ tests/` | Python |
 | `ruff-fix` | `ruff check --fix src/ tests/` | Python |
 | `mdformat` | `mdformat README.md docs/ .claude/skills/ .claude/agents/ .claude/rules/` | Markdown |
-| `prettier` | `npx prettier --write .` | JSON / CSS / HTML |
-| `stylelint` | `npx stylelint --fix "**/*.css"` | CSS |
+| `prettier` | `npx prettier --write "**/*.json" "!package-lock.json"` | JSON |
 | `sqlfluff-fix` | `sqlfluff fix --force` | SQL |
 
 The formatter registry lives in `src/ocd/format.py`. Missing formatters are reported with install hints. Formatters that fail (non-zero exit) cause `ocd format` to exit with code 1.
@@ -392,8 +389,6 @@ Stages 3–4 run only when Python code changes.
 | 2 (parallel) | `lint-markdown` | mdformat | `**/*.md` changes |
 | 2 (parallel) | `secret-scan` | gitleaks (reads `.gitleaks.toml`) | always |
 | 2 (parallel) | `lint-actions` | actionlint | workflow changes |
-| 2 (parallel) | `lint-node` | stylelint + htmlhint + prettier (npm) | CSS/HTML/JSON changes |
-| 2 (parallel) | `lint-sql` | sqlfluff | SQL changes |
 | 2 (parallel) | `scan-deps` | trivy fs (reads `trivy.yaml`) | Python changes |
 | 2 (parallel) | `sast-scan` | semgrep (reads `.semgrep.yml`) | Python changes |
 | 3 (after 2) | `lint-python` | `ocd compile-db` + ruff + mypy | Python changes |
@@ -404,7 +399,7 @@ Concurrency: `cancel-in-progress: true` per ref. Permissions: `contents: read` o
 ## Container CI Pipeline
 
 Defined in `.github/workflows/containers.yml`. Full details in
-[containers](09-containers.md).
+[containers](containers.md).
 
 | Stage | Job | Tool | Trigger |
 | ----------- | ----------------------------------------------------------------------- | -------------------------- | ------------ |
@@ -421,7 +416,7 @@ container builds. Also triggered by `workflow_dispatch`.
 | Image | Base | Purpose |
 | ------------ | ---------------------- | ---------------------------------------------------------------------------- |
 | `ocd-base` | `debian:bookworm-slim` | Hardened foundation: `uv`, `git`, `shellcheck` |
-| `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier`, `eslint`, `stylelint`, `htmlhint` |
+| `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier` |
 | `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference |
 | `ocd-python` | `ocd-base` | Python 3.12+ toolchain: `ruff`, `mypy`, `mdformat` with frontmatter plugin |
 | `ocd` | `ocd-python` | Product image: Python + Node + Ollama + Claude Code + OCD package |
@@ -432,7 +427,7 @@ Images live in `containers/<name>/Dockerfile`. Published to
 ### Inceptive Container
 
 The `ocd` product image embeds the OCD tooling itself — see
-[containers](09-containers.md#inceptive-container) for details.
+[containers](containers.md#inceptive-container) for details.
 
 ## Permissions and Sandbox
 

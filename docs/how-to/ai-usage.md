@@ -17,7 +17,7 @@ O.C.D. augments you with four layers:
 - **Persistence** — Knowledge pipeline captures insights and feeds them back
 - **Delegation** — Subagents handle bounded analysis (dead code, deps, lint checks)
 
-See [explanation](04-explanation.md) for the architecture and design rationale.
+See [explanation](../explanation/README.md) for the architecture and design rationale.
 
 ## Prompt Cookbook
 
@@ -91,7 +91,7 @@ The pipeline is content-agnostic — anything you can get into a markdown file c
 
 ### Daily Log Entry
 
-Create `USER/logs/daily/YYYY-MM-DD.md` with structured content and compile it. See [how-to](02-how-to.md#add-external-knowledge) for the full format.
+Create `USER/logs/daily/YYYY-MM-DD.md` with structured content and compile it. See [how-to](README.md#add-external-knowledge) for the full format.
 
 ### flush Ingestion
 
@@ -121,9 +121,9 @@ Read https://docs.docker.com/build/cache/ and extract the key caching strategies
 
 ## Navigation
 
-- [Getting Started](01-getting-started.md) — first 15 minutes walkthrough
-- [How-To](02-how-to.md) — step-by-step task guides
-- [Reference](03-reference.md) — all tables, schemas, and specs
-- [Explanation](04-explanation.md) — architecture, standards, design rationale
-- [Planning](05-planning.md) — record gaps and planned improvements
-- [Development Setup](07-development.md) — venv activation and local development workflow
+- [Getting Started](../tutorials/getting-started.md) — first 15 minutes walkthrough
+- [How-To](README.md) — step-by-step task guides
+- [Reference](../reference/README.md) — all tables, schemas, and specs
+- [Explanation](../explanation/README.md) — architecture, standards, design rationale
+- [Planning](../planning.md) — record gaps and planned improvements
+- [Development Setup](development.md) — venv activation and local development workflow

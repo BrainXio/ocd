@@ -63,7 +63,7 @@ Or, if using the Ollama devcontainer:
 claude
 ```
 
-The venv must be active before starting Claude — otherwise the hook commands won't be on PATH and sessions will start without knowledge injection or lint checks. See [development setup](07-development.md) for details.
+The venv must be active before starting Claude — otherwise the hook commands won't be on PATH and sessions will start without knowledge injection or lint checks. See [development setup](../how-to/development.md) for details.
 
 The `ocd hook session-start` hook runs automatically and injects:
 
@@ -81,7 +81,7 @@ Create a feature branch and make an edit:
 git checkout -b feat/my-change
 ```
 
-Edit a file — for example, add a line to `project/01-getting-started.md`. The `ocd hook lint-work --edit` hook runs after every Write/Edit and lints the changed file. If mdformat, ruff, or another linter finds issues, you see the error immediately.
+Edit a file — for example, add a line to `tutorials/getting-started.md`. The `ocd hook lint-work --edit` hook runs after every Write/Edit and lints the changed file. If mdformat, ruff, or another linter finds issues, you see the error immediately.
 
 ## 4. Commit the Change
 
@@ -117,7 +117,7 @@ On your next session, those compiled articles appear in the KB index injected at
 
 ## Next Steps
 
-- [How-to guides](02-how-to.md) — add a skill, add a subagent, run pipeline commands manually
-- [Reference](03-reference.md) — full tables of skills, agents, hooks, and commands
-- [Explanation](04-explanation.md) — architecture, the Nine Standards, design rationale
-- [Development Setup](07-development.md) — venv activation and local development workflow
+- [How-to guides](../how-to/README.md) — add a skill, add a subagent, run pipeline commands manually
+- [Reference](../reference/README.md) — full tables of skills, agents, hooks, and commands
+- [Explanation](../explanation/README.md) — architecture, the Nine Standards, design rationale
+- [Development Setup](../how-to/development.md) — venv activation and local development workflow

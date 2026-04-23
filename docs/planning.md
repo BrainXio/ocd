@@ -195,6 +195,6 @@ Systematic incorporation of best practices from Aider, Superpowers, and top Clau
 
 To add an item from this list:
 
-- Create the skill/agent/linter following existing patterns in [how-to](02-how-to.md) or [reference](03-reference.md)
+- Create the skill/agent/linter following existing patterns in [how-to](how-to/README.md) or [reference](reference/README.md)
 - Update this file to change the status from `Planned`/`Pending` to `Done`
 - Once all items in a category are done, remove that section

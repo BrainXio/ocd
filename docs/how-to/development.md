@@ -11,7 +11,7 @@ How to set up your local environment so that O.C.D. hooks are available when you
 ## System Prerequisites
 
 Full development requires system tools, Python tools, and Node.js tools. The
-[Linter Configurations](03-reference.md#linter-configurations) table in the
+[Linter Configurations](../reference/README.md#linter-configurations) table in the
 reference docs lists config files and scopes for each linter.
 
 ### Required System Tools
@@ -68,9 +68,7 @@ Running `npm ci` in the project root installs into `node_modules/`:
 
 | Tool | Purpose |
 | --------- | ------------------------ |
-| stylelint | CSS linting |
-| htmlhint | HTML linting |
-| prettier | JSON/CSS/HTML formatting |
+| prettier | JSON formatting |
 
 ## Devcontainer Setup
 

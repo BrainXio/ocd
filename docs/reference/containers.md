@@ -188,5 +188,5 @@ any project using it immediately benefits from OCD features:
 
 Some CRITICAL CVEs in base images have no upstream fix or are not exploitable in
 OCD's context. These are documented in `.trivyignore` with NVD links and
-acceptance rationale. See [reference](03-reference.md) for the trivy
+acceptance rationale. See [reference](README.md) for the trivy
 configuration details.

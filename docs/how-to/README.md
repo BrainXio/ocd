@@ -24,7 +24,7 @@ Task-oriented guides. Each section is independent — jump to what you need.
 - Write the prompt body with scope, output format, and failure conditions
 - Restart the session or use `/agents` to load the new agent
 
-See [reference](03-reference.md) for the full agent frontmatter schema.
+See [reference](../reference/README.md) for the full agent frontmatter schema.
 
 ## Add a New Hook
 
@@ -46,7 +46,7 @@ Python hooks live in `src/ocd/hooks/` as part of the installable package. Git ho
 - Add a symlink entry in `git_hooks/setup-hooks.sh`
 - Run `bash git_hooks/setup-hooks.sh` to install the symlink
 
-See [reference](03-reference.md) for the hook configuration schema and available events.
+See [reference](../reference/README.md) for the hook configuration schema and available events.
 
 ## Add a Claude Code Rule
 
@@ -57,9 +57,9 @@ Rules are modular markdown files in `.claude/rules/` that provide advisory instr
 - Keep under 60 lines — use positive instructions and add emphasis (`IMPORTANT`, `YOU MUST`) for critical rules
 - Unconditional rules (no `paths`) load every session; path-scoped rules load only when matching files are read
 - Rules are advisory — use hooks for hard enforcement
-- Update `project/03-reference.md` with the new rule entry
+- Update `reference/README.md` with the new rule entry
 
-See [reference](03-reference.md) for the rules registry and [explanation](04-explanation.md) for the rules-vs-hooks-vs-skills hierarchy.
+See [reference](../reference/README.md) for the rules registry and [explanation](../explanation/README.md) for the rules-vs-hooks-vs-skills hierarchy.
 
 ## Modify a Protected File
 
@@ -71,7 +71,7 @@ Infrastructure files (hooks, scripts, `pyproject.toml`) are protected by deny ru
 - Make your changes
 - Re-add the deny rule(s)
 
-See [reference](03-reference.md) for the full list of protected files and deny rule patterns.
+See [reference](../reference/README.md) for the full list of protected files and deny rule patterns.
 
 ## Test CI Locally
 
@@ -147,7 +147,7 @@ Create a markdown file at `USER/logs/daily/YYYY-MM-DD.md` with structured conten
 ocd compile --file USER/logs/daily/2026-04-18.md
 ```
 
-The compiler will extract concepts and create knowledge articles. The format is advisory — the LLM compiler handles any reasonable markdown. See [explanation](04-explanation.md#the-feedback-loop) for why the pipeline is content-agnostic.
+The compiler will extract concepts and create knowledge articles. The format is advisory — the LLM compiler handles any reasonable markdown. See [explanation](../explanation/README.md#the-feedback-loop) for why the pipeline is content-agnostic.
 
 ### Via flush
 
@@ -197,7 +197,7 @@ The pre-commit hook runs hadolint on staged Dockerfiles if hadolint is installed
 
 ## Trigger Container CI
 
-The container pipeline runs automatically on path filters (see [containers](09-containers.md#triggers)) and on `workflow_dispatch`.
+The container pipeline runs automatically on path filters (see [containers](../reference/containers.md#triggers)) and on `workflow_dispatch`.
 
 Trigger manually from the GitHub Actions UI:
 
@@ -230,7 +230,7 @@ docker pull ghcr.io/brainxio/ocd:1.2.3
 docker run --rm --entrypoint="" ghcr.io/brainxio/ocd:1.2.3 whoami  # ocd
 ```
 
-See [containers](09-containers.md) for the full pipeline documentation.
+See [containers](../reference/containers.md) for the full pipeline documentation.
 
 ## Run Autonomous Fix Loops
 
