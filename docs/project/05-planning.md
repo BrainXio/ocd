@@ -20,7 +20,7 @@ All five TP items shipped (TP-1 through TP-5, 2026-04-17 to 2026-04-21). Project
 | TP-4 | Closed-Loop Fix Family | `fix.py` | `ocd-fix-cycle` |
 | TP-5 | Session State Card | `session_card.py` | — |
 
-Generated artifacts (all in `.agent/.state/`, git-ignored): `kb-index.json`, `manifest.json`, `session-card.md`.
+Generated artifacts (all in `USER/state/`, git-ignored): `kb-index.json`, `manifest.json`, `session-card.md`.
 
 ## Phase 1: Foundation
 

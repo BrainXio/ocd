@@ -12,7 +12,7 @@ Inspired by [Karpathy's LLM KB](https://github.com/karpathy/llm-knowledge-base) 
 (root)             Project source, tests, docs, pyproject.toml
 src/ocd/           Installable Python package (hooks, scripts, config, utils)
 git_hooks/         Shell git hooks (commit-msg, pre-commit) + setup script
-.agent/            Data — daily logs, knowledge base, state (git-ignored)
+USER/            Data — daily logs, knowledge base, state (git-ignored)
 .claude/           LLM-Processor config — settings.json, skills/, agents/
 ```
 

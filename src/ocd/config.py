@@ -98,10 +98,6 @@ BUNDLED_DB_PATH: Path = Path(__file__).parent / "data" / "content.db"
 SESSION_CARD_FILE: Path = STATE_DIR / "session-card.md"
 MAX_SESSION_CARD_CHARS = 1200
 
-# Keep AGENT_DIR as an alias for USER_DIR for backward compatibility
-# during migration (will be removed in a future release)
-AGENT_DIR: Path = USER_DIR
-
 
 def now_iso() -> str:
     """Current time in ISO 8601 format."""

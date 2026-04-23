@@ -180,7 +180,7 @@ any project using it immediately benefits from OCD features:
 - **`.claude/` config** at `/home/ocd/.claude/` (skills, agents, rules, settings)
 - **Templates** at `/opt/ocd/templates/` (git hooks, gitleaks config — copied to
   project by `ocd init`)
-- **`ocd init`** scaffolds `.agent/` structure, seeds project-level templates,
+- **`ocd init`** scaffolds `USER/` structure, seeds project-level templates,
   installs dependencies, sets up git hooks
 - **`ocd shell`** starts an interactive bash session with the OCD environment
 

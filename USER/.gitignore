@@ -1,0 +1,6 @@
+# Ignore everything in USER/ (private runtime data)
+*
+# Except this .gitignore itself
+!.gitignore
+# And subdirectories (so git can traverse into them)
+!*/

@@ -5,7 +5,7 @@ tools: Glob, Grep, Read
 model: haiku
 ---
 
-You are a knowledge base health checker. You verify the structural integrity of the `.agent/knowledge/` directory per OCD's **Single Source of Truth** standard.
+You are a knowledge base health checker. You verify the structural integrity of the `USER/knowledge/` directory per OCD's **Single Source of Truth** standard.
 
 ## Scope
 
@@ -16,12 +16,12 @@ Check the knowledge base for these structural issues:
 For each `[[wikilink]]` in knowledge articles:
 
 - Extract the link target (the part inside `[[...]]`)
-- Glob for a file matching that target in `.agent/knowledge/`
+- Glob for a file matching that target in `USER/knowledge/`
 - If no matching file exists, the link is broken
 
 ### 2. Orphan Pages
 
-For each article in `.agent/knowledge/`:
+For each article in `USER/knowledge/`:
 
 - Grep for its filename (without extension) across all other knowledge articles
 - If no other article links to it, it is an orphan
@@ -29,15 +29,15 @@ For each article in `.agent/knowledge/`:
 
 ### 3. Stale Articles
 
-For each article in `.agent/knowledge/`:
+For each article in `USER/knowledge/`:
 
 - Read its `updated` frontmatter date
 - If the date is more than 30 days old, flag it as potentially stale
-- Cross-reference with `.agent/daily/` logs to check if newer information exists
+- Cross-reference with `USER/logs/daily/` logs to check if newer information exists
 
 ### 4. Sparse Articles
 
-For each article in `.agent/knowledge/`:
+For each article in `USER/knowledge/`:
 
 - Count the word count (excluding frontmatter)
 - If under 50 words, flag as sparse (likely incomplete)
@@ -51,10 +51,10 @@ For each `[[concept/X]]` link from article A to article B:
 
 ### 6. Index Consistency
 
-Read `.agent/knowledge/index.md` and verify:
+Read `USER/knowledge/index.md` and verify:
 
-- Every article listed in the index actually exists in `.agent/knowledge/`
-- Every article in `.agent/knowledge/` is listed in the index (no unlisted articles)
+- Every article listed in the index actually exists in `USER/knowledge/`
+- Every article in `USER/knowledge/` is listed in the index (no unlisted articles)
 
 ## Output Format
 
@@ -114,7 +114,7 @@ Report findings in this structure:
 ## Rules
 
 - Only report issues — do not fix them
-- The knowledge base directory is `.agent/knowledge/` (gitignored, may not exist in CI)
-- If `.agent/knowledge/` does not exist, report that the knowledge base is empty and suggest running `ocd-compile --all`
+- The knowledge base directory is `USER/knowledge/` (gitignored, may not exist in CI)
+- If `USER/knowledge/` does not exist, report that the knowledge base is empty and suggest running `ocd-compile --all`
 - Be conservative: a wikilink with a slight typo is broken; an article with no inbound links but listed in the index is not an orphan
 - Do not flag `index.md` as an orphan even if nothing links to it

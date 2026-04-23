@@ -19,12 +19,12 @@ The workspace exposes five root folders:
 | Folder | Purpose |
 | ------------------ | ----------------------------------------- |
 | `.` | Project root: source, tests, docs, config |
-| `.agent/daily` | Daily session logs |
-| `.agent/knowledge` | Compiled knowledge articles |
-| `.agent/reports` | Lint and audit reports |
-| `.agent/.state` | Temporary context files from hooks |
+| `USER/daily` | Daily session logs |
+| `USER/knowledge` | Compiled knowledge articles |
+| `USER/reports` | Lint and audit reports |
+| `USER/.state` | Temporary context files from hooks |
 
-The `.agent/` folders give quick access to the knowledge pipeline's data without cluttering the root view. These are gitignored directories — each instance has its own data.
+The `USER/` folders give quick access to the knowledge pipeline's data without cluttering the root view. These are gitignored directories — each instance has its own data.
 
 ## Settings
 

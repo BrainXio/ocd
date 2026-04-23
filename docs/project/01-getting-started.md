@@ -68,7 +68,7 @@ The venv must be active before starting Claude — otherwise the hook commands w
 The `ocd-session-start` hook runs automatically and injects:
 
 - The current date
-- The full knowledge base index from `.agent/knowledge/index.md`
+- The full knowledge base index from `USER/knowledge/index.md`
 - The last 30 lines of the most recent daily log
 
 You start every session with context — not from nothing.
@@ -109,9 +109,9 @@ The `pre-push` hook runs `pytest -q` before allowing the push. If tests fail, th
 
 ## 6. End the Session
 
-When the session ends, `ocd-session-end` captures the transcript and spawns `ocd-flush` as a background process. Flush extracts structured knowledge and appends it to `.agent/daily/YYYY-MM-DD.md`.
+When the session ends, `ocd-session-end` captures the transcript and spawns `ocd-flush` as a background process. Flush extracts structured knowledge and appends it to `USER/logs/daily/YYYY-MM-DD.md`.
 
-After 18:00 local time, flush automatically triggers `ocd-compile` if today's log hasn't been compiled yet. Compile transforms daily log entries into persistent knowledge articles in `.agent/knowledge/`.
+After 18:00 local time, flush automatically triggers `ocd-compile` if today's log hasn't been compiled yet. Compile transforms daily log entries into persistent knowledge articles in `USER/knowledge/`.
 
 On your next session, those compiled articles appear in the KB index injected at startup. The cycle continues.
 

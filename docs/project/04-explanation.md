@@ -27,17 +27,17 @@ The project has four distinct areas:
 (root)              Project source, tests, docs, pyproject.toml, .git
 src/ocd/            Installable Python package (hooks, scripts, config, utils)
 git_hooks/          Shell git hooks (commit-msg, pre-commit) + setup script
-.agent/             Data — daily logs, knowledge base, state (git-ignored)
+USER/             Data — daily logs, knowledge base, state (git-ignored)
 .claude/            LLM-Processor config — settings.json, skills/, agents/
 ```
 
 - **Project root** — The code being developed. `pyproject.toml`, `src/ocd/`, `tests/`, and `docs/` live here.
 - **`src/ocd/`** — The installable Python package. Entry points (`ocd-compile`, `ocd-flush`, etc.) are defined in `pyproject.toml` and installed by `uv sync`. This replaces the old pattern of running scripts with `uv --directory .claude run python scripts/...`.
 - **`git_hooks/`** — Bash git hooks and their setup script. Symlinks from `.git/hooks/` point here, not to `.claude/hooks/`.
-- **`.agent/`** — Conversation data and compiled knowledge. Isolated from git via `.gitignore`. Each instance has its own `.agent/` data.
+- **`USER/`** — Conversation data and compiled knowledge. Isolated from git via `.gitignore`. Each instance has its own `USER/` data.
 - **`.claude/`** — Claude Code configuration only: `settings.json` (hooks, permissions), `skills/` (language standards), `agents/` (subagent definitions). No Python code lives here.
 
-This separation means you can share the project and source code without exposing conversation data, and you can reset `.agent/` without losing the automation infrastructure.
+This separation means you can share the project and source code without exposing conversation data, and you can reset `USER/` without losing the automation infrastructure.
 
 ## The Nine Standards
 
@@ -51,7 +51,7 @@ This separation means you can share the project and source code without exposing
 | No Dead Code | Every line must earn its existence | The `dead-code-hunter` agent finds unused functions, variables, and configs |
 | Progressive Simplification | Start strict, relax only when justified | Skills begin with hard prohibitions; exemptions require explicit justification |
 | Single Source of Truth | Each fact lives in exactly one place | AI patterns in `ai-patterns.txt` (shared by hook + CI); config in `pyproject.toml` |
-| Structural Honesty | The structure reflects the reality, not a facade | Root is the project, `.agent/` is data, `src/ocd/` is automation, `.claude/` is config |
+| Structural Honesty | The structure reflects the reality, not a facade | Root is the project, `USER/` is data, `src/ocd/` is automation, `.claude/` is config |
 
 ## Why an Installable Package
 

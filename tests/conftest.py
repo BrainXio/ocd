@@ -87,7 +87,6 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
 
     patches = {
         "USER_DIR": tmp_agent_dir,
-        "AGENT_DIR": tmp_agent_dir,
         "AGENTS_DIR": tmp_agent_dir.parent / ".claude" / "agents",
         "DAILY_DIR": tmp_agent_dir / "logs" / "daily",
         "KNOWLEDGE_DIR": knowledge_dir,
