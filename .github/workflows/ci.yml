@@ -35,7 +35,7 @@ jobs:
               - 'pyproject.toml'
               - 'uv.lock'
             shell:
-              - 'git_hooks/**'
+              - '.githooks/**'
             yaml:
               - '.github/workflows/**'
               - '.yamllint'
@@ -124,7 +124,7 @@ jobs:
       - name: Install shellcheck
         run: command -v shellcheck || (sudo apt-get update && sudo apt-get install -y shellcheck)
       - name: Run shellcheck
-        run: shellcheck git_hooks/commit-msg git_hooks/pre-commit git_hooks/pre-push git_hooks/setup-hooks.sh
+        run: shellcheck .githooks/commit-msg .githooks/pre-commit .githooks/pre-push .githooks/setup-hooks.sh
 
   lint-markdown:
     needs: [changes]

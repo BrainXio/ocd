@@ -102,7 +102,7 @@ def _cmd_init(_args: argparse.Namespace) -> None:
             print(f"✗ npm ci failed (exit {result.returncode})", file=sys.stderr)
             sys.exit(result.returncode)
 
-    hooks_script = project_dir / "git_hooks" / "setup-hooks.sh"
+    hooks_script = project_dir / ".githooks" / "setup-hooks.sh"
     if hooks_script.exists() and project["git"]:
         print("→ Installing git hooks…")
         result = subprocess.run(["bash", str(hooks_script)], check=False)

@@ -25,7 +25,7 @@ Example violation: `MAX_CONTEXT_CHARS = 20_000` in `session_start.py` vs `MAX_FL
 
 For each path pattern used across the codebase:
 
-- Grep for hardcoded path strings like `USER/`, `src/ocd/`, `.claude/`, `git_hooks/`
+- Grep for hardcoded path strings like `USER/`, `src/ocd/`, `.claude/`, `.githooks/`
 - If the same path fragment appears in multiple files without a shared constant, it is a duplication
 - Check that path constants in `config.py` (e.g., `PROJECT_ROOT`, `KNOWLEDGE_DIR`, `DAILY_DIR`) are used consistently
 

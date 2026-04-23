@@ -17,7 +17,7 @@ git clone <repo-url> && cd ocd
 uv sync
 
 # Install git hooks (branch protection + AI attribution blocking + secret scanning)
-bash git_hooks/setup-hooks.sh
+bash .githooks/setup-hooks.sh
 
 # Install gitleaks for local secret scanning (optional but recommended)
 # See: https://github.com/gitleaks/gitleaks#installing
@@ -42,8 +42,8 @@ source .venv/bin/activate
 which ocd
 # Should resolve to .venv/bin/ocd
 
-ls -la .git/hooks/pre-commit .git/hooks/commit-msg
-# Both should be symlinks pointing to git_hooks/
+ls -la .githooks/pre-commit .githooks/commit-msg
+# Both should be executable
 ```
 
 ## 2. Start a Session

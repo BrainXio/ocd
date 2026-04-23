@@ -26,14 +26,14 @@ The project has four distinct areas:
 ```
 (root)              Project source, tests, docs, pyproject.toml, .git
 src/ocd/            Installable Python package (hooks, scripts, config, utils)
-git_hooks/          Shell git hooks (commit-msg, pre-commit) + setup script
+.githooks/          Shell git hooks (commit-msg, pre-commit) + setup script
 USER/             Data — daily logs, knowledge base, state (git-ignored)
 .claude/            LLM-Processor config — settings.json, skills/, agents/, worktrees/
 ```
 
 - **Project root** — The code being developed. `pyproject.toml`, `src/ocd/`, `tests/`, and `docs/` live here.
 - **`src/ocd/`** — The installable Python package. The `ocd` umbrella CLI (including `ocd hook` subcommands) is defined in `pyproject.toml` and installed by `uv sync`. This replaces the old pattern of running scripts with `uv --directory .claude run python scripts/...`.
-- **`git_hooks/`** — Bash git hooks and their setup script. Symlinks from `.git/hooks/` point here, not to `.claude/hooks/`.
+- **`.githooks/`** — Bash git hooks and their setup script. Symlinks from `.git/hooks/` point here, not to `.claude/hooks/`.
 - **`USER/`** — Conversation data and compiled knowledge. Isolated from git via `.gitignore`. Each instance has its own `USER/` data.
 - **`.claude/`** — Claude Code configuration only: `settings.json` (hooks, permissions), `skills/` (language standards), `agents/` (subagent definitions), `worktrees/` (isolated autofix worktrees). No Python code lives here.
 
@@ -62,11 +62,11 @@ The original structure embedded Python code in `.claude/scripts/` and `.claude/h
 - **Consistent invocation** — Hooks in `settings.json` use `ocd hook session-start` instead of `.claude/.venv/bin/python .claude/hooks/session-start.py`.
 - **Standard tooling** — `ruff`, `mypy`, `pytest` all work from project root with no `--config-file` or `--directory` flags.
 
-## Why Symlinks Not core.hooksPath
+## Why core.hooksPath Not Symlinks
 
-Git's `core.hooksPath` redirects all hook lookups to a single directory. This would expose Claude Code's Python hooks (which expect Claude-specific JSON on stdin) to git, causing cryptic failures when git runs them as regular shell scripts.
+Git's `core.hooksPath` tells git to look for hooks in `.githooks/` instead of `.git/hooks/`. This is the standard convention for projects that version their hooks alongside the code. The setup script (`bash .githooks/setup-hooks.sh`) runs `git config core.hooksPath .githooks/` and makes the hook scripts executable.
 
-Symlinks provide selective exposure — only the bash hooks (`pre-commit`, `commit-msg`) are installed into `.git/hooks/`, while Python hooks are invoked via the `ocd hook` CLI (`ocd hook session-start`, `ocd hook lint-work`, etc.) in the settings.json hook system. Each hook type runs in the environment it was designed for.
+Python hooks are invoked via the `ocd hook` CLI (`ocd hook session-start`, `ocd hook lint-work`, etc.) in the settings.json hook system, not by git directly. Each hook type runs in the environment it was designed for.
 
 ## Why Deny Rules and Protected Files
 
@@ -78,7 +78,7 @@ Deny rules in `settings.json` block three attack surfaces: direct edits (`Edit`)
 
 The `commit-msg` hook and CI `check-commit-messages` job reject AI-generated attribution patterns in commit messages. This is not about hiding AI involvement — it is about keeping the git log as a clean record of intent and change, not a billboard for tooling. Attribution lines add noise, drift as tools change, and provide no actionable information to a reader trying to understand why a change was made.
 
-The patterns are the single source of truth in `git_hooks/ai-patterns.txt`, shared between the local hook and CI. Add a pattern once, it takes effect everywhere.
+The patterns are the single source of truth in `.githooks/ai-patterns.txt`, shared between the local hook and CI. Add a pattern once, it takes effect everywhere.
 
 ## The Feedback Loop
 

@@ -41,7 +41,7 @@ Branch from main for every change. Delete branches after merge.
 
 ## IMPORTANT: No AI Attribution
 
-The commit-msg hook and CI reject these patterns (see `git_hooks/ai-patterns.txt`):
+The commit-msg hook and CI reject these patterns (see `.githooks/ai-patterns.txt`):
 
 - `Co-Authored-By:` lines
 - `Generated with/by/using` lines

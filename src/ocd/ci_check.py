@@ -174,10 +174,10 @@ def _shellcheck() -> tuple[bool, str]:
     result = subprocess.run(
         [
             "shellcheck",
-            "git_hooks/commit-msg",
-            "git_hooks/pre-commit",
-            "git_hooks/pre-push",
-            "git_hooks/setup-hooks.sh",
+            ".githooks/commit-msg",
+            ".githooks/pre-commit",
+            ".githooks/pre-push",
+            ".githooks/setup-hooks.sh",
         ],
         capture_output=True,
         text=True,

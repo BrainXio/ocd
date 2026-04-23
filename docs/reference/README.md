@@ -179,7 +179,7 @@ Path-scoped rules load only when matching files are read; unconditional rules lo
 
 ### AI Attribution Patterns
 
-Single source of truth: `git_hooks/ai-patterns.txt`
+Single source of truth: `.githooks/ai-patterns.txt`
 
 | Pattern | Matches |
 | ------------------------------ | ------------------------------------- |
@@ -187,7 +187,7 @@ Single source of truth: `git_hooks/ai-patterns.txt`
 | `^Generated (with\|by\|using)` | "Generated with/by/using" attribution |
 | `^\[AI(-generated)?\]` | `[AI]` or `[AI-generated]` tags |
 
-Git hooks are installed as symlinks: `.git/hooks/<hook>` → `git_hooks/<hook>`. Run `bash git_hooks/setup-hooks.sh` after cloning.
+Git hooks use `core.hooksPath`: run `bash .githooks/setup-hooks.sh` after cloning to configure git to use `.githooks/` as the hooks directory.
 
 ### Secret Scanning (gitleaks)
 
@@ -288,7 +288,7 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 ### Hook Subcommands
 
 Hook commands route through the `ocd` umbrella CLI via `ocd hook <name>`.
-They are invoked by Claude Code hooks (`.claude/settings.json`) and git hooks (`git_hooks/`).
+They are invoked by Claude Code hooks (`.claude/settings.json`) and git hooks (`.githooks/`).
 
 | Command | Module | Invoked by |
 | ------------------------ | ------------------------- | ------------------------------------------ |
@@ -381,11 +381,11 @@ Stages 3–4 run only when Python code changes.
 | Stage | Job | Tool | Condition |
 | ------------ | ----------------------- | ---------------------------------------- | ---------------------- |
 | 1 (detect) | `changes` | `dorny/paths-filter` | always |
-| 1 (gate) | `check-commit-messages` | grep (reads `git_hooks/ai-patterns.txt`) | always |
+| 1 (gate) | `check-commit-messages` | grep (reads `.githooks/ai-patterns.txt`) | always |
 | 1 (gate) | `verify-standards` | `ocd standards --verify` | always |
 | 1 (gate) | `no-local-config` | `git ls-files --error-unmatch` | always |
 | 2 (parallel) | `lint-yaml` | yamllint | YAML/workflow changes |
-| 2 (parallel) | `lint-shell` | shellcheck | `git_hooks/**` changes |
+| 2 (parallel) | `lint-shell` | shellcheck | `.githooks/**` changes |
 | 2 (parallel) | `lint-markdown` | mdformat | `**/*.md` changes |
 | 2 (parallel) | `secret-scan` | gitleaks (reads `.gitleaks.toml`) | always |
 | 2 (parallel) | `lint-actions` | actionlint | workflow changes |
@@ -464,7 +464,7 @@ Protected files (project-root-relative paths):
 
 - `src/ocd/hooks/format_work.py`, `src/ocd/hooks/lint_work.py`, `src/ocd/hooks/hookslib.py`, `src/ocd/hooks/pre_compact.py`, `src/ocd/hooks/session_start.py`, `src/ocd/hooks/session_end.py`
 - `src/ocd/config.py`, `src/ocd/compile.py`, `src/ocd/flush.py`, `src/ocd/lint.py`, `src/ocd/query.py`, `src/ocd/utils.py`
-- `git_hooks/commit-msg`, `git_hooks/pre-commit`, `git_hooks/pre-push`, `git_hooks/setup-hooks.sh`
+- `.githooks/commit-msg`, `.githooks/pre-commit`, `.githooks/pre-push`, `.githooks/setup-hooks.sh`
 - `.gitleaks.toml`
 
 **Bash deny** (block shell deletion of infrastructure):

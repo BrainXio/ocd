@@ -38,7 +38,7 @@ Run the hook-integrity agent, then based on its findings, update the CI workflow
 ```
 
 ```
-Run dead-code-hunter on src/ocd/ and git_hooks/. Report what it finds, then clean up anything that's truly unused.
+Run dead-code-hunter on src/ocd/ and .githooks/. Report what it finds, then clean up anything that's truly unused.
 ```
 
 ### Knowledge Capture
@@ -82,7 +82,7 @@ The ocd hook lint-work --commit hook is failing on commit. Run lint-status to se
 ```
 
 ```
-CI is failing on the check-commit-messages job. Show me the git_hooks/ai-patterns.txt file so I can see what pattern my commit message matched.
+CI is failing on the check-commit-messages job. Show me the .githooks/ai-patterns.txt file so I can see what pattern my commit message matched.
 ```
 
 ## Adding External Knowledge

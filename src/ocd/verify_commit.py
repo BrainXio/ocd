@@ -15,7 +15,7 @@ from pathlib import Path
 
 from ocd.config import PROJECT_ROOT
 
-_PATTERNS_FILE = PROJECT_ROOT / "git_hooks" / "ai-patterns.txt"
+_PATTERNS_FILE = PROJECT_ROOT / ".githooks" / "ai-patterns.txt"
 
 
 def load_patterns(patterns_file: Path | None = None) -> list[str]:
@@ -113,7 +113,7 @@ def main() -> None:
                 "Remove Co-Authored-By lines, 'Generated with/by/using' lines,",
                 file=sys.stderr,
             )
-            print("or [AI] tags. Patterns: git_hooks/ai-patterns.txt", file=sys.stderr)
+            print("or [AI] tags. Patterns: .githooks/ai-patterns.txt", file=sys.stderr)
             sys.exit(1)
         else:
             print("ok: no AI attribution patterns found in commit range")

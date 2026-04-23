@@ -28,7 +28,7 @@ See [reference](../reference/README.md) for the full agent frontmatter schema.
 
 ## Add a New Hook
 
-Python hooks live in `src/ocd/hooks/` as part of the installable package. Git hooks live in `git_hooks/`.
+Python hooks live in `src/ocd/hooks/` as part of the installable package. Git hooks live in `.githooks/`.
 
 ### Python hook (invoked by Claude Code)
 
@@ -41,10 +41,10 @@ Python hooks live in `src/ocd/hooks/` as part of the installable package. Git ho
 
 ### Git hook (invoked by git)
 
-- Create the script in `git_hooks/` (e.g., `my-hook`)
-- Make it executable: `chmod +x git_hooks/my-hook`
-- Add a symlink entry in `git_hooks/setup-hooks.sh`
-- Run `bash git_hooks/setup-hooks.sh` to install the symlink
+- Create the script in `.githooks/` (e.g., `my-hook`)
+- Make it executable: `chmod +x .githooks/my-hook`
+- Add an entry in `.githooks/setup-hooks.sh` to make the new hook executable
+- Run `bash .githooks/setup-hooks.sh` to configure git's `core.hooksPath`
 
 See [reference](../reference/README.md) for the hook configuration schema and available events.
 

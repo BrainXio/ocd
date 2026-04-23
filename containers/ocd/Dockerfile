@@ -87,7 +87,7 @@ RUN rm -f /home/ocd/.claude/settings.local.json \
 # ── OCD Templates ──────────────────────────────────────────────────
 # Project-level files that ocd init copies to the workspace.
 # These must be at the project root (not user-level) to work correctly.
-COPY git_hooks/ /opt/ocd/templates/git_hooks/
+COPY .githooks/ /opt/ocd/templates/.githooks/
 COPY .gitleaks.toml /opt/ocd/templates/.gitleaks.toml
 COPY package.json package-lock.json /opt/ocd/templates/
 
