@@ -24,6 +24,7 @@ import ocd.router
 import ocd.session_card
 import ocd.standards
 import ocd.utils
+import ocd.vec
 import ocd.vision
 
 # flush.py sets CLAUDE_INVOKED_BY at import time — clear again so
@@ -103,6 +104,11 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "INDEX_FILE": knowledge_dir / "index.md",
         "RAW_DIR": knowledge_dir / "raw",
         "OCD_DB": knowledge_dir / "ocd.db",
+        "VEC_DIMENSIONS": 384,
+        "VEC_EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+        "VEC_WEIGHT_TFIDF": 0.4,
+        "VEC_WEIGHT_VECTOR": 0.4,
+        "VEC_WEIGHT_QUALITY": 0.2,
         "KB_INDEX_JSON": state_dir / "kb-index.json",
         "MANIFEST_FILE": state_dir / "manifest.json",
         "SKILLS_DIR": tmp_agent_dir.parent / ".claude" / "skills" / "ocd",
@@ -124,6 +130,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         ocd.autofix,
         ocd.ingest,
         ocd.utils,
+        ocd.vec,
         ocd.hooks.hookslib,
         ocd.flush,
         ocd.hooks.session_start,

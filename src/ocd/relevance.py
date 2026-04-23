@@ -27,6 +27,9 @@ from ocd.config import (
     KNOWLEDGE_DIR,
     OCD_DB,
     STATE_DIR,
+    VEC_WEIGHT_QUALITY,
+    VEC_WEIGHT_TFIDF,
+    VEC_WEIGHT_VECTOR,
 )
 from ocd.utils import file_hash, list_wiki_articles, load_state
 
@@ -528,6 +531,109 @@ def _fallback_recent(index: dict[str, Any], top_k: int) -> list[dict[str, Any]]:
     ]
 
 
+def hybrid_score_articles(
+    query: str,
+    index: dict[str, Any],
+    db_path: Path | None = None,
+    top_k: int = KB_INJECTION_COUNT,
+) -> list[dict[str, Any]]:
+    """Score articles using hybrid TF-IDF + vector + quality weighting.
+
+    When vector support is available and ocd.db exists, combines three
+    signals: TF-IDF cosine similarity, vector semantic similarity, and
+    the OCD quality score. Falls back to TF-IDF + quality when vectors
+    are unavailable.
+    """
+    import sqlite3
+
+    # 1. Get TF-IDF scores (always available)
+    tfidf_results = score_articles(query, index, top_k=min(top_k * 3, 50))
+
+    # Build a dict of path -> tfidf_score for merging
+    tfidf_scores: dict[str, float] = {r["path"]: r["score"] for r in tfidf_results}
+
+    # 2. Get vector scores (optional)
+    vec_scores: dict[str, float] = {}
+    vec_available = False
+    try:
+        from ocd.vec import is_vec_available, search_vectors
+
+        if is_vec_available() and db_path and db_path.exists():
+            db = sqlite3.connect(str(db_path))
+            try:
+                results = search_vectors(db, query, top_k=min(top_k * 3, 50))
+                if results:
+                    # Convert cosine distance to similarity: similarity = 1 - distance
+                    vec_scores = {path: 1.0 - dist for path, dist in results}
+                    vec_available = True
+            except sqlite3.OperationalError:
+                pass
+            db.close()
+    except ImportError:
+        pass  # vec extras not installed
+
+    # 3. Get quality scores from articles table (optional)
+    quality_scores: dict[str, float] = {}
+    if db_path and db_path.exists():
+        db = sqlite3.connect(str(db_path))
+        try:
+            rows = db.execute("SELECT path, score FROM articles").fetchall()
+            quality_scores = {r[0]: r[1] for r in rows}
+        except sqlite3.OperationalError:
+            pass
+        db.close()
+
+    # 4. Collect all candidate paths
+    all_paths = set(tfidf_scores) | set(vec_scores) | set(quality_scores)
+
+    # 5. Determine weights (redistribute if a signal is missing)
+    w_tfidf = VEC_WEIGHT_TFIDF
+    w_vec = VEC_WEIGHT_VECTOR
+    w_quality = VEC_WEIGHT_QUALITY
+
+    if not vec_available:
+        # Redistribute vector weight to TF-IDF and quality
+        w_tfidf = VEC_WEIGHT_TFIDF + VEC_WEIGHT_VECTOR * 0.5
+        w_quality = VEC_WEIGHT_QUALITY + VEC_WEIGHT_VECTOR * 0.5
+        w_vec = 0.0
+
+    # 6. Normalize each signal to [0, 1] and compute weighted scores
+    def _normalize(scores: dict[str, float]) -> dict[str, float]:
+        if not scores:
+            return {}
+        max_val = max(scores.values())
+        if max_val == 0:
+            return {k: 0.0 for k in scores}
+        return {k: v / max_val for k, v in scores.items()}
+
+    norm_tfidf = _normalize(tfidf_scores)
+    norm_vec = _normalize(vec_scores)
+    norm_quality = _normalize(quality_scores)
+
+    # Merge article metadata from index for title/summary
+    index_lookup: dict[str, dict[str, Any]] = {a["path"]: a for a in index.get("articles", [])}
+
+    merged = []
+    for path in all_paths:
+        info = index_lookup.get(path, {})
+        final_score = (
+            w_tfidf * norm_tfidf.get(path, 0.0)
+            + w_vec * norm_vec.get(path, 0.0)
+            + w_quality * norm_quality.get(path, 0.0)
+        )
+        merged.append(
+            {
+                "path": path,
+                "title": info.get("title", path.split("/")[-1].replace(".md", "")),
+                "summary": info.get("summary", ""),
+                "score": final_score,
+            }
+        )
+
+    merged.sort(key=lambda x: x["score"], reverse=True)
+    return merged[:top_k]
+
+
 # ── Health card ──────────────────────────────────────────────────────────
 
 
@@ -603,11 +709,14 @@ def build_relevant_context(
     query: str = "",
     top_k: int = KB_INJECTION_COUNT,
     max_chars: int = 8000,
+    use_vectors: bool = False,
 ) -> str:
     """Build the context string for session start injection.
 
     Uses relevance scoring if a query is provided, otherwise falls back
     to most recently updated articles. Includes a KB health card header.
+    When use_vectors is True and vector support is available, uses hybrid
+    scoring (TF-IDF + vector + quality) instead of TF-IDF alone.
     """
     from datetime import UTC, datetime
 
@@ -618,8 +727,11 @@ def build_relevant_context(
         index = build_kb_index_json()
         save_kb_index(index)
 
-    # Score articles
-    scored = score_articles(query, index, top_k)
+    # Score articles — use hybrid search if requested
+    if use_vectors:
+        scored = hybrid_score_articles(query, index, db_path=OCD_DB, top_k=top_k)
+    else:
+        scored = score_articles(query, index, top_k)
 
     # Build health card
     health_card = build_health_card(index)

@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.24"]
 sql = ["sqlfluff>=3.0"]
+vec = ["sqlite-vec>=0.1.6", "fastembed>=0.4.0"]
 
 [project.scripts]
 # Single entry point — all commands under `ocd <subcommand>`, including hooks via `ocd hook <name>`

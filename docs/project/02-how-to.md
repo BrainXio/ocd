@@ -282,3 +282,48 @@ The quality score (0.0–1.0) is based on:
 | Contains wikilinks | 0.2 |
 
 After ingestion, `relevance.py` automatically reads from `ocd.db` when it exists, falling back to flat files when the database is absent.
+
+## Use Vector Search
+
+Semantic vector search lets agents retrieve knowledge by meaning, not just keyword matching. It uses local ONNX embeddings (`BAAI/bge-small-en-v1.5`, 384 dims) and `sqlite-vec` for KNN search.
+
+### Install vec extras
+
+```bash
+uv sync --extra vec
+```
+
+Without vec extras, all search falls back to TF-IDF + quality scoring. No error is raised — it just degrades gracefully.
+
+### Ingest articles and generate embeddings
+
+```bash
+ocd ingest              # automatically generates embeddings when vec extras are installed
+ocd ingest --all        # force re-ingest all files
+```
+
+### Query with semantic search
+
+```bash
+ocd vec search "how to handle authentication"
+ocd kb query --relevant-to "authentication" --vectors
+```
+
+The `--vectors` flag on `kb query` enables hybrid scoring (TF-IDF + vector + quality). Without it, only TF-IDF + quality is used.
+
+### Rebuild embeddings
+
+```bash
+ocd vec rebuild          # regenerate all embeddings from articles table
+ocd vec rebuild --force  # force rebuild even if embedding model changed
+```
+
+Rebuilding without `--force` raises an error if the configured model differs from the one stored in `vec_metadata`. This prevents accidental model switches from corrupting the vector index.
+
+### Check status
+
+```bash
+ocd vec status
+```
+
+Shows whether vec extras are available, the embedding count, model name, and database path.

@@ -20,7 +20,9 @@ from ocd.config import (
     DAILY_DIR,
     DEFAULT_INDEX_CONTENT,
     INDEX_FILE,
+    KB_INJECTION_COUNT,
     KNOWLEDGE_DIR,
+    OCD_DB,
     PROJECT_ROOT,
     QA_DIR,
     REPORTS_DIR,
@@ -127,17 +129,35 @@ def _cmd_format(_args: argparse.Namespace) -> None:
 def _cmd_kb(args: argparse.Namespace) -> None:
     """Handle kb subcommands."""
     if args.kb_command == "query":
-        from ocd.relevance import main as relevance_main
+        from ocd.relevance import (
+            build_kb_index_json,
+            score_articles,
+        )
 
-        argv = ["ocd-kb-query"]
-        if args.relevant_to:
-            argv.extend(["--relevant-to", args.relevant_to])
-        if args.top_k:
-            argv.extend(["--top-k", str(args.top_k)])
-        if args.build_index:
-            argv.append("--build-index")
-        sys.argv = argv
-        relevance_main()
+        index = build_kb_index_json(use_db=True)
+        if args.vectors:
+            from ocd.relevance import hybrid_score_articles
+
+            scored = hybrid_score_articles(
+                args.relevant_to, index, db_path=OCD_DB, top_k=args.top_k or KB_INJECTION_COUNT
+            )
+        else:
+            scored = score_articles(args.relevant_to, index, top_k=args.top_k or KB_INJECTION_COUNT)
+
+        if not scored:
+            print("No relevant articles found.")
+            return
+
+        print(f"Top {len(scored)} articles for: '{args.relevant_to}'\n")
+        for entry in scored:
+            score_str = f" ({entry['score']:.2f})" if entry.get("score", 0) > 0 else ""
+            title = entry.get("title", entry["path"])
+            summary = entry.get("summary", "")
+            print(f"  {title}{score_str}")
+            if summary:
+                print(f"    {summary}")
+            print(f"    → {entry['path']}")
+            print()
     else:
         print(f"Unknown kb subcommand: {args.kb_command}", file=sys.stderr)
         sys.exit(1)
@@ -252,6 +272,26 @@ def _cmd_ingest(args: argparse.Namespace) -> None:
     result = ingest_raw(force_all=args.all, dry_run=args.dry_run)
     print(result.to_json())
     sys.exit(1 if result.errors else 0)
+
+
+def _cmd_vec(args: argparse.Namespace) -> None:
+    """Handle vec subcommands."""
+    from ocd.vec import main as vec_main
+
+    argv = ["ocd-vec"]
+    if args.vec_command == "rebuild":
+        argv.append("rebuild")
+        if args.force:
+            argv.append("--force")
+    elif args.vec_command == "search":
+        argv.append("search")
+        argv.append(args.query)
+        if args.top_k:
+            argv.extend(["--top-k", str(args.top_k)])
+    elif args.vec_command == "status":
+        argv.append("status")
+    sys.argv = argv
+    vec_main()
 
 
 def _cmd_flush(args: argparse.Namespace) -> None:
@@ -433,6 +473,7 @@ def _build_parser() -> argparse.ArgumentParser:
     kb_query.add_argument("--relevant-to", required=True, help="Search query")
     kb_query.add_argument("--top-k", type=int, default=None, help="Number of results")
     kb_query.add_argument("--build-index", action="store_true", help="Rebuild index")
+    kb_query.add_argument("--vectors", action="store_true", help="Use hybrid vector+TF-IDF search")
     kb_query.set_defaults(func=_cmd_kb)
 
     # route
@@ -515,6 +556,19 @@ def _build_parser() -> argparse.ArgumentParser:
     ingest_parser.add_argument("--all", action="store_true", help="Force re-ingest all files")
     ingest_parser.add_argument("--dry-run", action="store_true", help="Report only, no DB changes")
     ingest_parser.set_defaults(func=_cmd_ingest)
+
+    # vec
+    vec_parser = subparsers.add_parser("vec", help="Vector embedding operations")
+    vec_sub = vec_parser.add_subparsers(dest="vec_command", help="Vector subcommands")
+    vec_rebuild = vec_sub.add_parser("rebuild", help="Rebuild all vector embeddings")
+    vec_rebuild.add_argument("--force", action="store_true", help="Force rebuild if model changed")
+    vec_rebuild.set_defaults(func=_cmd_vec)
+    vec_search = vec_sub.add_parser("search", help="Search knowledge base with vectors")
+    vec_search.add_argument("query", help="Search query")
+    vec_search.add_argument("--top-k", type=int, default=5, help="Number of results")
+    vec_search.set_defaults(func=_cmd_vec)
+    vec_status = vec_sub.add_parser("status", help="Show vector index status")
+    vec_status.set_defaults(func=_cmd_vec)
 
     # flush
     flush_parser = subparsers.add_parser("flush", help="Flush conversation context to daily log")
