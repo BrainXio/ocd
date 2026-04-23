@@ -17,7 +17,7 @@ How the `ocd.code-workspace` file configures VS Code for this project, what each
 The workspace exposes five root folders:
 
 | Folder | Purpose |
-| ------------------ | ----------------------------------------- |
+| ---------------- | ----------------------------------------- |
 | `.` | Project root: source, tests, docs, config |
 | `USER/daily` | Daily session logs |
 | `USER/knowledge` | Compiled knowledge articles |

@@ -47,7 +47,7 @@ Linear dependency chain. Each item builds on the one before it. Complete in orde
 | 2.3 | Release package composition | Bundled SQLite database inside the wheel; `ocd-compile-db` at build time, `ocd-materialize` at runtime | — | Done |
 | 2.4 | GitHub Release packaging | Build and attach the `brainxio-ocd` sdist/wheel to GitHub Releases alongside container images | 2.3 | Planned |
 | 2.5 | Release automation | CI job that composes release artifacts, creates a GitHub Release with composed package content, and uploads assets | 2.1, 2.2, 2.4 | Planned |
-| 2.6 | `AGENTS.md` | Instruction file for external agents on which packages and assets to download from this repo and how to set them up in foreign environments | 2.3 | Planned |
+| 2.6 | `AGENTS.md` | Instruction file for external agents on which packages and assets to download from this repo and how to set them up in foreign environments | 2.3 | Done |
 | 2.7 | Deployment pipelines | Staging → production deployment workflows | 2.5 | Planned |
 
 ### Release Package Composition
@@ -66,8 +66,11 @@ A GitHub Release contains:
 | `brainxio_ocd-<version>.tar.gz` | Source distribution |
 | Container images | Published to GHCR (`ghcr.io/brainxio/ocd-<name>:<version>`) |
 
-The `AGENTS.md` file should document how to install the wheel and run
-`ocd-materialize` to deploy the configuration.
+The `AGENTS.md` file documents how to install the wheel and run
+`ocd-materialize` to deploy the configuration. The `--vendor` flag materializes
+to vendor-specific formats: `--vendor aider`, `--vendor cursor`,
+`--vendor copilot`, `--vendor windsurf`, `--vendor amazonq`,
+`--vendor agents-md` (project root AGENTS.md), or `--vendor all`.
 
 ## Phase 3: Knowledge Pipeline Extensions
 

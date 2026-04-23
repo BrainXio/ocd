@@ -25,6 +25,14 @@ from ocd.format import run_formatters
 
 TEMPLATES_DIR = Path("/opt/ocd/templates")
 
+VENDOR_DIRS = [
+    ".aider",
+    ".cursor/rules",
+    ".github/instructions",
+    ".windsurf/rules",
+    ".amazonq/rules",
+]
+
 USER_DIRS = [
     str(p.relative_to(PROJECT_ROOT))
     for p in [
@@ -92,6 +100,12 @@ def main() -> None:
         scan_secrets_args = sys.argv[2:]
         sys.argv = [sys.argv[0], *scan_secrets_args]
         scan_secrets_main()
+    elif sys.argv[1] == "materialize":
+        from ocd.materialize import main as materialize_main
+
+        materialize_args = sys.argv[2:]
+        sys.argv = [sys.argv[0], *materialize_args]
+        materialize_main()
     else:
         print(f"Unknown command: {sys.argv[1]}", file=sys.stderr)
         sys.exit(1)
@@ -216,6 +230,18 @@ def _init_agent_dir(project_dir: Path) -> None:
         print(f"Created {USER_DIR.name}/ knowledge pipeline structure.")
 
 
+def _init_vendor_dirs(project_dir: Path) -> None:
+    """Scaffold vendor config directories for multi-tool support."""
+    created = False
+    for dir_path in VENDOR_DIRS:
+        full = project_dir / dir_path
+        if not full.exists():
+            full.mkdir(parents=True, exist_ok=True)
+            created = True
+    if created:
+        print("Created vendor config directories.")
+
+
 def _init() -> None:
     """Initialize the OCD environment in a container."""
     project_dir = Path.cwd()
@@ -223,6 +249,9 @@ def _init() -> None:
 
     # Scaffold USER/ for knowledge pipeline
     _init_agent_dir(project_dir)
+
+    # Scaffold vendor config directories
+    _init_vendor_dirs(project_dir)
 
     # Seed templates from /opt/ocd/templates/
     copied = _copy_templates(project_dir)

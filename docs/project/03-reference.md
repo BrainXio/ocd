@@ -140,7 +140,7 @@ Hooks receive a JSON object on stdin:
 ### State Files
 
 | File | Purpose |
-| --------------------------------------- | ----------------------------------------------------------------------------- |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
 | `USER/state/format-violations.jsonl` | Per-line JSON records of auto-format corrections (file, formatter, timestamp) |
 | `USER/state/flush.log` | Background flush process log |
 | `USER/state/state.json` | Session state |
@@ -252,7 +252,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 ## Package Entry Points
 
 | Command | Module | Purpose |
-| ------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, standards, and fix — `ocd init` scaffolds `USER/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference; `ocd fix-cycle <file>` runs closed-loop detect-fix-verify |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
@@ -269,7 +269,8 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 | `ocd-standards` | `ocd.standards:main` | Manage standards hash reference (verify, update) |
 | `ocd-fix-cycle` | `ocd.fix:main` | Closed-loop fix commands: fix-cycle, lint-and-fix, test-and-fix, security-scan-and-patch |
 | `ocd-compile-db` | `ocd.pack:main` | Compile `.claude/` content into bundled SQLite database (`content.db`) |
-| `ocd-materialize` | `ocd.materialize:main` | Reconstruct markdown files from `content.db` to target directory |
+| `ocd-materialize` | `ocd.materialize:main` | Reconstruct markdown files from `content.db` to target directory; `--vendor` flag materializes to vendor-specific formats (aider, cursor, copilot, windsurf, amazonq, all, agents-md) |
+| `ocd-vendors` | `ocd.materialize:main` | Alias for `ocd-materialize` — vendor format adapter entry point |
 
 All entry points are defined in `pyproject.toml` `[project.scripts]` and installed by `uv sync`.
 
