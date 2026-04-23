@@ -287,6 +287,16 @@ def main() -> None:
     print(f"\nCompilation complete. Total cost: ${total_cost:.2f}")
     print(f"Knowledge base: {len(articles)} articles")
 
+    # Auto-ingest: load new articles into the wiki database
+    from ocd.ingest import ingest_raw
+
+    print("Ingesting into knowledge.db...")
+    result = ingest_raw()
+    print(
+        f"Ingest: {result.inserted} inserted, {result.updated} updated, "
+        f"{result.skipped} unchanged, {result.errors} errors"
+    )
+
     # Rebuild the KB search index after compilation
     from ocd.relevance import build_kb_index_json, save_kb_index
 

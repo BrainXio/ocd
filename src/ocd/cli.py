@@ -22,12 +22,13 @@ from ocd.config import (
     INDEX_FILE,
     KB_INJECTION_COUNT,
     KNOWLEDGE_DIR,
-    OCD_DB,
     PROJECT_ROOT,
     QA_DIR,
     REPORTS_DIR,
+    RESOURCES_DIR,
     STATE_DIR,
     USER_DIR,
+    WIKI_DB,
 )
 from ocd.format import run_formatters
 
@@ -48,14 +49,13 @@ USER_DIRS = [
         CONCEPTS_DIR,
         CONNECTIONS_DIR,
         QA_DIR,
+        RESOURCES_DIR,
         REPORTS_DIR,
         STATE_DIR,
         USER_DIR / "logs",
         USER_DIR / "agents" / "tasks",
         USER_DIR / "agents" / "runtime",
         USER_DIR / "cache",
-        KNOWLEDGE_DIR / "raw",
-        KNOWLEDGE_DIR / "archive",
     ]
 ]
 
@@ -139,7 +139,7 @@ def _cmd_kb(args: argparse.Namespace) -> None:
             from ocd.relevance import hybrid_score_articles
 
             scored = hybrid_score_articles(
-                args.relevant_to, index, db_path=OCD_DB, top_k=args.top_k or KB_INJECTION_COUNT
+                args.relevant_to, index, db_path=WIKI_DB, top_k=args.top_k or KB_INJECTION_COUNT
             )
         else:
             scored = score_articles(args.relevant_to, index, top_k=args.top_k or KB_INJECTION_COUNT)
@@ -299,12 +299,40 @@ def _cmd_compile(args: argparse.Namespace) -> None:
 
 
 def _cmd_ingest(args: argparse.Namespace) -> None:
-    """Ingest raw knowledge articles into ocd.db."""
+    """Ingest wiki articles into knowledge.db."""
     from ocd.ingest import ingest_raw
 
     result = ingest_raw(force_all=args.all, dry_run=args.dry_run)
     print(result.to_json())
     sys.exit(1 if result.errors else 0)
+
+
+def _cmd_knowledge(args: argparse.Namespace) -> None:
+    """Handle knowledge subcommands."""
+    if args.knowledge_command == "status":
+        from ocd.ingest import kb_status
+
+        status = kb_status()
+        print(f"KB status: {status['db_count']} articles in DB, {status['disk_count']} on disk")
+        if status["new"]:
+            print(f"  {len(status['new'])} new (not yet ingested): {', '.join(status['new'][:5])}")
+            if len(status["new"]) > 5:
+                print(f"    ... and {len(status['new']) - 5} more")
+        if status["stale"]:
+            print(
+                f"  {len(status['stale'])} stale (mtime changed): {', '.join(status['stale'][:5])}"
+            )
+        if status["orphaned"]:
+            print(
+                f"  {len(status['orphaned'])} orphaned (in DB but not on disk): "
+                f"{', '.join(status['orphaned'][:5])}"
+            )
+        if status["last_ingest"]:
+            print(f"Last ingest: {status['last_ingest']}")
+        sys.exit(0 if status["synced"] else 1)
+    else:
+        print(f"Unknown knowledge subcommand: {args.knowledge_command}", file=sys.stderr)
+        sys.exit(1)
 
 
 def _cmd_vec(args: argparse.Namespace) -> None:
@@ -598,12 +626,18 @@ def _build_parser() -> argparse.ArgumentParser:
     comp_parser.set_defaults(func=_cmd_compile)
 
     # ingest
-    ingest_parser = subparsers.add_parser(
-        "ingest", help="Ingest raw knowledge articles into ocd.db"
-    )
+    ingest_parser = subparsers.add_parser("ingest", help="Ingest wiki articles into knowledge.db")
     ingest_parser.add_argument("--all", action="store_true", help="Force re-ingest all files")
     ingest_parser.add_argument("--dry-run", action="store_true", help="Report only, no DB changes")
     ingest_parser.set_defaults(func=_cmd_ingest)
+
+    # knowledge
+    knowledge_parser = subparsers.add_parser("knowledge", help="Knowledge base operations")
+    knowledge_sub = knowledge_parser.add_subparsers(
+        dest="knowledge_command", help="Knowledge subcommands"
+    )
+    ks = knowledge_sub.add_parser("status", help="Show KB sync status")
+    ks.set_defaults(func=_cmd_knowledge)
 
     # vec
     vec_parser = subparsers.add_parser("vec", help="Vector embedding operations")

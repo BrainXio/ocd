@@ -195,13 +195,12 @@ class TestVecStatus:
 
     @requires_vec
     def test_status_with_db(self, tmp_path, monkeypatch):
-        db_path = tmp_path / "knowledge" / "ocd.db"
-        db_path.parent.mkdir(parents=True)
+        db_path = tmp_path / "knowledge.db"
         db = sqlite3.connect(str(db_path))
         ensure_vec_schema(db)
         insert_vectors(db, [("test", "test content")])
         db.close()
-        monkeypatch.setattr("ocd.vec.OCD_DB", db_path)
+        monkeypatch.setattr("ocd.vec.WIKI_DB", db_path)
         status = vec_status(db_path)
         assert status["available"] is True
         assert status["db_exists"] is True
@@ -217,16 +216,17 @@ class TestRebuildVectors:
     def test_rebuild_creates_embeddings(self, tmp_path, monkeypatch):
         from ocd.ingest import ingest_raw
 
-        db_path = tmp_path / "knowledge" / "ocd.db"
-        raw_dir = tmp_path / "knowledge" / "raw"
-        raw_dir.mkdir(parents=True)
-        (raw_dir / "concepts").mkdir()
-        (raw_dir / "concepts" / "test.md").write_text("---\ntitle: Test\n---\nTest body content.")
-        monkeypatch.setattr("ocd.ingest.OCD_DB", db_path)
-        monkeypatch.setattr("ocd.ingest.RAW_DIR", raw_dir)
+        db_path = tmp_path / "knowledge.db"
+        knowledge_dir = tmp_path / "knowledge"
+        knowledge_dir.mkdir(parents=True)
+        (knowledge_dir / "concepts").mkdir()
+        (knowledge_dir / "concepts" / "test.md").write_text(
+            "---\ntitle: Test\n---\nTest body content."
+        )
+        monkeypatch.setattr("ocd.ingest.WIKI_DB", db_path)
 
         # First, ingest articles
-        ingest_raw(raw_dir=raw_dir, db_path=db_path)
+        ingest_raw(knowledge_dir=knowledge_dir, db_path=db_path)
 
         # Now rebuild vectors
         from ocd.vec import rebuild_vectors
@@ -243,8 +243,7 @@ class TestRebuildVectors:
     def test_rebuild_model_change_requires_force(self, tmp_path, monkeypatch):
         from ocd.vec import rebuild_vectors
 
-        db_path = tmp_path / "knowledge" / "ocd.db"
-        db_path.parent.mkdir(parents=True)
+        db_path = tmp_path / "knowledge.db"
         db = sqlite3.connect(str(db_path))
         ensure_vec_schema(db)
         insert_vectors(db, [("test", "content")])

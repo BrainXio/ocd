@@ -29,6 +29,7 @@ class TestPathConstants:
         assert config.CONCEPTS_DIR.parent == config.KNOWLEDGE_DIR
         assert config.CONNECTIONS_DIR.parent == config.KNOWLEDGE_DIR
         assert config.QA_DIR.parent == config.KNOWLEDGE_DIR
+        assert config.RESOURCES_DIR.parent == config.KNOWLEDGE_DIR
 
     def test_venv_bin_is_executable_parent(self):
         assert Path(sys.executable).parent == config.VENV_BIN

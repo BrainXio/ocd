@@ -16,8 +16,15 @@ from ocd.config import (
     INDEX_FILE,
     KNOWLEDGE_DIR,
     QA_DIR,
+    RESOURCES_DIR,
     STATE_FILE,
 )
+
+
+def _wiki_subdirs() -> list[Path]:
+    """Return the list of wiki article subdirectories."""
+    return [CONCEPTS_DIR, CONNECTIONS_DIR, QA_DIR, RESOURCES_DIR]
+
 
 # ── State management ──────────────────────────────────────────────────
 
@@ -74,7 +81,7 @@ def read_all_wiki_content() -> str:
     """Read index + all wiki articles into a single string for context."""
     parts = [f"## INDEX\n\n{read_wiki_index()}"]
 
-    for subdir in [CONCEPTS_DIR, CONNECTIONS_DIR, QA_DIR]:
+    for subdir in _wiki_subdirs():
         if not subdir.exists():
             continue
         for md_file in sorted(subdir.glob("*.md")):
@@ -88,7 +95,7 @@ def read_all_wiki_content() -> str:
 def list_wiki_articles() -> list[Path]:
     """List all wiki article files."""
     articles = []
-    for subdir in [CONCEPTS_DIR, CONNECTIONS_DIR, QA_DIR]:
+    for subdir in _wiki_subdirs():
         if subdir.exists():
             articles.extend(sorted(subdir.glob("*.md")))
     return articles
