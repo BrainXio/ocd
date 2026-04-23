@@ -135,19 +135,19 @@ Hooks receive a JSON object on stdin:
 | `parse_stdin_json()` | Parse JSON from stdin (includes Windows backslash fix) |
 | `extract_conversation_context(path)` | Read JSONL transcript, extract last 30 turns as markdown, capped at 15,000 chars |
 | `spawn_flush(context_file, session_id)` | Launch `ocd-flush` as detached background process |
-| `write_context_file(session_id, context, prefix)` | Write context to `.agent/.state/{prefix}-{session_id}-{timestamp}.md` |
+| `write_context_file(session_id, context, prefix)` | Write context to `USER/state/{prefix}-{session_id}-{timestamp}.md` |
 
 ### State Files
 
 | File | Purpose |
 | --------------------------------------- | ----------------------------------------------------------------------------- |
-| `.agent/.state/format-violations.jsonl` | Per-line JSON records of auto-format corrections (file, formatter, timestamp) |
-| `.agent/.state/flush.log` | Background flush process log |
-| `.agent/.state/state.json` | Session state |
-| `.agent/.state/last-flush.json` | Last flush metadata |
-| `.agent/.state/kb-index.json` | TF-IDF search index for KB relevance queries |
-| `.agent/.state/manifest.json` | Agent keyword manifest for task routing |
-| `.agent/.state/session-card.md` | Session state card for post-compaction recovery (FIFO, 1,200 char cap) |
+| `USER/state/format-violations.jsonl` | Per-line JSON records of auto-format corrections (file, formatter, timestamp) |
+| `USER/state/flush.log` | Background flush process log |
+| `USER/state/state.json` | Session state |
+| `USER/state/last-flush.json` | Last flush metadata |
+| `USER/state/kb-index.json` | TF-IDF search index for KB relevance queries |
+| `USER/state/manifest.json` | Agent keyword manifest for task routing |
+| `USER/state/session-card.md` | Session state card for post-compaction recovery (FIFO, 1,200 char cap) |
 | `.claude/skills/ocd/standards.md` | Nine Standards full text with version + hash frontmatter |
 
 ## Claude Code Rules
@@ -245,7 +245,7 @@ The `ocd.code-workspace` file provides shared workspace settings:
 - **Markdown**: word wrap enabled
 - **Files**: insert final newline, trim trailing whitespace, exclude `__pycache__`, `.venv`, `.mypy_cache`, `.ruff_cache` from file tree and search
 
-The workspace also adds `.agent/` subdirectories (daily logs, knowledge, state) as folder entries for quick navigation.
+The workspace also adds `USER/` subdirectories (daily logs, knowledge, state) as folder entries for quick navigation.
 
 Extension recommendations live in `.vscode/extensions.json` (gitignored — each developer chooses their own).
 
@@ -253,7 +253,7 @@ Extension recommendations live in `.vscode/extensions.json` (gitignored — each
 
 | Command | Module | Purpose |
 | ------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, standards, and fix — `ocd init` scaffolds `.agent/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference; `ocd fix-cycle <file>` runs closed-loop detect-fix-verify |
+| `ocd` | `ocd.cli:main` | Container init, shell, format, KB query, routing, standards, and fix — `ocd init` scaffolds `USER/`, seeds templates, installs deps/hooks; `ocd shell` drops into bash; `ocd format` runs all formatters with auto-fix; `ocd kb query --relevant-to "<q>"` returns relevant KB articles; `ocd route <query>` routes to optimal agents; `ocd standards` manages standards hash reference; `ocd fix-cycle <file>` runs closed-loop detect-fix-verify |
 | `ocd-compile` | `ocd.compile:main` | Daily logs → knowledge articles (LLM compiler) |
 | `ocd-flush` | `ocd.flush:main` | Extract knowledge from session context (background) |
 | `ocd-format` | `ocd.format:main` | Run all formatters with auto-fix |
@@ -435,14 +435,14 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Max relevant context chars | 8,000 | `ocd.config` |
 | Standards file | `.claude/skills/ocd/standards.md` | `ocd.config` |
 | Max session card chars | 1,200 | `ocd.config` |
-| Session card file | `.agent/.state/session-card.md` | `ocd.config` |
+| Session card file | `USER/state/session-card.md` | `ocd.config` |
 
 ## Pipeline Commands
 
 ```bash
 ocd-compile                              # compile new/changed logs
 ocd-compile --all                         # force recompile
-ocd-compile --file .agent/daily/<date>.md # compile specific log
+ocd-compile --file USER/logs/daily/<date>.md # compile specific log
 ocd-compile --manifest                   # rebuild agent manifest after compile
 ocd-lint-kb                              # full lint (structural + LLM)
 ocd-lint-kb --structural-only             # skip LLM checks

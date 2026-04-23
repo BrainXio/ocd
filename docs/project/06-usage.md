@@ -91,7 +91,7 @@ The pipeline is content-agnostic — anything you can get into a markdown file c
 
 ### Daily Log Entry
 
-Create `.agent/daily/YYYY-MM-DD.md` with structured content and compile it. See [how-to](02-how-to.md#add-external-knowledge) for the full format.
+Create `USER/logs/daily/YYYY-MM-DD.md` with structured content and compile it. See [how-to](02-how-to.md#add-external-knowledge) for the full format.
 
 ### flush Ingestion
 

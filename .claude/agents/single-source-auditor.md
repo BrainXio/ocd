@@ -25,7 +25,7 @@ Example violation: `MAX_CONTEXT_CHARS = 20_000` in `session_start.py` vs `MAX_FL
 
 For each path pattern used across the codebase:
 
-- Grep for hardcoded path strings like `.agent/`, `src/ocd/`, `.claude/`, `git_hooks/`
+- Grep for hardcoded path strings like `USER/`, `src/ocd/`, `.claude/`, `git_hooks/`
 - If the same path fragment appears in multiple files without a shared constant, it is a duplication
 - Check that path constants in `config.py` (e.g., `PROJECT_ROOT`, `KNOWLEDGE_DIR`, `DAILY_DIR`) are used consistently
 
@@ -71,8 +71,8 @@ Report findings in this structure:
 
 | Path Fragment       | Occurrences | Should Be Constant               |
 | ------------------- | ----------- | -------------------------------- |
-| `.agent/daily/`     | 4 files     | YES — use `config.DAILY_DIR`     |
-| `.agent/knowledge/` | 3 files     | YES — use `config.KNOWLEDGE_DIR` |
+| `USER/logs/daily/`     | 4 files     | YES — use `config.DAILY_DIR`     |
+| `USER/knowledge/` | 3 files     | YES — use `config.KNOWLEDGE_DIR` |
 
 ### Duplicated Config (CI vs Local)
 

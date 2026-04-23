@@ -95,7 +95,7 @@ ocd-compile
 ocd-compile --all
 
 # Compile a specific log file
-ocd-compile --file .agent/daily/2026-04-17.md
+ocd-compile --file USER/logs/daily/2026-04-17.md
 
 # Lint the knowledge base (structural checks only)
 ocd-lint-kb --structural-only
@@ -116,7 +116,7 @@ All commands are installed entry points — run them directly or via `uv run ocd
 
 ### Via Daily Log Entry
 
-Create a markdown file at `.agent/daily/YYYY-MM-DD.md` with structured content, then compile:
+Create a markdown file at `USER/logs/daily/YYYY-MM-DD.md` with structured content, then compile:
 
 ```markdown
 # Daily Log: 2026-04-18
@@ -144,7 +144,7 @@ Create a markdown file at `.agent/daily/YYYY-MM-DD.md` with structured content, 
 ```
 
 ```bash
-ocd-compile --file .agent/daily/2026-04-18.md
+ocd-compile --file USER/logs/daily/2026-04-18.md
 ```
 
 The compiler will extract concepts and create knowledge articles. The format is advisory — the LLM compiler handles any reasonable markdown. See [explanation](04-explanation.md#the-feedback-loop) for why the pipeline is content-agnostic.

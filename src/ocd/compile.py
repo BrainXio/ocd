@@ -19,12 +19,12 @@ from pathlib import Path
 from typing import Any
 
 from ocd.config import (
-    AGENT_DIR,
     CONCEPTS_DIR,
     CONNECTIONS_DIR,
     DAILY_DIR,
     KNOWLEDGE_DIR,
     PROJECT_ROOT,
+    USER_DIR,
     now_iso,
 )
 from ocd.utils import (
@@ -246,8 +246,8 @@ def main() -> None:
         if not target.is_absolute():
             target = DAILY_DIR / target.name
         if not target.exists():
-            # Try resolving relative to agent data directory
-            target = AGENT_DIR / args.file
+            # Try resolving relative to user data directory
+            target = USER_DIR / args.file
         if not target.exists():
             print(f"Error: {args.file} not found")
             sys.exit(1)
