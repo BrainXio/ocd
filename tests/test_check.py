@@ -7,11 +7,36 @@ from unittest.mock import MagicMock
 
 from ocd.check import (
     _branch_protection,
+    _no_local_config_staged,
     _scan_secrets_staged,
     _staged_files,
     _standards_verify,
     run_check,
 )
+
+
+class TestNoLocalConfigStaged:
+    """_no_local_config_staged() blocks local config files from commits."""
+
+    def test_allows_clean_staging(self, monkeypatch):
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda *a, **kw: MagicMock(stdout="src/ocd/check.py\n", returncode=0),
+        )
+        passed, msg = _no_local_config_staged()
+        assert passed is True
+        assert "no local configs" in msg
+
+    def test_rejects_settings_local_json(self, monkeypatch):
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda *a, **kw: MagicMock(stdout=".claude/settings.local.json\n", returncode=0),
+        )
+        passed, msg = _no_local_config_staged()
+        assert passed is False
+        assert "settings.local.json" in msg
 
 
 class TestBranchProtection:
@@ -126,6 +151,7 @@ class TestRunCheck:
         )
         monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 0)
         monkeypatch.setattr("ocd.check._staged_files", lambda ext: [])
+        monkeypatch.setattr("ocd.check._no_local_config_staged", lambda: (True, "ok"))
         assert run_check() == 0
 
     def test_branch_failure_fails(self, monkeypatch):
@@ -138,4 +164,21 @@ class TestRunCheck:
         )
         monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 0)
         monkeypatch.setattr("ocd.check._staged_files", lambda ext: [])
+        monkeypatch.setattr("ocd.check._no_local_config_staged", lambda: (True, "ok"))
+        assert run_check() == 1
+
+    def test_local_config_failure_fails(self, monkeypatch):
+        monkeypatch.setattr(
+            subprocess, "run", lambda *a, **kw: MagicMock(stdout="feature\n", returncode=0)
+        )
+        monkeypatch.setattr(
+            "ocd.standards.verify_standards_hash",
+            lambda: {"match": True, "version": "1.0", "computed_hash": "abc"},
+        )
+        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 0)
+        monkeypatch.setattr("ocd.check._staged_files", lambda ext: [])
+        monkeypatch.setattr(
+            "ocd.check._no_local_config_staged",
+            lambda: (False, "local config staged"),
+        )
         assert run_check() == 1

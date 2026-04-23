@@ -96,6 +96,19 @@ jobs:
       - name: Verify standards hash
         run: uv run ocd standards --verify
 
+  no-local-config:
+    needs: [changes]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check no local config files are tracked
+        run: |
+          if git ls-files --error-unmatch .claude/settings.local.json 2>/dev/null; then
+            echo "ERROR: .claude/settings.local.json is tracked by git but must not be"
+            exit 1
+          fi
+          echo "OK: no local config files tracked"
+
   # ── Stage 2: Fast lints (parallel, path-conditioned) ─────────────────────
   # All checks below are mirrored by: uv run ocd ci-check
   lint-yaml:
