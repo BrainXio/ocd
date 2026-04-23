@@ -140,7 +140,7 @@ Hooks receive a JSON object on stdin:
 ### State Files
 
 | File | Purpose |
-| ------------------------------------ | ------------------------------------------------------------------------------ |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
 | `USER/state/format-violations.jsonl` | Per-line JSON records of auto-format corrections (file, formatter, timestamp) |
 | `USER/state/flush.log` | Background flush process log |
 | `USER/state/state.json` | Session state |
@@ -149,7 +149,7 @@ Hooks receive a JSON object on stdin:
 | `USER/state/manifest.json` | Agent keyword manifest for task routing |
 | `USER/state/session-card.md` | Session state card for post-compaction recovery (FIFO, 1,200 char cap) |
 | `USER/state/autofix-loop.jsonl` | Per-line JSON records of autofix loop iterations (intent, branch, convergence) |
-| `USER/knowledge/ocd.db` | SQLite database: compiled knowledge articles from raw ingestion |
+| `USER/knowledge/ocd.db` | SQLite database: compiled knowledge articles + vector embeddings from raw ingestion |
 | `USER/knowledge/raw/` | Raw knowledge articles (concepts/, connections/, qa/, resources/) |
 | `.claude/skills/ocd/standards.md` | Nine Standards full text with version + hash frontmatter |
 
@@ -260,7 +260,7 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 `ocd` command dispatches to the appropriate module based on the subcommand.
 
 | Subcommand | Module | Purpose |
-| ----------------------------- | ------------------- | ------------------------------------------------------------------ |
+| ----------------------------- | ------------------- | ------------------------------------------------------------------- |
 | `ocd init` | `ocd.cli` | Scaffold `USER/`, seed templates, install deps/hooks |
 | `ocd shell` | `ocd.cli` | Start interactive shell with OCD environment |
 | `ocd format` | `ocd.format` | Run all formatters with auto-fix |
@@ -284,6 +284,9 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 | `ocd pre-push` | `ocd.pre_push` | Diff-aware pre-push test runner |
 | `ocd autofix` | `ocd.autofix` | Self-corrective fix loop in isolated worktree |
 | `ocd ingest` | `ocd.ingest` | Ingest raw knowledge articles into ocd.db |
+| `ocd vec rebuild` | `ocd.vec` | Regenerate all vector embeddings (with `--force` for model changes) |
+| `ocd vec search <query>` | `ocd.vec` | Semantic vector search against ocd.db |
+| `ocd vec status` | `ocd.vec` | Show vector availability, embedding count, model name |
 
 ### Hook Subcommands
 
@@ -326,6 +329,51 @@ ocd materialize                         # materialize content.db → .claude/
 ocd materialize -t /path/.cursor       # materialize to any agent directory
 ocd materialize -t /path/.copilot -f    # overwrite existing files
 ```
+
+## Vector Search
+
+Semantic vector search enables agents to retrieve knowledge by meaning, not just keywords. It uses `sqlite-vec` for KNN vector search and `fastembed` for local ONNX-based embeddings.
+
+### Install
+
+```bash
+uv sync --extra vec
+```
+
+Both `sqlite-vec` and `fastembed` are optional dependencies. Without them, search falls back to TF-IDF + quality scoring.
+
+### Database Schema
+
+| Table | Columns | Primary Key |
+| ------------------- | -------------------------------------------------------- | ----------- |
+| `knowledge_vectors` | `rowid`, `embedding float[384]` | `rowid` |
+| `vec_metadata` | `rowid`, `article_path`, `model_name`, `dims`, `created` | `rowid` |
+
+`vec_metadata.article_path` links to `articles.path` for full traceability. The `knowledge_vectors` virtual table uses the `vec0` engine from `sqlite-vec`.
+
+### Hybrid Scoring
+
+| Signal | Source | Weight |
+| ----------------- | ---------------------------------- | ------ |
+| TF-IDF cosine | `relevance.py` index | 0.4 |
+| Vector cosine | `knowledge_vectors` via sqlite-vec | 0.4 |
+| OCD quality score | `articles.score` column | 0.2 |
+
+When vector search is unavailable (no vec extras), weights redistribute proportionally: TF-IDF 0.5, quality 0.5.
+
+### CLI Commands
+
+```bash
+ocd vec rebuild                    # regenerate all embeddings from articles
+ocd vec rebuild --force            # rebuild even if embedding model changed
+ocd vec search "query text"        # semantic search, returns top-k results
+ocd vec status                     # show availability, embedding count, model name
+ocd kb query --relevant-to "topic" --vectors  # hybrid search combining all signals
+```
+
+### Ingestion Integration
+
+`ocd ingest` automatically generates vector embeddings after inserting articles, when vec extras are installed. No separate command is needed for initial indexing.
 
 ## CI Pipeline
 
@@ -469,6 +517,11 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Autofix audit log | `USER/state/autofix-loop.jsonl` | `ocd.config` |
 | Raw knowledge dir | `USER/knowledge/raw/` | `ocd.config` |
 | Knowledge database | `USER/knowledge/ocd.db` | `ocd.config` |
+| Vector dimensions | 384 | `ocd.config` |
+| Vector embedding model | `BAAI/bge-small-en-v1.5` | `ocd.config` |
+| Vector weight: TF-IDF | 0.4 | `ocd.config` |
+| Vector weight: semantic | 0.4 | `ocd.config` |
+| Vector weight: quality | 0.2 | `ocd.config` |
 
 ## Pipeline Commands
 
@@ -487,6 +540,11 @@ ocd kb query --build-index               # rebuild KB search index
 ocd ingest                               # ingest raw knowledge into ocd.db
 ocd ingest --all                         # force re-ingest all files
 ocd ingest --dry-run                     # report only, no DB changes
+ocd vec rebuild                          # regenerate all vector embeddings
+ocd vec rebuild --force                  # rebuild even if embedding model changed
+ocd vec search "query text"              # semantic vector search
+ocd vec status                           # show vector availability, count, model
+ocd kb query --relevant-to "topic" --vectors  # hybrid search (TF-IDF + vectors + quality)
 ocd route "find dead code"               # route request to optimal agent(s)
 ocd route --build-manifest               # rebuild agent manifest
 ocd standards                            # print current standards reference

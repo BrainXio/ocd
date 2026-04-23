@@ -110,6 +110,13 @@ USER_STANDARDS_FILE: Path = USER_DIR / "STANDARDS.md"
 MAX_VISION_CONTEXT_CHARS = 4000
 VISION_LOG_FILE: Path = USER_DIR / "logs" / "vision.log"
 
+# Vector search configuration
+VEC_DIMENSIONS = 384
+VEC_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
+VEC_WEIGHT_TFIDF = 0.4
+VEC_WEIGHT_VECTOR = 0.4
+VEC_WEIGHT_QUALITY = 0.2
+
 
 def now_iso() -> str:
     """Current time in ISO 8601 format."""
