@@ -25,6 +25,7 @@ from ocd.config import (
     KB_INDEX_JSON,
     KB_INJECTION_COUNT,
     KNOWLEDGE_DIR,
+    OCD_DB,
     STATE_DIR,
 )
 from ocd.utils import file_hash, list_wiki_articles, load_state
@@ -252,8 +253,73 @@ def _extract_details(content: str) -> str:
 # ── Index building ───────────────────────────────────────────────────────
 
 
-def build_kb_index_json() -> dict[str, Any]:
+def _build_index_from_db() -> list[dict[str, Any]] | None:
+    """Read articles from ocd.db and return TF-IDF-ready entries.
+
+    Returns None if the database doesn't exist or has no articles.
+    """
+    import sqlite3
+
+    if not OCD_DB.exists():
+        return None
+
+    db = sqlite3.connect(str(OCD_DB))
+    try:
+        rows = db.execute(
+            "SELECT path, title, tags, aliases, sources, body, hash, updated FROM articles"
+        ).fetchall()
+    except sqlite3.OperationalError:
+        db.close()
+        return None
+    db.close()
+
+    if not rows:
+        return None
+
+    import json as _json
+
+    articles = []
+    all_tfs = []
+    for row in rows:
+        path, title, tags_json, aliases_json, sources_json, body, hash_val, updated = row
+        tags = _json.loads(tags_json) if tags_json else []
+        aliases = _json.loads(aliases_json) if aliases_json else []
+        sources = _json.loads(sources_json) if sources_json else []
+
+        searchable = " ".join(
+            [str(title)]
+            + (tags if isinstance(tags, list) else [str(tags)])
+            + (aliases if isinstance(aliases, list) else [str(aliases)])
+            + (sources if isinstance(sources, list) else [str(sources)])
+            + [body]
+        )
+        tokens = tokenize(searchable)
+        tf = _term_freq(tokens)
+
+        summary = _find_summary(path, title)
+        articles.append(
+            {
+                "path": path,
+                "title": str(title),
+                "summary": summary,
+                "tags": tags,
+                "aliases": aliases,
+                "updated": str(updated),
+                "tf": tf,
+                "hash": hash_val,
+            }
+        )
+        all_tfs.append(tf)
+
+    return articles
+
+
+def build_kb_index_json(use_db: bool = True) -> dict[str, Any]:
     """Scan all KB articles and build a search index with TF-IDF metadata.
+
+    When use_db is True and ocd.db exists, reads articles from the database
+    instead of flat files. Falls back to flat files when the database is
+    unavailable.
 
     Returns a JSON-serializable dict with article entries containing:
     - path: relative path from knowledge dir
@@ -268,46 +334,52 @@ def build_kb_index_json() -> dict[str, Any]:
     articles: list[dict[str, Any]] = []
     all_tfs: list[dict[str, float]] = []
 
-    for article_path in list_wiki_articles():
-        rel = str(article_path.relative_to(KNOWLEDGE_DIR))
-        try:
-            content = article_path.read_text(encoding="utf-8")
-        except OSError:
-            continue
+    # Try DB path first when requested
+    db_articles = _build_index_from_db() if use_db else None
+    if db_articles is not None:
+        articles = db_articles
+        all_tfs = [a["tf"] for a in articles]
+    else:
+        for article_path in list_wiki_articles():
+            rel = str(article_path.relative_to(KNOWLEDGE_DIR))
+            try:
+                content = article_path.read_text(encoding="utf-8")
+            except OSError:
+                continue
 
-        fm = _parse_frontmatter(content)
-        key_points = _extract_key_points(content)
-        details = _extract_details(content)
+            fm = _parse_frontmatter(content)
+            key_points = _extract_key_points(content)
+            details = _extract_details(content)
 
-        # Combine title, tags, aliases, key points, and first details paragraph
-        title = fm.get("title", "")
-        tags = fm.get("tags", [])
-        aliases = fm.get("aliases", [])
-        searchable = " ".join(
-            [str(title)]
-            + (tags if isinstance(tags, list) else [str(tags)])
-            + (aliases if isinstance(aliases, list) else [str(aliases)])
-            + [key_points, details]
-        )
-        tokens = tokenize(searchable)
-        tf = _term_freq(tokens)
+            # Combine title, tags, aliases, key points, and first details paragraph
+            title = fm.get("title", "")
+            tags = fm.get("tags", [])
+            aliases = fm.get("aliases", [])
+            searchable = " ".join(
+                [str(title)]
+                + (tags if isinstance(tags, list) else [str(tags)])
+                + (aliases if isinstance(aliases, list) else [str(aliases)])
+                + [key_points, details]
+            )
+            tokens = tokenize(searchable)
+            tf = _term_freq(tokens)
 
-        # Find summary from index table
-        summary = _find_summary(rel, title)
+            # Find summary from index table
+            summary = _find_summary(rel, title)
 
-        articles.append(
-            {
-                "path": rel,
-                "title": str(title),
-                "summary": summary,
-                "tags": tags if isinstance(tags, list) else [str(tags)],
-                "aliases": aliases if isinstance(aliases, list) else [str(aliases)],
-                "updated": str(fm.get("updated", "")),
-                "tf": tf,
-                "hash": file_hash(article_path),
-            }
-        )
-        all_tfs.append(tf)
+            articles.append(
+                {
+                    "path": rel,
+                    "title": str(title),
+                    "summary": summary,
+                    "tags": tags if isinstance(tags, list) else [str(tags)],
+                    "aliases": aliases if isinstance(aliases, list) else [str(aliases)],
+                    "updated": str(fm.get("updated", "")),
+                    "tf": tf,
+                    "hash": file_hash(article_path),
+                }
+            )
+            all_tfs.append(tf)
 
     # Compute IDF across all articles
     idf = _idf(all_tfs)

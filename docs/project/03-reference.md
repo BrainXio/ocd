@@ -149,6 +149,8 @@ Hooks receive a JSON object on stdin:
 | `USER/state/manifest.json` | Agent keyword manifest for task routing |
 | `USER/state/session-card.md` | Session state card for post-compaction recovery (FIFO, 1,200 char cap) |
 | `USER/state/autofix-loop.jsonl` | Per-line JSON records of autofix loop iterations (intent, branch, convergence) |
+| `USER/knowledge/ocd.db` | SQLite database: compiled knowledge articles from raw ingestion |
+| `USER/knowledge/raw/` | Raw knowledge articles (concepts/, connections/, qa/, resources/) |
 | `.claude/skills/ocd/standards.md` | Nine Standards full text with version + hash frontmatter |
 
 ## Claude Code Rules
@@ -281,6 +283,7 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 | `ocd compile-db` | `ocd.pack` | Compile `.claude/` content into bundled SQLite database |
 | `ocd pre-push` | `ocd.pre_push` | Diff-aware pre-push test runner |
 | `ocd autofix` | `ocd.autofix` | Self-corrective fix loop in isolated worktree |
+| `ocd ingest` | `ocd.ingest` | Ingest raw knowledge articles into ocd.db |
 
 ### Hook Subcommands
 
@@ -464,6 +467,8 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Session card file | `USER/state/session-card.md` | `ocd.config` |
 | Worktrees directory | `.claude/worktrees/` | `ocd.config` |
 | Autofix audit log | `USER/state/autofix-loop.jsonl` | `ocd.config` |
+| Raw knowledge dir | `USER/knowledge/raw/` | `ocd.config` |
+| Knowledge database | `USER/knowledge/ocd.db` | `ocd.config` |
 
 ## Pipeline Commands
 
@@ -479,6 +484,9 @@ ocd query "q" --file-back                # query + file answer
 ocd format                                # run all formatters with auto-fix
 ocd kb query --relevant-to "auth redirect" # TF-IDF relevance query (3-5 articles)
 ocd kb query --build-index               # rebuild KB search index
+ocd ingest                               # ingest raw knowledge into ocd.db
+ocd ingest --all                         # force re-ingest all files
+ocd ingest --dry-run                     # report only, no DB changes
 ocd route "find dead code"               # route request to optimal agent(s)
 ocd route --build-manifest               # rebuild agent manifest
 ocd standards                            # print current standards reference
