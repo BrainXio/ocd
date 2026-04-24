@@ -273,13 +273,13 @@ Raw articles live in subdirectories under `USER/knowledge/raw/`: `concepts/`, `c
 
 The quality score (0.0–1.0) is based on:
 
-| Criterion          | Points |
+| Criterion | Points |
 | ------------------ | ------ |
-| Has title          | 0.2    |
-| Has tags           | 0.2    |
-| Has sources        | 0.2    |
-| Word count >= 100  | 0.2    |
-| Contains wikilinks | 0.2    |
+| Has title | 0.2 |
+| Has tags | 0.2 |
+| Has sources | 0.2 |
+| Word count >= 100 | 0.2 |
+| Contains wikilinks | 0.2 |
 
 After ingestion, `relevance.py` automatically reads from `ocd.db` when it exists, falling back to flat files when the database is absent.
 
