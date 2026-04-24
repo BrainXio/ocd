@@ -168,6 +168,7 @@ Rules are distinct from hooks: hooks enforce deterministically, rules guide beha
 | `markdown.md` | `**/*.md` | mdformat, frontmatter plugin, quote style, ordered list normalization |
 | `infrastructure.md` | Infrastructure paths | Deny rule modification procedure for protected files |
 | `export.md` | `src/ocd/kb/export.py`, tests | Behavioral guidance for knowledge export command |
+| `worktrees.md` | Unconditional | Mandatory worktree development rule |
 
 All rule files live in `.claude/rules/`. The root `CLAUDE.md` serves as the rules index.
 Path-scoped rules load only when matching files are read; unconditional rules load every session.
@@ -231,7 +232,7 @@ Python linters are installed via `uv sync`. Prettier is installed via `npm ci` (
 `ocd format` runs all available formatters with auto-fix. Each formatter is only run if its tool is installed and its config file exists.
 
 | Formatter | Command | Scope |
-| -------------- | ------------------------------------------------------------------------- | -------- |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- | -------- |
 | `ruff-format` | `ruff format src/ tests/` | Python |
 | `ruff-fix` | `ruff check --fix src/ tests/` | Python |
 | `mdformat` | `mdformat README.md docs/ .claude/skills/ .claude/agents/ .claude/rules/ docs/reference/skills/ docs/reference/agents/` | Markdown |
@@ -290,6 +291,10 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 | `ocd vec rebuild` | `ocd.vec` | Regenerate all vector embeddings (with `--force` for model changes) |
 | `ocd vec search <query>` | `ocd.vec` | Semantic vector search against ocd.db |
 | `ocd vec status` | `ocd.vec` | Show vector availability, embedding count, model name |
+| `ocd worktree new <desc>` | `ocd.worktree` | Create isolated git worktree for development |
+| `ocd worktree list` | `ocd.worktree` | List managed worktrees |
+| `ocd worktree remove <slug>` | `ocd.worktree` | Remove worktree and its branch |
+| `ocd worktree status` | `ocd.worktree` | Show current worktree context |
 
 ### Hook Subcommands
 

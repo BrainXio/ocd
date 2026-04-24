@@ -33,6 +33,7 @@ import ocd.session.app_spec
 import ocd.session.flush
 import ocd.session.session_card
 import ocd.utils
+import ocd.worktree
 
 # flush.py sets CLAUDE_INVOKED_BY at import time — clear again so
 # tests don't see a stale value.
@@ -154,6 +155,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         ocd.routing.standards,
         ocd.session.app_spec,
         ocd.utils,
+        ocd.worktree,
     ):
         for name, value in patches.items():
             if hasattr(module, name):
