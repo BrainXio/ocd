@@ -1,1 +1,1 @@
-"""O.C.D. — Obsessive Claude Developer environment."""
+"""O.C.D. — Obsessive Code Discipline environment."""
