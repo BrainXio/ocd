@@ -151,7 +151,7 @@ Hooks receive a JSON object on stdin:
 | `USER/state/autofix-loop.jsonl` | Per-line JSON records of autofix loop iterations (intent, branch, convergence) |
 | `USER/knowledge/ocd.db` | SQLite database: compiled knowledge articles + vector embeddings from raw ingestion |
 | `USER/knowledge/raw/` | Raw knowledge articles (concepts/, connections/, qa/, resources/) |
-| `USER/knowledge-export/` | Obsidian-compatible vault export (gitignored) |
+| `USER/knowledge/` | Obsidian-compatible vault export (default, gitignored) |
 | `docs/knowledge/` | Commit-friendly knowledge export (via `--commit`) |
 | `.claude/skills/ocd/standards.md` | Nine Standards full text with version + hash frontmatter |
 
@@ -161,7 +161,7 @@ Rules in `.claude/rules/` provide advisory instructions to Claude Code sessions.
 Rules are distinct from hooks: hooks enforce deterministically, rules guide behavior.
 
 | Rule File | Scope | Purpose |
-| ------------------- | -------------------- | --------------------------------------------------------------------- |
+| ------------------- | ----------------------------- | --------------------------------------------------------------------- |
 | `commit-hygiene.md` | Unconditional | Conventional commits, branch naming, no AI attribution |
 | `pr-workflow.md` | Unconditional | PR labels, body template, merge requirements |
 | `doc-sync.md` | Unconditional | Update reference/planning docs when shipping features |
@@ -519,7 +519,7 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Autofix audit log | `USER/state/autofix-loop.jsonl` | `ocd.config` |
 | Raw knowledge dir | `USER/knowledge/raw/` | `ocd.config` |
 | Knowledge database | `USER/knowledge/ocd.db` | `ocd.config` |
-| Knowledge export dir | `USER/knowledge-export/` | `ocd.config` |
+| Knowledge export dir | `USER/knowledge/` | `ocd.config` |
 | Commit knowledge dir | `docs/knowledge/` | `ocd.config` |
 | Vector dimensions | 384 | `ocd.config` |
 | Vector embedding model | `BAAI/bge-small-en-v1.5` | `ocd.config` |
@@ -566,7 +566,7 @@ ocd compile-db                           # compile .claude/ → content.db
 ocd materialize                          # materialize content.db → .claude/
 ocd materialize -t /path/.cursor        # materialize to custom target
 ocd materialize -f                       # overwrite existing files
-ocd export                              # export to USER/knowledge-export/
+ocd export                              # export to USER/knowledge/
 ocd export --commit                     # export to docs/knowledge/ (commit-friendly)
 ocd export --output /path               # export to custom path
 ocd export --force                      # overwrite existing files

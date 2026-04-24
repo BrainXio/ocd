@@ -110,7 +110,7 @@ The `ocd export` command reads from `knowledge.db` and writes an
 Obsidian-compatible markdown vault. It is deliberately one-directional: the
 knowledge pipeline owns the database, and the export is a derived view.
 
-- **Default target** (`USER/knowledge-export/`) is gitignored — personal
+- **Default target** (`USER/knowledge/`) is gitignored — personal
   exports never leak to version control
 - **`--commit` flag** targets `docs/knowledge/` for projects that want
   curated knowledge in version control

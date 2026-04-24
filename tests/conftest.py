@@ -124,7 +124,6 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "AUTOFIX_LOG": state_dir / "autofix-loop.jsonl",
         "APP_SPEC_FILE": tmp_agent_dir.parent / "app_spec.txt",
         "MAX_APP_SPEC_CHARS": 4000,
-        "KNOWLEDGE_EXPORT_DIR": tmp_agent_dir / "knowledge-export",
         "COMMIT_KNOWLEDGE_DIR": tmp_agent_dir.parent / "docs" / "knowledge",
     }
 

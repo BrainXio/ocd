@@ -11,7 +11,7 @@ Rules for the `ocd export` command behavior.
 
 ## Default Export Target
 
-- `ocd export` (no flags) writes to `USER/knowledge-export/`
+- `ocd export` (no flags) writes to `USER/knowledge/`
 - This directory is gitignored (falls under the `USER/*` pattern)
 - Never prompt for confirmation when writing to the default target
 

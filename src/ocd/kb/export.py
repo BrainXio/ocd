@@ -2,11 +2,11 @@
 
 Reads all rows from knowledge.db and writes Obsidian-compatible markdown
 files with rich YAML frontmatter, wikilinks, a MOC index, and a backlinks
-map. Default export target is USER/knowledge-export/ (gitignored). Use
---commit to export to docs/knowledge/ for version control.
+map. Default export target is USER/knowledge/ (gitignored). Use --commit to
+export to docs/knowledge/ for version control.
 
 Usage:
-    ocd export                          # export to USER/knowledge-export/
+    ocd export                          # export to USER/knowledge/
     ocd export --commit                 # export to docs/knowledge/
     ocd export --output /path/to/vault  # export to custom path
     ocd export --force                  # overwrite existing files
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-from ocd.config import COMMIT_KNOWLEDGE_DIR, KNOWLEDGE_EXPORT_DIR, WIKI_DB
+from ocd.config import COMMIT_KNOWLEDGE_DIR, KNOWLEDGE_DIR, WIKI_DB
 from ocd.utils import extract_wikilinks
 
 _EXPORT_SUBDIRS = ("concepts", "connections", "qa", "resources")
@@ -246,7 +246,7 @@ def run_export(
     elif commit:
         output_dir = COMMIT_KNOWLEDGE_DIR
     else:
-        output_dir = KNOWLEDGE_EXPORT_DIR
+        output_dir = KNOWLEDGE_DIR
 
     db = db_path or WIKI_DB
 

@@ -282,8 +282,8 @@ class TestGenerateBacklinksMap:
 
 class TestRunExport:
     def test_default_output_dir(self, temp_export_db, tmp_path, monkeypatch):
-        export_dir = tmp_path / "knowledge-export"
-        monkeypatch.setattr("ocd.kb.export.KNOWLEDGE_EXPORT_DIR", export_dir)
+        export_dir = tmp_path / "knowledge"
+        monkeypatch.setattr("ocd.kb.export.KNOWLEDGE_DIR", export_dir)
         monkeypatch.setattr("ocd.kb.export.WIKI_DB", temp_export_db)
         result = run_export(db_path=temp_export_db)
         assert result == 0
