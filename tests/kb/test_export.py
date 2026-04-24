@@ -231,6 +231,20 @@ class TestGenerateMoc:
         assert "dataview" in moc
         assert 'FROM "concepts"' in moc
 
+    def test_dataview_queries_section(self):
+        articles = [
+            {
+                "slug": "concepts/test",
+                "type": "concept",
+                "updated": "2026-04-21",
+                "score": 0.8,
+                "body": "",
+            },
+        ]
+        moc = _generate_moc(articles)
+        assert "Dataview Queries" in moc
+        assert "WHERE score >= 0.8" in moc
+
     def test_article_count(self):
         articles = [
             {"slug": "a", "type": "concept", "updated": "2026-04-21", "score": 0.8, "body": ""},

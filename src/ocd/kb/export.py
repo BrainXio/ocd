@@ -138,6 +138,23 @@ def _generate_moc(articles: list[dict[str, object]]) -> str:
         "",
     ]
 
+    lines.append("## Dataview Queries")
+    lines.append("")
+    lines.append("Use these queries in Obsidian's Dataview plugin:")
+    lines.append("")
+    lines.append("```dataview")
+    lines.append("TABLE title, type, score, updated")
+    lines.append('FROM "concepts" OR "connections" OR "qa" OR "resources"')
+    lines.append("SORT updated DESC")
+    lines.append("```")
+    lines.append("")
+    lines.append("```dataview")
+    lines.append("LIST")
+    lines.append("WHERE score >= 0.8")
+    lines.append("SORT score DESC")
+    lines.append("```")
+    lines.append("")
+
     lines.append("## By Type")
     lines.append("")
     for subdir in _EXPORT_SUBDIRS:
