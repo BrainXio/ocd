@@ -16,25 +16,25 @@ reference docs lists config files and scopes for each linter.
 
 ### Required System Tools
 
-| Tool | Minimum Version | Install | Purpose |
+| Tool    | Minimum Version | Install                                            | Purpose                            |
 | ------- | --------------- | -------------------------------------------------- | ---------------------------------- |
-| uv | 0.4+ | `curl -LsSf https://astral.sh/uv/install.sh \| sh` | Python package manager |
-| Python | 3.12+ | system package manager or `uv python install 3.12` | Runtime |
-| Node.js | 22+ | system package manager or `fnm`/`nvm` | CSS/HTML/JSON linting via `npm ci` |
-| Git | 2.40+ | system package manager | Version control and hooks |
+| uv      | 0.4+            | `curl -LsSf https://astral.sh/uv/install.sh \| sh` | Python package manager             |
+| Python  | 3.12+           | system package manager or `uv python install 3.12` | Runtime                            |
+| Node.js | 22+             | system package manager or `fnm`/`nvm`              | CSS/HTML/JSON linting via `npm ci` |
+| Git     | 2.40+           | system package manager                             | Version control and hooks          |
 
 ### Python Tools (installed by `uv sync`)
 
-| Tool | Minimum Version | Purpose |
+| Tool                 | Minimum Version | Purpose                               |
 | -------------------- | --------------- | ------------------------------------- |
-| ruff | 0.8+ | Lint and format Python |
-| mypy | 1.13+ | Strict type checking |
-| yamllint | 1.35+ | Lint YAML |
-| mdformat | 0.7+ | Format Markdown |
-| mdformat-frontmatter | 2.0.10+ | Preserve YAML frontmatter in Markdown |
-| claude-agent-sdk | 0.1.29+ | Agent SDK for compile and flush |
-| pytest | 9.0.3+ | Test runner |
-| pytest-asyncio | 1.3.0+ | Async test support |
+| ruff                 | 0.8+            | Lint and format Python                |
+| mypy                 | 1.13+           | Strict type checking                  |
+| yamllint             | 1.35+           | Lint YAML                             |
+| mdformat             | 0.7+            | Format Markdown                       |
+| mdformat-frontmatter | 2.0.10+         | Preserve YAML frontmatter in Markdown |
+| claude-agent-sdk     | 0.1.29+         | Agent SDK for compile and flush       |
+| pytest               | 9.0.3+          | Test runner                           |
+| pytest-asyncio       | 1.3.0+          | Async test support                    |
 
 ### Optional: SQL Tools
 
@@ -53,20 +53,20 @@ root.
 These linters are not required for basic development. Git hooks warn but do not
 fail when they are missing. CI always installs them.
 
-| Tool | Install | CI Job |
+| Tool       | Install                                                            | CI Job         |
 | ---------- | ------------------------------------------------------------------ | -------------- |
-| gitleaks | [binary install](https://github.com/gitleaks/gitleaks#installing) | `secret-scan` |
-| hadolint | [binary install](https://github.com/hadolint/hadolint#installing) | containers CI |
-| shellcheck | `apt install shellcheck` / `brew install shellcheck` | `lint-shell` |
-| actionlint | [binary install](https://github.com/rhysd/actionlint#install) | `lint-actions` |
-| trivy | [binary install](https://github.com/aquasecurity/trivy#installing) | `scan-deps` |
-| semgrep | `pip install semgrep` | `sast-scan` |
+| gitleaks   | [binary install](https://github.com/gitleaks/gitleaks#installing)  | `secret-scan`  |
+| hadolint   | [binary install](https://github.com/hadolint/hadolint#installing)  | containers CI  |
+| shellcheck | `apt install shellcheck` / `brew install shellcheck`               | `lint-shell`   |
+| actionlint | [binary install](https://github.com/rhysd/actionlint#install)      | `lint-actions` |
+| trivy      | [binary install](https://github.com/aquasecurity/trivy#installing) | `scan-deps`    |
+| semgrep    | `pip install semgrep`                                              | `sast-scan`    |
 
 ### Node.js Tools (installed by `npm ci`)
 
 Running `npm ci` in the project root installs into `node_modules/`:
 
-| Tool | Purpose |
+| Tool     | Purpose         |
 | -------- | --------------- |
 | prettier | JSON formatting |
 
