@@ -1,4 +1,4 @@
-# O.C.D. — Obsessive Claude Developer
+# O.C.D. — Obsessive Code Discipline
 
 A Claude Code environment with a personal knowledge base compiled from AI conversations.
 
