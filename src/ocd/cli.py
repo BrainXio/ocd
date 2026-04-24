@@ -460,6 +460,34 @@ def _cmd_autofix(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_worktree(args: argparse.Namespace) -> None:
+    """Git worktree management — create, list, remove, status."""
+    from ocd.worktree import list_worktrees, new_worktree, remove_worktree, worktree_status
+
+    if args.worktree_command == "new":
+        new_worktree(args.description, prefix=args.prefix)
+    elif args.worktree_command == "list":
+        worktrees = list_worktrees()
+        if not worktrees:
+            print("No worktrees found.")
+        for wt in worktrees:
+            print(f"  {wt.slug}  branch={wt.branch}  path={wt.path}")
+    elif args.worktree_command == "remove":
+        ok = remove_worktree(args.slug, force=args.force)
+        sys.exit(0 if ok else 1)
+    elif args.worktree_command == "status":
+        info = worktree_status()
+        if info["location"] == "worktree":
+            print(f"Worktree: {info['path']}")
+            print(f"Branch: {info['branch']}")
+        else:
+            print(f"Main tree: {info['path']}")
+            print(f"Branch: {info['branch']}")
+    else:
+        worktree_parser = _build_parser()
+        worktree_parser.parse_args(["worktree", "--help"])
+
+
 # ── Hook subcommand handlers ──────────────────────────────────────────────────
 
 
@@ -751,6 +779,29 @@ def _build_parser() -> argparse.ArgumentParser:
     autofix_parser.add_argument("--max-iterations", type=int, default=5, help="Max loop iterations")
     autofix_parser.add_argument("--dry-run", action="store_true", help="Report only, no merge")
     autofix_parser.set_defaults(func=_cmd_autofix)
+
+    # worktree (nested subcommands for git worktree management)
+    worktree_parser = subparsers.add_parser("worktree", help="Git worktree management")
+    worktree_sub = worktree_parser.add_subparsers(
+        dest="worktree_command", help="Worktree subcommands"
+    )
+    wt_new = worktree_sub.add_parser("new", help="Create a worktree for development")
+    wt_new.add_argument("description", help="Short kebab-case description (e.g., add-search-index)")
+    wt_new.add_argument(
+        "--prefix",
+        default="feat",
+        choices=["feat", "fix", "refactor", "experiment", "docs", "test", "ci", "chore"],
+        help="Branch prefix (default: feat)",
+    )
+    wt_new.set_defaults(func=_cmd_worktree)
+    wt_list = worktree_sub.add_parser("list", help="List managed worktrees")
+    wt_list.set_defaults(func=_cmd_worktree)
+    wt_remove = worktree_sub.add_parser("remove", help="Remove a worktree and its branch")
+    wt_remove.add_argument("slug", help="Worktree slug (e.g., feat+add-search)")
+    wt_remove.add_argument("--force", action="store_true", help="Force removal of dirty worktree")
+    wt_remove.set_defaults(func=_cmd_worktree)
+    wt_status = worktree_sub.add_parser("status", help="Show current worktree context")
+    wt_status.set_defaults(func=_cmd_worktree)
 
     # hook (nested subcommands for Claude Code and git hook dispatch)
     hook_parser = subparsers.add_parser("hook", help="Hook dispatch commands")
