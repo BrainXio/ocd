@@ -56,7 +56,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Reject AI attribution in commit messages
@@ -80,7 +80,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Verify standards hash
@@ -136,7 +136,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: mdformat --check
@@ -217,7 +217,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: ruff check
@@ -237,7 +237,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Run tests
