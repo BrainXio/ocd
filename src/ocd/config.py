@@ -94,6 +94,10 @@ MANIFEST_FILE: Path = STATE_DIR / "manifest.json"
 SKILLS_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "skills" / "ocd"
 STANDARDS_FILE: Path = SKILLS_DIR / "standards.md"
 
+# Canonical portable content (skills/agents shared across AI tools)
+DOCS_SKILLS_DIR: Path = PROJECT_ROOT / "docs" / "reference" / "skills"
+DOCS_AGENTS_DIR: Path = PROJECT_ROOT / "docs" / "reference" / "agents"
+
 # Bundled content database (for release packaging)
 BUNDLED_DB_PATH: Path = Path(__file__).parent / "data" / "content.db"
 

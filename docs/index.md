@@ -21,6 +21,8 @@ Documentation organized by the [Diataxis framework](https://diataxis.fr/) — fo
 ## Reference
 
 - [Reference](reference/README.md) — all tables, schemas, and specs in one place
+- [Portable Skills](reference/skills/) — language/tech skills usable by any AI tool
+- [Portable Agents](reference/agents/) — audit agents usable by any AI tool
 - [Code Workspace](reference/code-workspace.md) — VS Code workspace configuration
 - [Containers](reference/containers.md) — images, CI pipeline, security scanning, and publishing
 

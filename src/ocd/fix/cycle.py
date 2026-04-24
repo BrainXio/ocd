@@ -28,7 +28,14 @@ from ocd.config import PROJECT_ROOT, VENV_BIN
 # Only formatters and lint fixes that are deterministic and non-breaking.
 _SAFE_FIXES: dict[str, list[str]] = {
     "ruff": ["ruff", "check", "--fix", "src/", "tests/"],
-    "mdformat": ["mdformat", "README.md", "docs/", ".claude/skills/"],
+    "mdformat": [
+        "mdformat",
+        "README.md",
+        "docs/",
+        ".claude/skills/",
+        ".claude/agents/",
+        ".claude/rules/",
+    ],
     "prettier": ["npx", "prettier", "--write", "."],
     "stylelint": ["npx", "stylelint", "--fix", "**/*.css"],
     "sqlfluff": ["sqlfluff", "fix", "--force"],

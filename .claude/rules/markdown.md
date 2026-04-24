@@ -43,7 +43,7 @@ Do not fight the normalization by writing manual numbers.
 The CI lint-markdown job checks these paths:
 
 ```
-mdformat --check README.md docs/*.md docs/**/*.md .claude/skills/*/SKILL.md .claude/agents/*.md .claude/rules/*.md
+mdformat --check README.md docs/*.md docs/**/*.md .claude/skills/*/SKILL.md .claude/agents/*.md .claude/rules/*.md docs/reference/skills/*.md docs/reference/agents/*.md
 ```
 
 Run the same command locally before pushing.
@@ -63,6 +63,17 @@ Skill files use these frontmatter fields:
 - `name` (skill name, matches directory name)
 - `description` (quoted string describing the skill)
 - `argument-hint` (quoted string showing expected arguments)
+
+Canonical skill docs (`docs/reference/skills/*.md`) add Diataxis fields:
+
+- `title` (human-readable skill title)
+- `aliases` (list of alternate names, e.g. `[python-skill]`)
+- `tags` (YAML list: `tags: [skill, language, python]`)
+- `created` (date: YYYY-MM-DD)
+- `updated` (date: YYYY-MM-DD, update on every edit)
+
+Agent files in `docs/reference/agents/*.md` follow the same merged pattern
+(Claude Code `name`/`description`/`tools`/`model` + Diataxis `title`/`aliases`/`tags`/`created`/`updated`).
 
 ## Line Length
 

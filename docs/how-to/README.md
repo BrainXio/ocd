@@ -3,14 +3,15 @@ title: How-To Guides
 aliases: [how-to, guides, tasks]
 tags: [how-to]
 created: 2026-04-17
-updated: 2026-04-23
+updated: 2026-04-24
 ---
 
 Task-oriented guides. Each section is independent — jump to what you need.
 
 ## Add a New Skill
 
-- Create `.claude/skills/<name>/SKILL.md`
+- Create `docs/reference/skills/<name>.md` (canonical location)
+- Create a symlink: `ln -s ../../../docs/reference/skills/<name>.md .claude/skills/<name>/SKILL.md`
 - Include the metadata header (`name`, `description`, `argument-hint`)
 - Define mandatory practices, hard prohibitions, and commit gates
 - If the skill has a commit-gate linter, add it to `pyproject.toml` and the CI pipeline (`.github/workflows/ci.yml`)
@@ -19,7 +20,8 @@ Task-oriented guides. Each section is independent — jump to what you need.
 
 ## Add a New Subagent
 
-- Create `.claude/agents/<name>.md` with YAML frontmatter (`name`, `description`, `tools`, `model`)
+- Create `docs/reference/agents/<name>.md` with YAML frontmatter (`name`, `description`, `tools`, `model`)
+- Create a symlink: `ln -s ../../docs/reference/agents/<name>.md .claude/agents/<name>.md`
 - Quote `description` values containing colons (YAML requirement): `description: 'value with: colon'`
 - Write the prompt body with scope, output format, and failure conditions
 - Restart the session or use `/agents` to load the new agent

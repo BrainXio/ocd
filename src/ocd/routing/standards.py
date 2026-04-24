@@ -2,7 +2,7 @@
 
 Replaces full standards text (~7,678 chars / ~1,919 tokens) with a short
 version+hash reference (~15 tokens). The full text lives in
-.claude/skills/ocd/stand.md and is injected on demand via `Read`.
+.claude/skills/ocd/standards.md and is injected on demand via `Read`.
 
 Usage:
     ocd standards              # print the current reference line
