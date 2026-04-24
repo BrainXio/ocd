@@ -21,6 +21,7 @@ from ocd.config import (
     DEFAULT_INDEX_CONTENT,
     INDEX_FILE,
     KB_INJECTION_COUNT,
+    KNOWLEDGE_DB,
     KNOWLEDGE_DIR,
     PROJECT_ROOT,
     QA_DIR,
@@ -28,7 +29,6 @@ from ocd.config import (
     RESOURCES_DIR,
     STATE_DIR,
     USER_DIR,
-    WIKI_DB,
 )
 from ocd.fix.format import run_formatters
 
@@ -139,7 +139,10 @@ def _cmd_kb(args: argparse.Namespace) -> None:
             from ocd.kb.relevance import hybrid_score_articles
 
             scored = hybrid_score_articles(
-                args.relevant_to, index, db_path=WIKI_DB, top_k=args.top_k or KB_INJECTION_COUNT
+                args.relevant_to,
+                index,
+                db_path=KNOWLEDGE_DB,
+                top_k=args.top_k or KB_INJECTION_COUNT,
             )
         else:
             scored = score_articles(args.relevant_to, index, top_k=args.top_k or KB_INJECTION_COUNT)

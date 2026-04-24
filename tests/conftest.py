@@ -103,7 +103,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "CONNECTIONS_DIR": knowledge_dir / "connections",
         "QA_DIR": knowledge_dir / "qa",
         "RESOURCES_DIR": knowledge_dir / "resources",
-        "WIKI_DB": tmp_agent_dir / "knowledge.db",
+        "KNOWLEDGE_DB": tmp_agent_dir / "knowledge.db",
         "REPORTS_DIR": tmp_agent_dir / "reports",
         "STATE_DIR": state_dir,
         "STATE_FILE": state_dir / "state.json",

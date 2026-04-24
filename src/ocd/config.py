@@ -48,7 +48,7 @@ VENV_BIN: Path = Path(sys.executable).parent
 
 DAILY_DIR: Path = USER_DIR / "logs" / "daily"
 KNOWLEDGE_DIR: Path = USER_DIR / "knowledge"
-WIKI_DB: Path = USER_DIR / "knowledge.db"
+KNOWLEDGE_DB: Path = USER_DIR / "knowledge.db"
 CONCEPTS_DIR: Path = KNOWLEDGE_DIR / "concepts"
 CONNECTIONS_DIR: Path = KNOWLEDGE_DIR / "connections"
 QA_DIR: Path = KNOWLEDGE_DIR / "qa"

@@ -284,7 +284,7 @@ class TestRunExport:
     def test_default_output_dir(self, temp_export_db, tmp_path, monkeypatch):
         export_dir = tmp_path / "knowledge"
         monkeypatch.setattr("ocd.kb.export.KNOWLEDGE_DIR", export_dir)
-        monkeypatch.setattr("ocd.kb.export.WIKI_DB", temp_export_db)
+        monkeypatch.setattr("ocd.kb.export.KNOWLEDGE_DB", temp_export_db)
         result = run_export(db_path=temp_export_db)
         assert result == 0
         assert (export_dir / "index.md").exists()
@@ -330,7 +330,7 @@ class TestRunExport:
         assert not export_dir.exists()
 
     def test_missing_db(self, tmp_path, monkeypatch):
-        monkeypatch.setattr("ocd.kb.export.WIKI_DB", tmp_path / "nonexistent.db")
+        monkeypatch.setattr("ocd.kb.export.KNOWLEDGE_DB", tmp_path / "nonexistent.db")
         result = run_export(db_path=tmp_path / "nonexistent.db")
         assert result == 1
 

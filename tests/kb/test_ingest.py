@@ -96,7 +96,7 @@ class TestSchemaCreation:
         db_path = tmp_path / "knowledge.db"
         knowledge_dir = tmp_path / "knowledge"
         knowledge_dir.mkdir()
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         # Create a file so the DB is actually created (empty scan returns early)
         (knowledge_dir / "concepts").mkdir()
@@ -119,7 +119,7 @@ class TestSchemaCreation:
         db_path = tmp_path / "knowledge.db"
         knowledge_dir = tmp_path / "knowledge"
         knowledge_dir.mkdir()
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         (knowledge_dir / "concepts").mkdir()
         (knowledge_dir / "concepts" / "test.md").write_text("---\ntitle: Test\n---\nBody.")
@@ -135,7 +135,7 @@ class TestSchemaCreation:
         db_path = tmp_path / "knowledge.db"
         knowledge_dir = tmp_path / "knowledge"
         knowledge_dir.mkdir()
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         f = knowledge_dir / "concepts" / "test.md"
         f.parent.mkdir(parents=True)
@@ -157,7 +157,7 @@ class TestSchemaCreation:
 class TestIngestArticles:
     def test_insert_articles(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nOAuth content.")
         tmp_raw_kb("connections", "auth-flow", "---\ntitle: Auth Flow\n---\nFlow content.")
@@ -169,7 +169,7 @@ class TestIngestArticles:
 
     def test_article_metadata_stored(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         tmp_raw_kb(
             "concepts",
@@ -195,7 +195,7 @@ class TestIngestArticles:
 class TestDeduplication:
     def test_unchanged_articles_skipped(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nSame content.")
@@ -215,7 +215,7 @@ class TestMtimeDetection:
     def test_mtime_match_skips_file(self, tmp_raw_kb, tmp_path, monkeypatch):
         """When mtime matches, file is skipped without reading content."""
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nSame content.")
@@ -229,7 +229,7 @@ class TestMtimeDetection:
     def test_mtime_change_triggers_hash_check(self, tmp_raw_kb, tmp_path, monkeypatch):
         """When mtime changes but content is the same, still skipped (hash match)."""
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         content = "---\ntitle: OAuth\n---\nSame content."
@@ -253,7 +253,7 @@ class TestMtimeDetection:
     def test_content_change_detected(self, tmp_raw_kb, tmp_path, monkeypatch):
         """When both mtime and hash differ, article is updated."""
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         path = tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nOriginal.")
@@ -277,7 +277,7 @@ class TestMtimeDetection:
 class TestDeletionDetection:
     def test_deleted_file_removed_from_db(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         path = tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nOAuth content.")
@@ -297,7 +297,7 @@ class TestDeletionDetection:
 
     def test_deletion_logged(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         path = tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nOAuth content.")
@@ -314,7 +314,7 @@ class TestDeletionDetection:
 
     def test_ingest_result_has_deleted_field(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         tmp_raw_kb("concepts", "test", "---\ntitle: Test\n---\nBody.")
 
@@ -329,7 +329,7 @@ class TestDeletionDetection:
 class TestUpdateDetection:
     def test_changed_articles_updated(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         path = tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nOriginal.")
@@ -352,7 +352,7 @@ class TestUpdateDetection:
 class TestIngestionLog:
     def test_log_entries_written(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         tmp_raw_kb("concepts", "test", "---\ntitle: Test\n---\nBody.")
 
@@ -371,7 +371,7 @@ class TestIngestionLog:
 class TestDryRun:
     def test_no_db_changes(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         tmp_raw_kb("concepts", "test", "---\ntitle: Test\n---\nBody.")
 
@@ -390,7 +390,7 @@ class TestDryRun:
 class TestForceAll:
     def test_force_reingest(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         tmp_raw_kb("concepts", "test", "---\ntitle: Test\n---\nBody.")
@@ -410,7 +410,7 @@ class TestErrorHandling:
         db_path = tmp_path / "knowledge.db"
         knowledge_dir = tmp_path / "knowledge"
         knowledge_dir.mkdir()
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         bad_file = knowledge_dir / "concepts" / "bad.md"
         bad_file.parent.mkdir(parents=True, exist_ok=True)
@@ -430,7 +430,7 @@ class TestErrorHandling:
 class TestTFIDFRebuild:
     def test_rebuild_called_after_ingest(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         # Mock build_kb_index_json to track calls (it's a lazy import in ingest.py)
         called: list[bool] = []
@@ -466,8 +466,8 @@ class TestDBFallback:
         from ocd.kb.relevance import build_kb_index_json
 
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
-        monkeypatch.setattr("ocd.kb.relevance.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
+        monkeypatch.setattr("ocd.kb.relevance.KNOWLEDGE_DB", db_path)
 
         tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nOAuth content.")
 
@@ -486,7 +486,7 @@ class TestKbStatus:
         db_path = tmp_path / "knowledge.db"
         knowledge_dir = tmp_path / "knowledge"
         knowledge_dir.mkdir()
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         status = kb_status(knowledge_dir=knowledge_dir, db_path=db_path)
         assert status["synced"] is True
@@ -495,7 +495,7 @@ class TestKbStatus:
 
     def test_synced_after_ingest(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         tmp_raw_kb("concepts", "test", "---\ntitle: Test\n---\nBody.")
@@ -508,7 +508,7 @@ class TestKbStatus:
 
     def test_new_files_detected(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         # Ingest one article
@@ -525,7 +525,7 @@ class TestKbStatus:
 
     def test_orphaned_files_detected(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         path = tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nBody.")
@@ -541,7 +541,7 @@ class TestKbStatus:
 
     def test_stale_files_detected(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         path = tmp_raw_kb("concepts", "oauth", "---\ntitle: OAuth\n---\nBody.")
@@ -559,7 +559,7 @@ class TestKbStatus:
         db_path = tmp_path / "knowledge.db"
         knowledge_dir = tmp_path / "knowledge"
         knowledge_dir.mkdir()
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         (knowledge_dir / "concepts").mkdir()
         (knowledge_dir / "concepts" / "test.md").write_text("---\ntitle: Test\n---\nBody.")
@@ -572,7 +572,7 @@ class TestKbStatus:
 
     def test_last_ingest_timestamp(self, tmp_raw_kb, tmp_path, monkeypatch):
         db_path = tmp_path / "knowledge.db"
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
         knowledge_dir = tmp_path / "knowledge"
 
         tmp_raw_kb("concepts", "test", "---\ntitle: Test\n---\nBody.")

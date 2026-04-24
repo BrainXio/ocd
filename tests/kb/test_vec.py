@@ -200,7 +200,7 @@ class TestVecStatus:
         ensure_vec_schema(db)
         insert_vectors(db, [("test", "test content")])
         db.close()
-        monkeypatch.setattr("ocd.kb.vec.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.vec.KNOWLEDGE_DB", db_path)
         status = vec_status(db_path)
         assert status["available"] is True
         assert status["db_exists"] is True
@@ -223,7 +223,7 @@ class TestRebuildVectors:
         (knowledge_dir / "concepts" / "test.md").write_text(
             "---\ntitle: Test\n---\nTest body content."
         )
-        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.KNOWLEDGE_DB", db_path)
 
         # First, ingest articles
         ingest_raw(knowledge_dir=knowledge_dir, db_path=db_path)

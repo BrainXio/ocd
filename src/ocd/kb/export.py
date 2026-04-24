@@ -23,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-from ocd.config import COMMIT_KNOWLEDGE_DIR, KNOWLEDGE_DIR, WIKI_DB
+from ocd.config import COMMIT_KNOWLEDGE_DIR, KNOWLEDGE_DB, KNOWLEDGE_DIR
 from ocd.utils import extract_wikilinks
 
 _EXPORT_SUBDIRS = ("concepts", "connections", "qa", "resources")
@@ -248,7 +248,7 @@ def run_export(
     else:
         output_dir = KNOWLEDGE_DIR
 
-    db = db_path or WIKI_DB
+    db = db_path or KNOWLEDGE_DB
 
     if not db.exists():
         print(f"error: database not found: {db}", file=sys.stderr)
