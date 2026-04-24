@@ -1,11 +1,11 @@
-"""Tests for ocd.ci_check — full CI mirror."""
+"""Tests for ocd.gates.ci_check — full CI mirror."""
 
 from __future__ import annotations
 
 import subprocess
 from unittest.mock import MagicMock
 
-from ocd.ci_check import (
+from ocd.gates.ci_check import (
     _mdformat_check,
     _mypy,
     _ruff_check,
@@ -19,11 +19,11 @@ from ocd.ci_check import (
 
 
 class TestStandardsVerify:
-    """_standards_verify() delegates to ocd.standards."""
+    """_standards_verify() delegates to ocd.routing.standards."""
 
     def test_match(self, monkeypatch):
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {"match": True, "version": "1.0", "computed_hash": "abc"},
         )
         passed, msg = _standards_verify()
@@ -32,7 +32,7 @@ class TestStandardsVerify:
 
     def test_mismatch(self, monkeypatch):
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {"match": False, "stored_hash": "old", "computed_hash": "new"},
         )
         passed, _msg = _standards_verify()
@@ -40,7 +40,7 @@ class TestStandardsVerify:
 
 
 class TestVerifyCommitMessages:
-    """_verify_commit_messages() delegates to ocd.verify_commit."""
+    """_verify_commit_messages() delegates to ocd.gates.verify_commit."""
 
     def test_no_range_skips(self):
         passed, msg = _verify_commit_messages(None)
@@ -49,7 +49,7 @@ class TestVerifyCommitMessages:
 
     def test_violations_found(self, monkeypatch):
         monkeypatch.setattr(
-            "ocd.verify_commit.check_commit_range",
+            "ocd.gates.verify_commit.check_commit_range",
             lambda r: [("abc1234", "^Co-Authored-By:", "Co-Authored-By: bot")],
         )
         passed, _msg = _verify_commit_messages("origin/main..HEAD")
@@ -57,7 +57,7 @@ class TestVerifyCommitMessages:
 
     def test_no_violations(self, monkeypatch):
         monkeypatch.setattr(
-            "ocd.verify_commit.check_commit_range",
+            "ocd.gates.verify_commit.check_commit_range",
             lambda r: [],
         )
         passed, _msg = _verify_commit_messages("origin/main..HEAD")
@@ -65,20 +65,26 @@ class TestVerifyCommitMessages:
 
 
 class TestScanSecretsFull:
-    """_scan_secrets_full() delegates to ocd.scan_secrets."""
+    """_scan_secrets_full() delegates to ocd.gates.scan_secrets."""
 
     def test_clean(self, monkeypatch):
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=False, source=".": 0)
+        monkeypatch.setattr(
+            "ocd.gates.scan_secrets.scan_secrets", lambda staged=False, source=".": 0
+        )
         passed, _msg = _scan_secrets_full()
         assert passed is True
 
     def test_secrets_found(self, monkeypatch):
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=False, source=".": 1)
+        monkeypatch.setattr(
+            "ocd.gates.scan_secrets.scan_secrets", lambda staged=False, source=".": 1
+        )
         passed, _msg = _scan_secrets_full()
         assert passed is False
 
     def test_not_installed(self, monkeypatch):
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=False, source=".": 2)
+        monkeypatch.setattr(
+            "ocd.gates.scan_secrets.scan_secrets", lambda staged=False, source=".": 2
+        )
         passed, msg = _scan_secrets_full()
         assert passed is True
         assert "skipped" in msg
@@ -88,7 +94,7 @@ class TestToolChecks:
     """Tool-based checks gracefully skip when tools are unavailable."""
 
     def test_ruff_check_clean(self, monkeypatch):
-        monkeypatch.setattr("ocd.ci_check._tool_available", lambda _: True)
+        monkeypatch.setattr("ocd.gates.ci_check._tool_available", lambda _: True)
         monkeypatch.setattr(
             subprocess,
             "run",
@@ -98,7 +104,7 @@ class TestToolChecks:
         assert passed is True
 
     def test_ruff_format_check_clean(self, monkeypatch):
-        monkeypatch.setattr("ocd.ci_check._tool_available", lambda _: True)
+        monkeypatch.setattr("ocd.gates.ci_check._tool_available", lambda _: True)
         monkeypatch.setattr(
             subprocess,
             "run",
@@ -108,25 +114,25 @@ class TestToolChecks:
         assert passed is True
 
     def test_mypy_skipped(self, monkeypatch):
-        monkeypatch.setattr("ocd.ci_check._tool_available", lambda _: False)
+        monkeypatch.setattr("ocd.gates.ci_check._tool_available", lambda _: False)
         passed, msg = _mypy()
         assert passed is True
         assert "skipped" in msg
 
     def test_mdformat_skipped(self, monkeypatch):
-        monkeypatch.setattr("ocd.ci_check._tool_available", lambda _: False)
+        monkeypatch.setattr("ocd.gates.ci_check._tool_available", lambda _: False)
         passed, msg = _mdformat_check()
         assert passed is True
         assert "skipped" in msg
 
     def test_yamllint_skipped(self, monkeypatch):
-        monkeypatch.setattr("ocd.ci_check._tool_available", lambda _: False)
+        monkeypatch.setattr("ocd.gates.ci_check._tool_available", lambda _: False)
         passed, msg = _yamllint()
         assert passed is True
         assert "skipped" in msg
 
     def test_shellcheck_skipped(self, monkeypatch):
-        monkeypatch.setattr("ocd.ci_check._tool_available", lambda _: False)
+        monkeypatch.setattr("ocd.gates.ci_check._tool_available", lambda _: False)
         passed, msg = _shellcheck()
         assert passed is True
         assert "skipped" in msg

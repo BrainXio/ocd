@@ -3,7 +3,7 @@
 from typing import Any
 
 from ocd.config import MANIFEST_FILE
-from ocd.router import (
+from ocd.routing.router import (
     _extract_keywords,
     _parse_agent_frontmatter,
     build_manifest,
@@ -68,7 +68,7 @@ class TestBuildManifest:
             "tools: Glob, Grep, Read\n---\n"
             "## Scope\n1. Find unused functions\n2. Find unused vars\n"
         )
-        monkeypatch.setattr("ocd.router.AGENTS_DIR", agents_dir)
+        monkeypatch.setattr("ocd.routing.router.AGENTS_DIR", agents_dir)
 
         manifest = build_manifest()
         assert manifest["version"] == 1
@@ -80,7 +80,7 @@ class TestBuildManifest:
     def test_empty_agents_dir(self, mock_config_paths, monkeypatch, tmp_path):
         agents_dir = tmp_path / "empty_agents"
         agents_dir.mkdir()
-        monkeypatch.setattr("ocd.router.AGENTS_DIR", agents_dir)
+        monkeypatch.setattr("ocd.routing.router.AGENTS_DIR", agents_dir)
 
         manifest = build_manifest()
         assert manifest["agents"] == []

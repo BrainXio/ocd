@@ -2,7 +2,7 @@
 
 import json
 
-from ocd.fix import FixResult, fix_cycle, lint_and_fix, security_scan_and_patch, test_and_fix
+from ocd.fix.cycle import FixResult, fix_cycle, lint_and_fix, security_scan_and_patch, test_and_fix
 
 
 class TestFixResult:

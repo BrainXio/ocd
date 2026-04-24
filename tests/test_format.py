@@ -1,8 +1,8 @@
-"""Tests for ocd.format — formatter registry, tool detection, and result reporting."""
+"""Tests for ocd.fix.format — formatter registry, tool detection, and result reporting."""
 
 from unittest.mock import MagicMock, patch
 
-from ocd.format import (
+from ocd.fix.format import (
     FORMATTERS,
     _config_present,
     _find_files,
@@ -48,13 +48,13 @@ class TestFormattersRegistry:
 
 class TestFindFiles:
     def test_finds_python_files(self, monkeypatch, tmp_path):
-        monkeypatch.setattr("ocd.format.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("ocd.fix.format.PROJECT_ROOT", tmp_path)
         (tmp_path / "src.py").write_text("pass")
         result = _find_files(str(tmp_path), ("py",))
         assert "src.py" in result
 
     def test_ignores_venv(self, monkeypatch, tmp_path):
-        monkeypatch.setattr("ocd.format.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("ocd.fix.format.PROJECT_ROOT", tmp_path)
         venv = tmp_path / ".venv" / "lib"
         venv.mkdir(parents=True)
         (venv / "site.py").write_text("pass")
@@ -62,7 +62,7 @@ class TestFindFiles:
         assert "site.py" not in result
 
     def test_no_matching_files(self, monkeypatch, tmp_path):
-        monkeypatch.setattr("ocd.format.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("ocd.fix.format.PROJECT_ROOT", tmp_path)
         result = _find_files(str(tmp_path), ("xyz",))
         assert result == []
 
@@ -80,14 +80,14 @@ class TestToolAvailable:
         """A binary in VENV_BIN should be found."""
         fake_bin = tmp_path / "ruff"
         fake_bin.write_text("")
-        monkeypatch.setattr("ocd.format.VENV_BIN", tmp_path)
+        monkeypatch.setattr("ocd.fix.format.VENV_BIN", tmp_path)
         assert _tool_available(["ruff", "format", "src/"]) is True
 
     def test_missing_tool(self, monkeypatch):
         monkeypatch.setattr("shutil.which", lambda _: None)
         fake_dir = MagicMock()
         fake_dir.__truediv__ = lambda s, o: MagicMock(exists=lambda: False)
-        monkeypatch.setattr("ocd.format.VENV_BIN", fake_dir)
+        monkeypatch.setattr("ocd.fix.format.VENV_BIN", fake_dir)
         assert _tool_available(["nonexistent_tool_xyz"]) is False
 
     def test_callable_command_extracts_binary(self, monkeypatch):
@@ -122,7 +122,7 @@ class TestHasMatchingFiles:
         assert _has_matching_files(("py",)) is True
 
     def test_no_matching_extension(self, monkeypatch, tmp_path):
-        monkeypatch.setattr("ocd.format.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("ocd.fix.format.PROJECT_ROOT", tmp_path)
         assert _has_matching_files(("xyz123",)) is False
 
 
@@ -149,17 +149,17 @@ class TestFormatInstallHint:
 
 class TestRunFormatters:
     def test_returns_zero_on_all_ok(self, monkeypatch, capsys):
-        monkeypatch.setattr("ocd.format._tool_available", lambda _: True)
-        monkeypatch.setattr("ocd.format._config_present", lambda _: True)
-        monkeypatch.setattr("ocd.format._has_matching_files", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._tool_available", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._config_present", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._has_matching_files", lambda _: True)
         with patch("subprocess.run", return_value=MagicMock(returncode=0, stdout="", stderr="")):
             result = run_formatters()
         assert result == 0
 
     def test_returns_one_on_error(self, monkeypatch, capsys):
-        monkeypatch.setattr("ocd.format._tool_available", lambda _: True)
-        monkeypatch.setattr("ocd.format._config_present", lambda _: True)
-        monkeypatch.setattr("ocd.format._has_matching_files", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._tool_available", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._config_present", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._has_matching_files", lambda _: True)
         with patch(
             "subprocess.run",
             return_value=MagicMock(returncode=1, stdout="error", stderr=""),
@@ -168,24 +168,24 @@ class TestRunFormatters:
         assert result == 1
 
     def test_reports_missing_tools(self, monkeypatch, capsys):
-        monkeypatch.setattr("ocd.format._tool_available", lambda _: False)
+        monkeypatch.setattr("ocd.fix.format._tool_available", lambda _: False)
         result = run_formatters()
         output = capsys.readouterr().out
         assert "skipped" in output
         assert result == 0
 
     def test_reports_missing_config(self, monkeypatch, capsys):
-        monkeypatch.setattr("ocd.format._tool_available", lambda _: True)
-        monkeypatch.setattr("ocd.format._config_present", lambda _: False)
+        monkeypatch.setattr("ocd.fix.format._tool_available", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._config_present", lambda _: False)
         result = run_formatters()
         output = capsys.readouterr().out
         assert "no config" in output
         assert result == 0
 
     def test_skips_when_no_matching_files(self, monkeypatch, capsys):
-        monkeypatch.setattr("ocd.format._tool_available", lambda _: True)
-        monkeypatch.setattr("ocd.format._config_present", lambda _: True)
-        monkeypatch.setattr("ocd.format._has_matching_files", lambda _: False)
+        monkeypatch.setattr("ocd.fix.format._tool_available", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._config_present", lambda _: True)
+        monkeypatch.setattr("ocd.fix.format._has_matching_files", lambda _: False)
         result = run_formatters()
         output = capsys.readouterr().out
         assert "no matching files" in output

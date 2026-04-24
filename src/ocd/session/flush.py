@@ -182,7 +182,7 @@ def maybe_trigger_compilation() -> None:
 
     logging.info("End-of-day compilation triggered (after %d:00)", COMPILE_AFTER_HOUR)
 
-    cmd = [sys.executable, "-m", "ocd.compile"]
+    cmd = [sys.executable, "-m", "ocd.kb.compile"]
 
     kwargs: dict[str, Any] = {}
     if sys.platform == "win32":

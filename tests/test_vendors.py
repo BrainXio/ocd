@@ -1,4 +1,4 @@
-"""Tests for ocd.vendors — vendor format adapters."""
+"""Tests for ocd.packaging.vendors — vendor format adapters."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from ocd.vendors import (
+from ocd.packaging.vendors import (
     VENDOR_TARGETS,
     VENDORS,
     generate_agents_md,

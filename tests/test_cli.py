@@ -98,7 +98,7 @@ class TestMainDispatch:
     def test_check_dispatches(self):
         with (
             patch.object(sys, "argv", ["ocd", "check"]),
-            patch("ocd.check.run_check", return_value=0),
+            patch("ocd.gates.check.run_check", return_value=0),
             pytest.raises(SystemExit) as exc_info,
         ):
             main()
@@ -181,7 +181,7 @@ class TestHookDispatch:
     def test_hook_verify_commit(self):
         with (
             patch.object(sys, "argv", ["ocd", "hook", "verify-commit"]),
-            patch("ocd.verify_commit.main") as mock,
+            patch("ocd.gates.verify_commit.main") as mock,
         ):
             main()
             mock.assert_called_once()
@@ -189,7 +189,7 @@ class TestHookDispatch:
     def test_hook_ci_check(self):
         with (
             patch.object(sys, "argv", ["ocd", "hook", "ci-check", "--fast"]),
-            patch("ocd.ci_check.main") as mock,
+            patch("ocd.gates.ci_check.main") as mock,
         ):
             main()
             mock.assert_called_once()

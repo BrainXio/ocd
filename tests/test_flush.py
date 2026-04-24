@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 import ocd.config
-import ocd.flush as flush
+import ocd.session.flush as flush
 
 
 class TestLoadFlushState:
@@ -124,7 +124,7 @@ class TestMaybeTriggerCompilation:
         popen_mock.assert_not_called()
 
     def test_triggers_after_compile_hour(self, monkeypatch, mock_config_paths):
-        """After 18:00, compilation should be triggered via sys.executable -m ocd.compile."""
+        """After 18:00, compilation should be triggered via sys.executable -m ocd.kb.compile."""
         from datetime import UTC, datetime
 
         real_datetime = datetime
@@ -145,4 +145,4 @@ class TestMaybeTriggerCompilation:
         popen_mock.assert_called_once()
         cmd = popen_mock.call_args[0][0]
         assert "-m" in cmd
-        assert "ocd.compile" in cmd
+        assert "ocd.kb.compile" in cmd

@@ -1,4 +1,4 @@
-"""Tests for ocd.autofix — self-corrective fix loops in isolated worktrees."""
+"""Tests for ocd.fix.autofix — self-corrective fix loops in isolated worktrees."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from ocd.autofix import (
+from ocd.fix.autofix import (
     _GUARD_ENV,
     LoopResult,
     WorktreeInfo,
@@ -19,7 +19,7 @@ from ocd.autofix import (
     merge_worktree,
     remove_worktree,
 )
-from ocd.fix import FixResult
+from ocd.fix.cycle import FixResult
 
 # ── Unit tests (no git required) ────────────────────────────────────────────
 
@@ -86,8 +86,8 @@ class TestWorktreeLifecycle:
         # Point worktrees dir inside the temp git repo
         worktrees_dir = tmp_git_repo / ".claude" / "worktrees"
         worktrees_dir.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setattr("ocd.autofix.WORKTREES_DIR", worktrees_dir)
-        monkeypatch.setattr("ocd.autofix.PROJECT_ROOT", tmp_git_repo)
+        monkeypatch.setattr("ocd.fix.autofix.WORKTREES_DIR", worktrees_dir)
+        monkeypatch.setattr("ocd.fix.autofix.PROJECT_ROOT", tmp_git_repo)
 
         wt = create_worktree("fix-lint", target="src/ocd/config.py")
 
@@ -117,8 +117,8 @@ class TestWorktreeLifecycle:
     def test_remove_worktree(self, tmp_git_repo, mock_config_paths, monkeypatch):
         worktrees_dir = tmp_git_repo / ".claude" / "worktrees"
         worktrees_dir.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setattr("ocd.autofix.WORKTREES_DIR", worktrees_dir)
-        monkeypatch.setattr("ocd.autofix.PROJECT_ROOT", tmp_git_repo)
+        monkeypatch.setattr("ocd.fix.autofix.WORKTREES_DIR", worktrees_dir)
+        monkeypatch.setattr("ocd.fix.autofix.PROJECT_ROOT", tmp_git_repo)
 
         wt = create_worktree("remove-test", target="README.md")
         assert wt.path.is_dir()
@@ -130,8 +130,8 @@ class TestWorktreeLifecycle:
     def test_list_worktrees(self, tmp_git_repo, mock_config_paths, monkeypatch):
         worktrees_dir = tmp_git_repo / ".claude" / "worktrees"
         worktrees_dir.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setattr("ocd.autofix.WORKTREES_DIR", worktrees_dir)
-        monkeypatch.setattr("ocd.autofix.PROJECT_ROOT", tmp_git_repo)
+        monkeypatch.setattr("ocd.fix.autofix.WORKTREES_DIR", worktrees_dir)
+        monkeypatch.setattr("ocd.fix.autofix.PROJECT_ROOT", tmp_git_repo)
 
         # Initially empty
         assert list_worktrees() == []
@@ -147,8 +147,8 @@ class TestWorktreeLifecycle:
     def test_merge_worktree(self, tmp_git_repo, mock_config_paths, monkeypatch):
         worktrees_dir = tmp_git_repo / ".claude" / "worktrees"
         worktrees_dir.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setattr("ocd.autofix.WORKTREES_DIR", worktrees_dir)
-        monkeypatch.setattr("ocd.autofix.PROJECT_ROOT", tmp_git_repo)
+        monkeypatch.setattr("ocd.fix.autofix.WORKTREES_DIR", worktrees_dir)
+        monkeypatch.setattr("ocd.fix.autofix.PROJECT_ROOT", tmp_git_repo)
 
         wt = create_worktree("merge-test", target="README.md")
 
@@ -186,15 +186,15 @@ class TestAutofixLog:
     def test_log_file_created(self, tmp_git_repo, mock_config_paths, monkeypatch):
         worktrees_dir = tmp_git_repo / ".claude" / "worktrees"
         worktrees_dir.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setattr("ocd.autofix.WORKTREES_DIR", worktrees_dir)
-        monkeypatch.setattr("ocd.autofix.PROJECT_ROOT", tmp_git_repo)
+        monkeypatch.setattr("ocd.fix.autofix.WORKTREES_DIR", worktrees_dir)
+        monkeypatch.setattr("ocd.fix.autofix.PROJECT_ROOT", tmp_git_repo)
         monkeypatch.setattr(
-            "ocd.autofix.AUTOFIX_LOG", mock_config_paths / "state" / "autofix-loop.jsonl"
+            "ocd.fix.autofix.AUTOFIX_LOG", mock_config_paths / "state" / "autofix-loop.jsonl"
         )
 
         wt = create_worktree("log-test", target="README.md")
 
-        from ocd.autofix import _log_iteration
+        from ocd.fix.autofix import _log_iteration
 
         _log_iteration(
             "log-test",

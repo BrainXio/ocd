@@ -5,7 +5,7 @@ import sqlite3
 import pytest
 
 from ocd.config import VEC_DIMENSIONS, VEC_EMBEDDING_MODEL
-from ocd.vec import (
+from ocd.kb.vec import (
     ensure_vec_schema,
     insert_vectors,
     is_vec_available,
@@ -58,7 +58,7 @@ class TestEnsureVecSchema:
         db.close()
 
     def test_returns_false_when_unavailable(self, monkeypatch):
-        monkeypatch.setattr("ocd.vec.is_vec_available", lambda: False)
+        monkeypatch.setattr("ocd.kb.vec.is_vec_available", lambda: False)
         db = sqlite3.connect(":memory:")
         result = ensure_vec_schema(db)
         assert result is False
@@ -71,7 +71,7 @@ class TestEnsureVecSchema:
 class TestEmbedTexts:
     @requires_vec
     def test_embeds_single_text(self):
-        from ocd.vec import embed_texts
+        from ocd.kb.vec import embed_texts
 
         result = embed_texts(["hello world"])
         assert result is not None
@@ -80,15 +80,15 @@ class TestEmbedTexts:
 
     @requires_vec
     def test_embeds_multiple_texts(self):
-        from ocd.vec import embed_texts
+        from ocd.kb.vec import embed_texts
 
         result = embed_texts(["hello", "world"])
         assert result is not None
         assert len(result) == 2
 
     def test_returns_none_when_unavailable(self, monkeypatch):
-        monkeypatch.setattr("ocd.vec.is_vec_available", lambda: False)
-        from ocd.vec import embed_texts
+        monkeypatch.setattr("ocd.kb.vec.is_vec_available", lambda: False)
+        from ocd.kb.vec import embed_texts
 
         # embed_texts calls _get_model which returns None
         # when fastembed is not available
@@ -142,7 +142,7 @@ class TestInsertVectors:
         db.close()
 
     def test_skips_when_vec_unavailable(self, monkeypatch):
-        monkeypatch.setattr("ocd.vec.is_vec_available", lambda: False)
+        monkeypatch.setattr("ocd.kb.vec.is_vec_available", lambda: False)
         db = sqlite3.connect(":memory:")
         result = insert_vectors(db, [("test", "content")])
         assert result == 0
@@ -176,7 +176,7 @@ class TestSearchVectors:
 
     @requires_vec
     def test_search_returns_none_when_unavailable(self, monkeypatch):
-        monkeypatch.setattr("ocd.vec.is_vec_available", lambda: False)
+        monkeypatch.setattr("ocd.kb.vec.is_vec_available", lambda: False)
         db = sqlite3.connect(":memory:")
         result = search_vectors(db, "test query")
         assert result is None
@@ -188,7 +188,7 @@ class TestSearchVectors:
 
 class TestVecStatus:
     def test_status_without_vec(self, monkeypatch):
-        monkeypatch.setattr("ocd.vec.is_vec_available", lambda: False)
+        monkeypatch.setattr("ocd.kb.vec.is_vec_available", lambda: False)
         fake_path = __import__("pathlib").Path("/tmp/fake.db")
         status = vec_status(fake_path)
         assert status["available"] is False
@@ -200,7 +200,7 @@ class TestVecStatus:
         ensure_vec_schema(db)
         insert_vectors(db, [("test", "test content")])
         db.close()
-        monkeypatch.setattr("ocd.vec.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.vec.WIKI_DB", db_path)
         status = vec_status(db_path)
         assert status["available"] is True
         assert status["db_exists"] is True
@@ -214,7 +214,7 @@ class TestVecStatus:
 class TestRebuildVectors:
     @requires_vec
     def test_rebuild_creates_embeddings(self, tmp_path, monkeypatch):
-        from ocd.ingest import ingest_raw
+        from ocd.kb.ingest import ingest_raw
 
         db_path = tmp_path / "knowledge.db"
         knowledge_dir = tmp_path / "knowledge"
@@ -223,13 +223,13 @@ class TestRebuildVectors:
         (knowledge_dir / "concepts" / "test.md").write_text(
             "---\ntitle: Test\n---\nTest body content."
         )
-        monkeypatch.setattr("ocd.ingest.WIKI_DB", db_path)
+        monkeypatch.setattr("ocd.kb.ingest.WIKI_DB", db_path)
 
         # First, ingest articles
         ingest_raw(knowledge_dir=knowledge_dir, db_path=db_path)
 
         # Now rebuild vectors
-        from ocd.vec import rebuild_vectors
+        from ocd.kb.vec import rebuild_vectors
 
         count = rebuild_vectors(db_path)
         assert count == 1
@@ -241,7 +241,7 @@ class TestRebuildVectors:
 
     @requires_vec
     def test_rebuild_model_change_requires_force(self, tmp_path, monkeypatch):
-        from ocd.vec import rebuild_vectors
+        from ocd.kb.vec import rebuild_vectors
 
         db_path = tmp_path / "knowledge.db"
         db = sqlite3.connect(str(db_path))
@@ -250,7 +250,7 @@ class TestRebuildVectors:
         db.close()
 
         # Simulate model change
-        monkeypatch.setattr("ocd.vec.VEC_EMBEDDING_MODEL", "different-model")
+        monkeypatch.setattr("ocd.kb.vec.VEC_EMBEDDING_MODEL", "different-model")
 
         with pytest.raises(ValueError, match="Embedding model changed"):
             rebuild_vectors(db_path)

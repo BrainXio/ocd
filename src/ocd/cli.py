@@ -30,7 +30,7 @@ from ocd.config import (
     USER_DIR,
     WIKI_DB,
 )
-from ocd.format import run_formatters
+from ocd.fix.format import run_formatters
 
 TEMPLATES_DIR = Path("/opt/ocd/templates")
 
@@ -129,14 +129,14 @@ def _cmd_format(_args: argparse.Namespace) -> None:
 def _cmd_kb(args: argparse.Namespace) -> None:
     """Handle kb subcommands."""
     if args.kb_command == "query":
-        from ocd.relevance import (
+        from ocd.kb.relevance import (
             build_kb_index_json,
             score_articles,
         )
 
         index = build_kb_index_json(use_db=True)
         if args.vectors:
-            from ocd.relevance import hybrid_score_articles
+            from ocd.kb.relevance import hybrid_score_articles
 
             scored = hybrid_score_articles(
                 args.relevant_to, index, db_path=WIKI_DB, top_k=args.top_k or KB_INJECTION_COUNT
@@ -165,7 +165,7 @@ def _cmd_kb(args: argparse.Namespace) -> None:
 
 def _cmd_route(args: argparse.Namespace) -> None:
     """Route a task to the best-matching agent."""
-    from ocd.router import main as router_main
+    from ocd.routing.router import main as router_main
 
     argv = ["ocd-route"]
     if args.build_manifest:
@@ -179,7 +179,7 @@ def _cmd_route(args: argparse.Namespace) -> None:
 
 def _cmd_standards(args: argparse.Namespace) -> None:
     """Manage standards hash reference."""
-    from ocd.standards import main as standards_main
+    from ocd.routing.standards import main as standards_main
 
     argv = ["ocd-standards"]
     if args.verify:
@@ -192,7 +192,7 @@ def _cmd_standards(args: argparse.Namespace) -> None:
 
 def _cmd_fix(args: argparse.Namespace) -> None:
     """Closed-loop fix commands."""
-    from ocd.fix import fix_cycle, lint_and_fix, security_scan_and_patch, test_and_fix
+    from ocd.fix.cycle import fix_cycle, lint_and_fix, security_scan_and_patch, test_and_fix
 
     command = args.fix_command
     if command == "fix-cycle":
@@ -216,14 +216,14 @@ def _cmd_fix(args: argparse.Namespace) -> None:
 
 def _cmd_check(_args: argparse.Namespace) -> None:
     """Fast local quality gate."""
-    from ocd.check import run_check
+    from ocd.gates.check import run_check
 
     sys.exit(run_check())
 
 
 def _cmd_ci_check(args: argparse.Namespace) -> None:
     """Full local CI mirror."""
-    from ocd.ci_check import main as ci_check_main
+    from ocd.gates.ci_check import main as ci_check_main
 
     argv = ["ocd-ci-check"]
     if args.fast:
@@ -236,7 +236,7 @@ def _cmd_ci_check(args: argparse.Namespace) -> None:
 
 def _cmd_verify_commit(args: argparse.Namespace) -> None:
     """Verify commit messages."""
-    from ocd.verify_commit import main as verify_commit_main
+    from ocd.gates.verify_commit import main as verify_commit_main
 
     argv = ["ocd-verify-commit"]
     if args.msg_file:
@@ -251,7 +251,7 @@ def _cmd_verify_commit(args: argparse.Namespace) -> None:
 
 def _cmd_scan_secrets(args: argparse.Namespace) -> None:
     """Scan for secrets in source code."""
-    from ocd.scan_secrets import main as scan_secrets_main
+    from ocd.gates.scan_secrets import main as scan_secrets_main
 
     argv = ["ocd-scan-secrets"]
     if args.staged:
@@ -264,7 +264,7 @@ def _cmd_scan_secrets(args: argparse.Namespace) -> None:
 
 def _cmd_materialize(args: argparse.Namespace) -> None:
     """Materialize .claude/ content from database to target directory."""
-    from ocd.materialize import main as materialize_main
+    from ocd.packaging.materialize import main as materialize_main
 
     argv = ["ocd-materialize"]
     if args.target:
@@ -281,7 +281,7 @@ def _cmd_materialize(args: argparse.Namespace) -> None:
 
 def _cmd_compile(args: argparse.Namespace) -> None:
     """Compile daily logs into knowledge articles."""
-    from ocd.compile import main as compile_main
+    from ocd.kb.compile import main as compile_main
 
     argv = ["ocd-compile"]
     if args.all:
@@ -300,7 +300,7 @@ def _cmd_compile(args: argparse.Namespace) -> None:
 
 def _cmd_ingest(args: argparse.Namespace) -> None:
     """Ingest wiki articles into knowledge.db."""
-    from ocd.ingest import ingest_raw
+    from ocd.kb.ingest import ingest_raw
 
     result = ingest_raw(force_all=args.all, dry_run=args.dry_run)
     print(result.to_json())
@@ -310,7 +310,7 @@ def _cmd_ingest(args: argparse.Namespace) -> None:
 def _cmd_knowledge(args: argparse.Namespace) -> None:
     """Handle knowledge subcommands."""
     if args.knowledge_command == "status":
-        from ocd.ingest import kb_status
+        from ocd.kb.ingest import kb_status
 
         status = kb_status()
         print(f"KB status: {status['db_count']} articles in DB, {status['disk_count']} on disk")
@@ -337,7 +337,7 @@ def _cmd_knowledge(args: argparse.Namespace) -> None:
 
 def _cmd_vec(args: argparse.Namespace) -> None:
     """Handle vec subcommands."""
-    from ocd.vec import main as vec_main
+    from ocd.kb.vec import main as vec_main
 
     argv = ["ocd-vec"]
     if args.vec_command == "rebuild":
@@ -357,7 +357,7 @@ def _cmd_vec(args: argparse.Namespace) -> None:
 
 def _cmd_flush(args: argparse.Namespace) -> None:
     """Flush conversation context to daily log."""
-    from ocd.flush import main as flush_main
+    from ocd.session.flush import main as flush_main
 
     argv = ["ocd-flush"]
     if args.context_file:
@@ -370,7 +370,7 @@ def _cmd_flush(args: argparse.Namespace) -> None:
 
 def _cmd_query(args: argparse.Namespace) -> None:
     """Query the personal knowledge base."""
-    from ocd.query import main as query_main
+    from ocd.kb.query import main as query_main
 
     argv = ["ocd-query", args.question]
     if args.file_back:
@@ -381,7 +381,7 @@ def _cmd_query(args: argparse.Namespace) -> None:
 
 def _cmd_lint_kb(args: argparse.Namespace) -> None:
     """Lint the knowledge base for structural issues."""
-    from ocd.lint import main as lint_main
+    from ocd.kb.lint import main as lint_main
 
     argv = ["ocd-lint-kb"]
     if args.structural_only:
@@ -392,7 +392,7 @@ def _cmd_lint_kb(args: argparse.Namespace) -> None:
 
 def _cmd_compile_db(args: argparse.Namespace) -> None:
     """Compile .claude/ content into bundled SQLite database."""
-    from ocd.pack import main as pack_main
+    from ocd.packaging.pack import main as pack_main
 
     argv = ["ocd-compile-db"]
     if args.output:
@@ -405,7 +405,7 @@ def _cmd_compile_db(args: argparse.Namespace) -> None:
 
 def _cmd_pre_push(args: argparse.Namespace) -> None:
     """Diff-aware pre-push test runner."""
-    from ocd.pre_push import main as pre_push_main
+    from ocd.gates.pre_push import main as pre_push_main
 
     sys.argv = ["ocd-pre-push"]
     pre_push_main()
@@ -413,7 +413,7 @@ def _cmd_pre_push(args: argparse.Namespace) -> None:
 
 def _cmd_autofix(args: argparse.Namespace) -> None:
     """Self-corrective fix loop in isolated worktree."""
-    from ocd.autofix import main as autofix_main
+    from ocd.fix.autofix import main as autofix_main
 
     argv = ["ocd-autofix"]
     if args.target:
@@ -478,7 +478,7 @@ def _cmd_hook_lint_work(args: argparse.Namespace) -> None:
 
 def _cmd_hook_verify_commit(args: argparse.Namespace) -> None:
     """Verify commit messages for AI attribution patterns."""
-    from ocd.verify_commit import main as verify_commit_main
+    from ocd.gates.verify_commit import main as verify_commit_main
 
     argv = ["ocd-verify-commit"]
     if args.msg_file:
@@ -493,7 +493,7 @@ def _cmd_hook_verify_commit(args: argparse.Namespace) -> None:
 
 def _cmd_hook_ci_check(args: argparse.Namespace) -> None:
     """Full local CI mirror."""
-    from ocd.ci_check import main as ci_check_main
+    from ocd.gates.ci_check import main as ci_check_main
 
     argv = ["ocd-ci-check"]
     if args.fast:

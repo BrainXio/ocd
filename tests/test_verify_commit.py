@@ -1,4 +1,4 @@
-"""Tests for ocd.verify_commit — AI attribution checker."""
+"""Tests for ocd.gates.verify_commit — AI attribution checker."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from ocd.verify_commit import check_commit_range, check_message, load_patterns
+from ocd.gates.verify_commit import check_commit_range, check_message, load_patterns
 
 
 class TestLoadPatterns:
@@ -88,7 +88,7 @@ class TestCheckMessage:
         """When patterns=None, load_patterns() is called with default file."""
         patterns_file = tmp_path / "ai-patterns.txt"
         patterns_file.write_text("^TEST-PATTERN\n")
-        monkeypatch.setattr("ocd.verify_commit._PATTERNS_FILE", patterns_file)
+        monkeypatch.setattr("ocd.gates.verify_commit._PATTERNS_FILE", patterns_file)
         result = check_message("TEST-PATTERN found here", patterns=None)
         assert len(result) == 1
 
@@ -127,7 +127,7 @@ class TestCheckCommitRange:
 
         monkeypatch.setattr(subprocess, "run", fake_run)
         monkeypatch.setattr(
-            "ocd.verify_commit.load_patterns",
+            "ocd.gates.verify_commit.load_patterns",
             lambda: ["^Co-Authored-By:"],
         )
         result = check_commit_range("origin/main..HEAD")

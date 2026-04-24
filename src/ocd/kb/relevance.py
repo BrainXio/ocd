@@ -556,7 +556,7 @@ def hybrid_score_articles(
     vec_scores: dict[str, float] = {}
     vec_available = False
     try:
-        from ocd.vec import is_vec_available, search_vectors
+        from ocd.kb.vec import is_vec_available, search_vectors
 
         if is_vec_available() and db_path and db_path.exists():
             db = sqlite3.connect(str(db_path))

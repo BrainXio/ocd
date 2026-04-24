@@ -19,7 +19,7 @@ from ocd.config import (
     SESSION_CARD_FILE,
     STATE_DIR,
 )
-from ocd.relevance import build_health_card, load_kb_index
+from ocd.kb.relevance import build_health_card, load_kb_index
 
 
 def build_session_card() -> str:
@@ -38,7 +38,7 @@ def build_session_card() -> str:
                 parts.append(health)
 
     # Standards reference
-    from ocd.standards import get_standards_reference
+    from ocd.routing.standards import get_standards_reference
 
     ref = get_standards_reference()
     if ref:

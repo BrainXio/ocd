@@ -70,7 +70,7 @@ def _run_formatters(
     project_root: Path | None = None,
 ) -> tuple[list[str], list[str]]:
     """Run all safe auto-fix formatters. Returns (fixed, errors)."""
-    from ocd.format import FORMATTERS, _config_present, _has_matching_files, _tool_available
+    from ocd.fix.format import FORMATTERS, _config_present, _has_matching_files, _tool_available
 
     root = _resolve_root(project_root)
     fixed: list[str] = []

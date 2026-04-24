@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from ocd.config import AGENTS_DIR, MANIFEST_FILE, STATE_DIR
-from ocd.relevance import tokenize
+from ocd.kb.relevance import tokenize
 
 # ── Manifest building ───────────────────────────────────────────────────
 

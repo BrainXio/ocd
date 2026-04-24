@@ -34,7 +34,7 @@ def _find_bundled_db() -> Path:
     if source_db.exists():
         return source_db
     # When installed as a package, use __file__-relative path
-    installed_db = Path(__file__).parent / "data" / "content.db"
+    installed_db = Path(__file__).resolve().parent.parent / "data" / "content.db"
     if installed_db.exists():
         return installed_db
     raise FileNotFoundError(
@@ -195,7 +195,7 @@ def materialize_vendor(db_path: Path, vendor: str, force: bool = False) -> dict[
     Returns:
         Dict with counts per vendor target.
     """
-    from ocd.vendors import VENDOR_TARGETS, VENDORS, generate_agents_md
+    from ocd.packaging.vendors import VENDOR_TARGETS, VENDORS, generate_agents_md
 
     db = sqlite3.connect(str(db_path))
     counts: dict[str, int] = {}
@@ -240,7 +240,7 @@ def materialize_vendor(db_path: Path, vendor: str, force: bool = False) -> dict[
 
 def main() -> None:
     """Entry point for ocd materialize command."""
-    from ocd.vendors import VENDORS
+    from ocd.packaging.vendors import VENDORS
 
     parser = argparse.ArgumentParser(description="Materialize agent config from content.db")
     parser.add_argument(

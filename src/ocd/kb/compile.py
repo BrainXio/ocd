@@ -288,7 +288,7 @@ def main() -> None:
     print(f"Knowledge base: {len(articles)} articles")
 
     # Auto-ingest: load new articles into the wiki database
-    from ocd.ingest import ingest_raw
+    from ocd.kb.ingest import ingest_raw
 
     print("Ingesting into knowledge.db...")
     result = ingest_raw()
@@ -298,7 +298,7 @@ def main() -> None:
     )
 
     # Rebuild the KB search index after compilation
-    from ocd.relevance import build_kb_index_json, save_kb_index
+    from ocd.kb.relevance import build_kb_index_json, save_kb_index
 
     print("Rebuilding KB search index...")
     index = build_kb_index_json()
@@ -307,7 +307,7 @@ def main() -> None:
 
     # Rebuild agent manifest if requested
     if args.manifest:
-        from ocd.router import build_manifest, save_manifest
+        from ocd.routing.router import build_manifest, save_manifest
 
         print("Rebuilding agent manifest...")
         manifest = build_manifest()
@@ -316,7 +316,7 @@ def main() -> None:
 
     # Update standards hash if requested
     if args.update_standards_hash:
-        from ocd.standards import update_standards_hash
+        from ocd.routing.standards import update_standards_hash
 
         print("Updating standards hash...")
         new_hash = update_standards_hash()

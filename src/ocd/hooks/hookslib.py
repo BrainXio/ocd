@@ -92,7 +92,7 @@ def spawn_flush(context_file: Path, session_id: str) -> None:
     cmd = [
         sys.executable,
         "-m",
-        "ocd.flush",
+        "ocd.session.flush",
         str(context_file),
         session_id,
     ]

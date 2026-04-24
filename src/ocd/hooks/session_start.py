@@ -15,10 +15,10 @@ import json
 import sys
 
 from ocd.config import MAX_CONTEXT_CHARS, MAX_RELEVANT_CONTEXT_CHARS
-from ocd.relevance import build_relevant_context
-from ocd.session_card import load_session_card
-from ocd.standards import get_standards_reference, verify_standards_hash
-from ocd.vision import build_vision_context
+from ocd.kb.relevance import build_relevant_context
+from ocd.routing.standards import get_standards_reference, verify_standards_hash
+from ocd.session.session_card import load_session_card
+from ocd.session.vision import build_vision_context
 
 
 def main() -> None:

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from ocd.standards import (
+from ocd.routing.standards import (
     _extract_frontmatter_and_body,
     compute_hash,
     compute_standards_hash,
@@ -69,19 +69,21 @@ class TestComputeStandardsHash:
         std_file = skills_dir / "standards.md"
         std_file.write_text(SAMPLE_STANDARDS)
 
-        import ocd.standards
+        import ocd.routing.standards
 
-        prev = ocd.standards.STANDARDS_FILE
-        ocd.standards.STANDARDS_FILE = std_file
+        prev = ocd.routing.standards.STANDARDS_FILE
+        ocd.routing.standards.STANDARDS_FILE = std_file
         try:
             h = compute_standards_hash()
             assert h is not None
             assert len(h) == 16
         finally:
-            ocd.standards.STANDARDS_FILE = prev
+            ocd.routing.standards.STANDARDS_FILE = prev
 
     def test_missing_file(self, mock_config_paths, monkeypatch):
-        monkeypatch.setattr("ocd.standards.STANDARDS_FILE", Path("/nonexistent/standards.md"))
+        monkeypatch.setattr(
+            "ocd.routing.standards.STANDARDS_FILE", Path("/nonexistent/standards.md")
+        )
         assert compute_standards_hash() is None
 
 
@@ -92,18 +94,20 @@ class TestGetStandardsVersion:
         std_file = skills_dir / "standards.md"
         std_file.write_text(SAMPLE_STANDARDS)
 
-        import ocd.standards
+        import ocd.routing.standards
 
-        prev = ocd.standards.STANDARDS_FILE
-        ocd.standards.STANDARDS_FILE = std_file
+        prev = ocd.routing.standards.STANDARDS_FILE
+        ocd.routing.standards.STANDARDS_FILE = std_file
         try:
             version = get_standards_version()
             assert version == "1.0"
         finally:
-            ocd.standards.STANDARDS_FILE = prev
+            ocd.routing.standards.STANDARDS_FILE = prev
 
     def test_missing_file(self, mock_config_paths, monkeypatch):
-        monkeypatch.setattr("ocd.standards.STANDARDS_FILE", Path("/nonexistent/standards.md"))
+        monkeypatch.setattr(
+            "ocd.routing.standards.STANDARDS_FILE", Path("/nonexistent/standards.md")
+        )
         assert get_standards_version() is None
 
 
@@ -114,19 +118,21 @@ class TestGetStandardsReference:
         std_file = skills_dir / "standards.md"
         std_file.write_text(SAMPLE_STANDARDS)
 
-        import ocd.standards
+        import ocd.routing.standards
 
-        prev = ocd.standards.STANDARDS_FILE
-        ocd.standards.STANDARDS_FILE = std_file
+        prev = ocd.routing.standards.STANDARDS_FILE
+        ocd.routing.standards.STANDARDS_FILE = std_file
         try:
             ref = get_standards_reference()
             assert ref.startswith("ocd-standards:v1.0 [")
             assert ref.endswith("]")
         finally:
-            ocd.standards.STANDARDS_FILE = prev
+            ocd.routing.standards.STANDARDS_FILE = prev
 
     def test_missing_file(self, mock_config_paths, monkeypatch):
-        monkeypatch.setattr("ocd.standards.STANDARDS_FILE", Path("/nonexistent/standards.md"))
+        monkeypatch.setattr(
+            "ocd.routing.standards.STANDARDS_FILE", Path("/nonexistent/standards.md")
+        )
         assert get_standards_reference() == ""
 
 
@@ -137,10 +143,10 @@ class TestVerifyStandardsHash:
         std_file = skills_dir / "standards.md"
         std_file.write_text(SAMPLE_STANDARDS)
 
-        import ocd.standards
+        import ocd.routing.standards
 
-        prev = ocd.standards.STANDARDS_FILE
-        ocd.standards.STANDARDS_FILE = std_file
+        prev = ocd.routing.standards.STANDARDS_FILE
+        ocd.routing.standards.STANDARDS_FILE = std_file
         try:
             # First update hash so it matches
             update_standards_hash()
@@ -149,7 +155,7 @@ class TestVerifyStandardsHash:
             assert result["stored_hash"] == result["computed_hash"]
             assert result["version"] == "1.0"
         finally:
-            ocd.standards.STANDARDS_FILE = prev
+            ocd.routing.standards.STANDARDS_FILE = prev
 
     def test_mismatched_hash(self, mock_config_paths, tmp_path):
         skills_dir = tmp_path / ".claude" / "skills" / "ocd"
@@ -157,10 +163,10 @@ class TestVerifyStandardsHash:
         std_file = skills_dir / "standards.md"
         std_file.write_text(SAMPLE_STANDARDS)
 
-        import ocd.standards
+        import ocd.routing.standards
 
-        prev = ocd.standards.STANDARDS_FILE
-        ocd.standards.STANDARDS_FILE = std_file
+        prev = ocd.routing.standards.STANDARDS_FILE
+        ocd.routing.standards.STANDARDS_FILE = std_file
         try:
             # SAMPLE_STANDARDS has hash "abc123def45678" which doesn't match body
             result = verify_standards_hash()
@@ -168,10 +174,12 @@ class TestVerifyStandardsHash:
             assert result["stored_hash"] == "abc123def45678"
             assert result["computed_hash"] != "abc123def45678"
         finally:
-            ocd.standards.STANDARDS_FILE = prev
+            ocd.routing.standards.STANDARDS_FILE = prev
 
     def test_missing_file(self, mock_config_paths, monkeypatch):
-        monkeypatch.setattr("ocd.standards.STANDARDS_FILE", Path("/nonexistent/standards.md"))
+        monkeypatch.setattr(
+            "ocd.routing.standards.STANDARDS_FILE", Path("/nonexistent/standards.md")
+        )
         result = verify_standards_hash()
         assert result["match"] is False
         assert "error" in result
@@ -184,10 +192,10 @@ class TestUpdateStandardsHash:
         std_file = skills_dir / "standards.md"
         std_file.write_text(SAMPLE_STANDARDS)
 
-        import ocd.standards
+        import ocd.routing.standards
 
-        prev = ocd.standards.STANDARDS_FILE
-        ocd.standards.STANDARDS_FILE = std_file
+        prev = ocd.routing.standards.STANDARDS_FILE
+        ocd.routing.standards.STANDARDS_FILE = std_file
         try:
             new_hash = update_standards_hash()
             assert new_hash is not None
@@ -198,8 +206,10 @@ class TestUpdateStandardsHash:
             result = verify_standards_hash()
             assert result["match"] is True
         finally:
-            ocd.standards.STANDARDS_FILE = prev
+            ocd.routing.standards.STANDARDS_FILE = prev
 
     def test_missing_file(self, mock_config_paths, monkeypatch):
-        monkeypatch.setattr("ocd.standards.STANDARDS_FILE", Path("/nonexistent/standards.md"))
+        monkeypatch.setattr(
+            "ocd.routing.standards.STANDARDS_FILE", Path("/nonexistent/standards.md")
+        )
         assert update_standards_hash() is None

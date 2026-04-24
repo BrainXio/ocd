@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from ocd.vision import (
+from ocd.session.vision import (
     Story,
     _extract_referenced_files,
     _load_referenced_file,
@@ -272,7 +272,7 @@ class TestBuildVisionContext:
     def test_context_respects_max_chars(self, mock_config_paths, vision_file, monkeypatch):
         vision_file(_TWO_STORIES)
         # Monkeypatch a very small budget to force truncation
-        from ocd import vision as vision_mod
+        from ocd.session import vision as vision_mod
 
         monkeypatch.setattr(vision_mod, "MAX_VISION_CONTEXT_CHARS", 200)
         result = build_vision_context(max_chars=200)

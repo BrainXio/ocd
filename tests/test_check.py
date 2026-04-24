@@ -1,11 +1,11 @@
-"""Tests for ocd.check — fast local quality gate."""
+"""Tests for ocd.gates.check — fast local quality gate."""
 
 from __future__ import annotations
 
 import subprocess
 from unittest.mock import MagicMock
 
-from ocd.check import (
+from ocd.gates.check import (
     _branch_protection,
     _no_local_config_staged,
     _scan_secrets_staged,
@@ -86,11 +86,11 @@ class TestStagedFiles:
 
 
 class TestStandardsVerify:
-    """_standards_verify() delegates to ocd.standards."""
+    """_standards_verify() delegates to ocd.routing.standards."""
 
     def test_match_returns_true(self, monkeypatch):
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {"match": True, "version": "1.0", "computed_hash": "abc123"},
         )
         passed, msg = _standards_verify()
@@ -99,7 +99,7 @@ class TestStandardsVerify:
 
     def test_mismatch_returns_false(self, monkeypatch):
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {
                 "match": False,
                 "stored_hash": "old",
@@ -112,7 +112,7 @@ class TestStandardsVerify:
 
     def test_error_returns_false(self, monkeypatch):
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {"match": False, "error": "not found"},
         )
         passed, _msg = _standards_verify()
@@ -120,20 +120,20 @@ class TestStandardsVerify:
 
 
 class TestScanSecretsStaged:
-    """_scan_secrets_staged() delegates to ocd.scan_secrets."""
+    """_scan_secrets_staged() delegates to ocd.gates.scan_secrets."""
 
     def test_clean(self, monkeypatch):
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 0)
+        monkeypatch.setattr("ocd.gates.scan_secrets.scan_secrets", lambda staged=True: 0)
         passed, _msg = _scan_secrets_staged()
         assert passed is True
 
     def test_secrets_found(self, monkeypatch):
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 1)
+        monkeypatch.setattr("ocd.gates.scan_secrets.scan_secrets", lambda staged=True: 1)
         passed, _msg = _scan_secrets_staged()
         assert passed is False
 
     def test_not_installed_skips(self, monkeypatch):
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 2)
+        monkeypatch.setattr("ocd.gates.scan_secrets.scan_secrets", lambda staged=True: 2)
         passed, _msg = _scan_secrets_staged()
         assert passed is True
 
@@ -146,12 +146,12 @@ class TestRunCheck:
             subprocess, "run", lambda *a, **kw: MagicMock(stdout="feature\n", returncode=0)
         )
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {"match": True, "version": "1.0", "computed_hash": "abc"},
         )
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 0)
-        monkeypatch.setattr("ocd.check._staged_files", lambda ext: [])
-        monkeypatch.setattr("ocd.check._no_local_config_staged", lambda: (True, "ok"))
+        monkeypatch.setattr("ocd.gates.scan_secrets.scan_secrets", lambda staged=True: 0)
+        monkeypatch.setattr("ocd.gates.check._staged_files", lambda ext: [])
+        monkeypatch.setattr("ocd.gates.check._no_local_config_staged", lambda: (True, "ok"))
         assert run_check() == 0
 
     def test_branch_failure_fails(self, monkeypatch):
@@ -159,12 +159,12 @@ class TestRunCheck:
             subprocess, "run", lambda *a, **kw: MagicMock(stdout="main\n", returncode=0)
         )
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {"match": True, "version": "1.0", "computed_hash": "abc"},
         )
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 0)
-        monkeypatch.setattr("ocd.check._staged_files", lambda ext: [])
-        monkeypatch.setattr("ocd.check._no_local_config_staged", lambda: (True, "ok"))
+        monkeypatch.setattr("ocd.gates.scan_secrets.scan_secrets", lambda staged=True: 0)
+        monkeypatch.setattr("ocd.gates.check._staged_files", lambda ext: [])
+        monkeypatch.setattr("ocd.gates.check._no_local_config_staged", lambda: (True, "ok"))
         assert run_check() == 1
 
     def test_local_config_failure_fails(self, monkeypatch):
@@ -172,13 +172,13 @@ class TestRunCheck:
             subprocess, "run", lambda *a, **kw: MagicMock(stdout="feature\n", returncode=0)
         )
         monkeypatch.setattr(
-            "ocd.standards.verify_standards_hash",
+            "ocd.routing.standards.verify_standards_hash",
             lambda: {"match": True, "version": "1.0", "computed_hash": "abc"},
         )
-        monkeypatch.setattr("ocd.scan_secrets.scan_secrets", lambda staged=True: 0)
-        monkeypatch.setattr("ocd.check._staged_files", lambda ext: [])
+        monkeypatch.setattr("ocd.gates.scan_secrets.scan_secrets", lambda staged=True: 0)
+        monkeypatch.setattr("ocd.gates.check._staged_files", lambda ext: [])
         monkeypatch.setattr(
-            "ocd.check._no_local_config_staged",
+            "ocd.gates.check._no_local_config_staged",
             lambda: (False, "local config staged"),
         )
         assert run_check() == 1

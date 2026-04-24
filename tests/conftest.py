@@ -10,22 +10,28 @@ import pytest
 # so the recursion guard in main() doesn't skip hook logic during tests.
 os.environ.pop("CLAUDE_INVOKED_BY", None)
 
-import ocd.autofix
 import ocd.config
-import ocd.flush
+import ocd.fix.autofix
+import ocd.fix.cycle
+import ocd.fix.format
+import ocd.gates.check
+import ocd.gates.ci_check
+import ocd.gates.scan_secrets
+import ocd.gates.verify_commit
 import ocd.hooks.hookslib
 import ocd.hooks.lint_work
 import ocd.hooks.pre_compact
 import ocd.hooks.session_end
 import ocd.hooks.session_start
-import ocd.ingest
-import ocd.relevance
-import ocd.router
-import ocd.session_card
-import ocd.standards
+import ocd.kb.ingest
+import ocd.kb.relevance
+import ocd.kb.vec
+import ocd.routing.router
+import ocd.routing.standards
+import ocd.session.flush
+import ocd.session.session_card
+import ocd.session.vision
 import ocd.utils
-import ocd.vec
-import ocd.vision
 
 # flush.py sets CLAUDE_INVOKED_BY at import time — clear again so
 # tests don't see a stale value.
@@ -126,20 +132,26 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
 
     # Patch modules that imported these names directly
     for module in (
-        ocd.autofix,
-        ocd.ingest,
-        ocd.utils,
-        ocd.vec,
+        ocd.fix.autofix,
+        ocd.fix.cycle,
+        ocd.fix.format,
+        ocd.gates.check,
+        ocd.gates.ci_check,
+        ocd.gates.scan_secrets,
+        ocd.gates.verify_commit,
         ocd.hooks.hookslib,
-        ocd.flush,
+        ocd.session.flush,
         ocd.hooks.session_start,
         ocd.hooks.session_end,
         ocd.hooks.pre_compact,
         ocd.hooks.lint_work,
-        ocd.relevance,
-        ocd.session_card,
-        ocd.standards,
-        ocd.vision,
+        ocd.kb.ingest,
+        ocd.kb.relevance,
+        ocd.kb.vec,
+        ocd.session.session_card,
+        ocd.routing.standards,
+        ocd.session.vision,
+        ocd.utils,
     ):
         for name, value in patches.items():
             if hasattr(module, name):

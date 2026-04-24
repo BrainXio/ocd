@@ -107,7 +107,7 @@ class TestWriteContextFile:
 
 class TestSpawnFlush:
     def test_calls_popen_with_module_flag(self, mock_config_paths, monkeypatch):
-        """spawn_flush now uses sys.executable -m ocd.flush instead of a script path."""
+        """spawn_flush now uses sys.executable -m ocd.session.flush instead of a script path."""
         import subprocess
 
         popen_mock = MagicMock()
@@ -119,7 +119,7 @@ class TestSpawnFlush:
         popen_mock.assert_called_once()
         cmd = popen_mock.call_args[0][0]
         assert "-m" in cmd
-        assert "ocd.flush" in cmd
+        assert "ocd.session.flush" in cmd
         assert str(context_file) in cmd
         assert "sess-123" in cmd
 

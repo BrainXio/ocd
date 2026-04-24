@@ -4,7 +4,7 @@ import json
 from typing import Any
 
 from ocd.config import KB_INDEX_JSON
-from ocd.relevance import (
+from ocd.kb.relevance import (
     _cosine_similarity,
     _extract_details,
     _extract_key_points,

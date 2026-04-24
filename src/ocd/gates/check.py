@@ -46,7 +46,7 @@ def _branch_protection() -> tuple[bool, str]:
 
 def _standards_verify() -> tuple[bool, str]:
     """Verify standards hash matches content."""
-    from ocd.standards import verify_standards_hash
+    from ocd.routing.standards import verify_standards_hash
 
     result = verify_standards_hash()
     if result.get("error"):
@@ -61,7 +61,7 @@ def _standards_verify() -> tuple[bool, str]:
 
 def _scan_secrets_staged() -> tuple[bool, str]:
     """Scan staged changes for secrets."""
-    from ocd.scan_secrets import scan_secrets
+    from ocd.gates.scan_secrets import scan_secrets
 
     rc = scan_secrets(staged=True)
     if rc == 0:

@@ -1,4 +1,4 @@
-"""Tests for ocd.pre_push — diff-aware test runner."""
+"""Tests for ocd.gates.pre_push — diff-aware test runner."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ocd.pre_push import _FULL_SUITE_FILES, get_changed_files, map_files_to_tests
+from ocd.gates.pre_push import _FULL_SUITE_FILES, get_changed_files, map_files_to_tests
 
 
 class TestGetChangedFiles:
@@ -142,7 +142,7 @@ class TestMainIntegration:
             return r
 
         monkeypatch.setattr(subprocess, "run", fake_run)
-        from ocd.pre_push import main
+        from ocd.gates.pre_push import main
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -163,7 +163,7 @@ class TestMainIntegration:
             return r
 
         monkeypatch.setattr(subprocess, "run", fake_run)
-        from ocd.pre_push import main
+        from ocd.gates.pre_push import main
 
         with pytest.raises(SystemExit) as exc_info:
             main()

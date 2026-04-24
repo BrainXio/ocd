@@ -328,7 +328,7 @@ def ingest_raw(
 
     # Rebuild TF-IDF index after ingestion
     try:
-        from ocd.relevance import build_kb_index_json
+        from ocd.kb.relevance import build_kb_index_json
 
         build_kb_index_json()
     except Exception:
@@ -336,7 +336,7 @@ def ingest_raw(
 
     # Incremental vector update: only re-embed changed articles
     try:
-        from ocd.vec import ensure_vec_schema, insert_vectors, is_vec_available
+        from ocd.kb.vec import ensure_vec_schema, insert_vectors, is_vec_available
 
         if is_vec_available() and changed_articles:
             vec_db = sqlite3.connect(str(db_file))

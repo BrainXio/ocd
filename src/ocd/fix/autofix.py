@@ -26,7 +26,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from ocd.config import AUTOFIX_LOG, PROJECT_ROOT, WORKTREES_DIR
-from ocd.fix import FixResult, fix_cycle, lint_and_fix
+from ocd.fix.cycle import FixResult, fix_cycle, lint_and_fix
 
 # ── Recursion guard ──────────────────────────────────────────────────────────
 

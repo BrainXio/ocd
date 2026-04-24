@@ -37,7 +37,7 @@ def _tool_available(binary: str) -> bool:
 
 def _standards_verify() -> tuple[bool, str]:
     """Verify standards hash matches content."""
-    from ocd.standards import verify_standards_hash
+    from ocd.routing.standards import verify_standards_hash
 
     result = verify_standards_hash()
     if result.get("error"):
@@ -52,7 +52,7 @@ def _standards_verify() -> tuple[bool, str]:
 
 def _verify_commit_messages(range_spec: str | None = None) -> tuple[bool, str]:
     """Check commit messages for AI attribution."""
-    from ocd.verify_commit import check_commit_range
+    from ocd.gates.verify_commit import check_commit_range
 
     if not range_spec:
         return True, "commit-messages: skipped (no range specified)"
@@ -65,7 +65,7 @@ def _verify_commit_messages(range_spec: str | None = None) -> tuple[bool, str]:
 
 def _scan_secrets_full() -> tuple[bool, str]:
     """Full repository secret scan."""
-    from ocd.scan_secrets import scan_secrets
+    from ocd.gates.scan_secrets import scan_secrets
 
     rc = scan_secrets(staged=False, source=".")
     if rc == 0:
@@ -195,7 +195,7 @@ def _pytest(fast: bool = False) -> tuple[bool, str]:
         return True, "pytest: skipped (not installed)"
 
     if fast:
-        from ocd.pre_push import get_changed_files, map_files_to_tests
+        from ocd.gates.pre_push import get_changed_files, map_files_to_tests
 
         remote_check = subprocess.run(
             ["git", "rev-parse", "--verify", "origin/main"],

@@ -1,11 +1,11 @@
-"""Tests for ocd.scan_secrets — gitleaks wrapper."""
+"""Tests for ocd.gates.scan_secrets — gitleaks wrapper."""
 
 from __future__ import annotations
 
 import subprocess
 from unittest.mock import MagicMock
 
-from ocd.scan_secrets import scan_secrets
+from ocd.gates.scan_secrets import scan_secrets
 
 
 class TestScanSecrets:
@@ -66,6 +66,6 @@ class TestScanSecrets:
 
         monkeypatch.setattr(subprocess, "run", fake_run)
         monkeypatch.setattr("shutil.which", lambda _: "/usr/bin/gitleaks")
-        monkeypatch.setattr("ocd.scan_secrets._GITLEAKS_CONFIG", config)
+        monkeypatch.setattr("ocd.gates.scan_secrets._GITLEAKS_CONFIG", config)
         scan_secrets(staged=True)
         assert any("-c" in c for c in calls[0])
