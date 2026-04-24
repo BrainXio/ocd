@@ -48,4 +48,4 @@ Protected files enforce project standards. If they can be freely modified, the
 enforcement becomes meaningless. The deny-remove-edit-readd cycle makes
 modification a deliberate act, not an accidental one.
 
-See `docs/03-reference.md` for the full list of protected files and deny patterns.
+See `docs/reference/README.md` for the full list of protected files and deny patterns.

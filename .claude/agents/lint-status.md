@@ -17,7 +17,7 @@ Run the following linters based on what files exist in the project:
 | `ruff check` | `.claude/hooks/*.py`, `.claude/scripts/*.py` | Exit code + output |
 | `ruff format --check` | `.claude/hooks/*.py`, `.claude/scripts/*.py` | Exit code |
 | `mypy` | `.claude/hooks/`, `.claude/scripts/` | Exit code + output |
-| `mdformat --check` | `*.md`, `.claude/skills/*/SKILL.md` | Exit code + output |
+| `mdformat --check` | `*.md`, `.claude/skills/*/SKILL.md`, `.claude/agents/*.md`, `.claude/rules/*.md` | Exit code + output |
 | `yamllint` | `.github/workflows/*.yml`, `.github/*.yml` | Exit code + output |
 
 ## Output Format

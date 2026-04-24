@@ -139,6 +139,8 @@ def _mdformat_check() -> tuple[bool, str]:
             ".claude/skills/",
             ".claude/agents/",
             ".claude/rules/",
+            "docs/reference/skills/",
+            "docs/reference/agents/",
         ],
         capture_output=True,
         text=True,

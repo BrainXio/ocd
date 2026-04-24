@@ -3,7 +3,7 @@ title: Reference
 aliases: [reference, api, specs, tables]
 tags: [reference]
 created: 2026-04-17
-updated: 2026-04-21
+updated: 2026-04-24
 ---
 
 All lookup tables, schemas, and specifications in one place. Dry, authoritative, complete.
@@ -37,7 +37,7 @@ All lookup tables, schemas, and specifications in one place. Dry, authoritative,
 | `typescript` | TypeScript 5.x, `strict: true`, `pnpm`, explicit return types. No `any` — use `unknown`. |
 | `yaml` | 2-space indent, quoted ambiguous types, `yamllint` zero-errors gate. No tabs, no unquoted booleans. |
 
-All skills live in `.claude/skills/<name>/SKILL.md`.
+Portable skills live in `docs/reference/skills/<name>.md` with symlinks from `.claude/skills/<name>/SKILL.md`. The OCD-specific skill (`ocd`) stays at `.claude/skills/ocd/SKILL.md`.
 
 ## Subagent Registry
 
@@ -69,7 +69,7 @@ All skills live in `.claude/skills/<name>/SKILL.md`.
 | `owasp-scanner` | haiku | Glob, Grep, Read | Security review: OWASP Top 10 patterns (XSS, injection, CSRF, insecure deserialization) |
 | `test-writer` | haiku | Glob, Grep, Read, Bash | Test generation: identify uncovered code, generate test cases, enforce coverage gates |
 
-All agents live in `.claude/agents/<name>.md`.
+Portable agents live in `docs/reference/agents/<name>.md` with symlinks from `.claude/agents/<name>.md`. OCD-specific agents stay at `.claude/agents/<name>.md` directly.
 
 ### Agent Frontmatter Schema
 
@@ -234,7 +234,7 @@ Python linters are installed via `uv sync`. Prettier is installed via `npm ci` (
 | -------------- | ------------------------------------------------------------------------- | -------- |
 | `ruff-format` | `ruff format src/ tests/` | Python |
 | `ruff-fix` | `ruff check --fix src/ tests/` | Python |
-| `mdformat` | `mdformat README.md docs/ .claude/skills/ .claude/agents/ .claude/rules/` | Markdown |
+| `mdformat` | `mdformat README.md docs/ .claude/skills/ .claude/agents/ .claude/rules/ docs/reference/skills/ docs/reference/agents/` | Markdown |
 | `prettier` | `npx prettier --write "**/*.json" "!package-lock.json"` | JSON |
 | `sqlfluff-fix` | `sqlfluff fix --force` | SQL |
 

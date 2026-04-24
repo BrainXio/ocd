@@ -70,6 +70,8 @@ RUN apt-get update \
 COPY pyproject.toml uv.lock /tmp/ocd-build/
 COPY src/ocd/ /tmp/ocd-build/src/ocd/
 COPY .claude/ /tmp/ocd-source/.claude/
+COPY docs/reference/skills/ /tmp/ocd-source/docs/reference/skills/
+COPY docs/reference/agents/ /tmp/ocd-source/docs/reference/agents/
 RUN python /tmp/ocd-build/src/ocd/packaging/pack.py \
         --source /tmp/ocd-source/.claude \
         --output /tmp/ocd-build/src/ocd/data/content.db \
@@ -81,6 +83,8 @@ RUN python /tmp/ocd-build/src/ocd/packaging/pack.py \
 # Skills, agents, rules, and settings at ~/.claude/ are available
 # to all projects immediately (no ocd init needed for these).
 COPY .claude/ /home/ocd/.claude/
+COPY docs/reference/skills/ /home/ocd/docs/reference/skills/
+COPY docs/reference/agents/ /home/ocd/docs/reference/agents/
 RUN rm -f /home/ocd/.claude/settings.local.json \
     && chown -R ocd:ocd /home/ocd/.claude
 

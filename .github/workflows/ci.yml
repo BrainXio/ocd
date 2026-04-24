@@ -143,7 +143,8 @@ jobs:
         run: >-
           uv run mdformat --check
           README.md docs/*.md docs/**/*.md .claude/skills/*/SKILL.md
-          .claude/agents/*.md .claude/rules/*.md
+          .claude/agents/*.md .claude/rules/*.md docs/reference/skills/*.md
+          docs/reference/agents/*.md
 
   secret-scan:
     needs: [changes]
