@@ -1,3 +1,5 @@
+# Managed at BrainXio/.github/defaults/
+# Edit source of truth there. Local overrides minimized.
 ---
 ignored:
   - DL3008 # Pin versions in apt-get install; we pin via digest in FROM instead

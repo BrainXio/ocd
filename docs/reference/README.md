@@ -213,11 +213,13 @@ To allowlist a false positive, add an entry under `[allowlist]` in `.gitleaks.to
 | shellcheck | — | Shell | system package |
 | gitleaks | `.gitleaks.toml` | Secrets | binary install |
 | actionlint | — | GitHub Actions | binary install |
-| prettier | `package.json` | JSON | `npm ci` |
+| prettier | `.prettierrc` | JSON | `npm ci` |
 | sqlfluff | — | SQL | `uv sync --extra sql` |
 | hadolint | `.hadolint.yaml` | Dockerfile | binary install |
 | trivy | `trivy.yaml` + `.trivyignore` | Vulnerabilities | binary install |
 | semgrep | `.semgrep.yml` | SAST (OWASP Top 10) | pip install |
+
+Four config files originate from [BrainXio/.github/defaults/](https://github.com/brainxio/.github/tree/main/defaults): `.yamllint`, `.hadolint.yaml`, `.mdformat.toml`, `.prettierrc`. See [org defaults](../explanation/org-defaults.md) for the shared policy.
 
 Python linters are installed via `uv sync`. Prettier is installed via `npm ci` (defined in `package.json`). The `ocd hook lint-work` reports missing linters gracefully — it does not block edits when a linter is unavailable.
 
