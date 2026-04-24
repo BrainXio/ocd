@@ -1,1 +1,1 @@
-"""Session lifecycle — flush, session card, vision."""
+"""Session lifecycle — flush, session card, app spec."""

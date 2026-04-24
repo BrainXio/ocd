@@ -2,9 +2,8 @@
 
 Uses TF-IDF relevance scoring to inject only the most pertinent articles
 instead of the full KB index. Falls back to most recently updated articles
-when no query is available. Also injects vision roadmap + next unfinished
-story, standards hash reference, and session state card for post-compaction
-recovery.
+when no query is available. Also injects app spec, standards hash reference,
+and session state card for post-compaction recovery.
 
 Invoked via `ocd hook session-start`.
 """
@@ -17,8 +16,8 @@ import sys
 from ocd.config import MAX_CONTEXT_CHARS, MAX_RELEVANT_CONTEXT_CHARS
 from ocd.kb.relevance import build_relevant_context
 from ocd.routing.standards import get_standards_reference, verify_standards_hash
+from ocd.session.app_spec import build_app_spec_context
 from ocd.session.session_card import load_session_card
-from ocd.session.vision import build_vision_context
 
 
 def main() -> None:
@@ -44,10 +43,10 @@ def main() -> None:
         if ref:
             context = f"{context}\n\n---\n\n{ref}"
 
-    # Inject vision roadmap + next unfinished story
-    vision_context = build_vision_context()
-    if vision_context:
-        context = f"{context}\n\n---\n\n{vision_context}"
+    # Inject app spec
+    app_spec = build_app_spec_context()
+    if app_spec:
+        context = f"{context}\n\n---\n\n{app_spec}"
 
     # Inject last session card for post-compaction recovery
     card = load_session_card()

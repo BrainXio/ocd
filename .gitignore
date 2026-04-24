@@ -109,6 +109,9 @@ CLAUDE.md
 # === Regeneratable files ===
 AGENTS.md
 
+# === Plain text files (app_spec.txt, notes, etc.) ===
+*.txt
+
 # === USER (content) ===
 .obsidian
 USER/*

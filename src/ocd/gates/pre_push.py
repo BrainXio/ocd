@@ -56,13 +56,29 @@ def map_files_to_tests(changed_files: list[str]) -> list[str]:
         if f in _FULL_SUITE_FILES:
             return []
 
+    # Subpackage → test directory mapping
+    _SUBPKG_MAP: dict[str, str] = {
+        "fix": "fix",
+        "gates": "gates",
+        "hooks": "hooks",
+        "kb": "kb",
+        "packaging": "packaging",
+        "routing": "routing",
+        "session": "session",
+    }
+
     test_files: set[str] = set()
 
     for f in changed_files:
-        if f.startswith("src/ocd/hooks/") or (f.startswith("src/ocd/") and f.endswith(".py")):
+        if f.startswith("src/ocd/"):
+            parts = Path(f).parts
             module = Path(f).stem
-            test_files.add(f"tests/test_{module}.py")
-        elif f.startswith("tests/test_") and f.endswith(".py"):
+            if len(parts) >= 3 and parts[2] in _SUBPKG_MAP:
+                test_dir = _SUBPKG_MAP[parts[2]]
+                test_files.add(f"tests/{test_dir}/test_{module}.py")
+            elif f.endswith(".py"):
+                test_files.add(f"tests/test_{module}.py")
+        elif f.startswith("tests/") and f.endswith(".py"):
             test_files.add(f)
 
     return sorted(test_files)

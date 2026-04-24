@@ -803,7 +803,7 @@ def _detect_project(project_dir: Path) -> dict[str, bool]:
     return {
         "python": (project_dir / "pyproject.toml").exists(),
         "node": (project_dir / "package.json").exists(),
-        "git": (project_dir / ".git").is_dir(),
+        "git": (project_dir / ".git").exists(),
     }
 
 

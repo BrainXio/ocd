@@ -59,33 +59,35 @@ class TestMain:
         assert "## Today" in context
 
 
-class TestVisionIntegration:
-    """Tests that vision context is injected into session-start output."""
+class TestAppSpecIntegration:
+    """Tests that app spec context is injected into session-start output."""
 
-    def test_vision_context_injected_when_present(self, mock_config_paths, capsys):
-        (mock_config_paths / "VISION.md").write_text(
-            "### 1. Done ✅ DONE\n\nContent.\n\n### 2. Next\n\nNext content.\n",
-            encoding="utf-8",
+    def test_app_spec_injected_when_present(self, mock_config_paths, monkeypatch, capsys):
+        app_spec_path = mock_config_paths.parent / "app_spec.txt"
+        app_spec_path.write_text("Build a CLI tool for task management", encoding="utf-8")
+        monkeypatch.setattr("ocd.session.app_spec.APP_SPEC_FILE", app_spec_path)
+        session_start.main()
+        output = capsys.readouterr().out
+        result = json.loads(output)
+        context = result["hookSpecificOutput"]["additionalContext"]
+        assert "## App Spec" in context
+        assert "task management" in context
+
+    def test_app_spec_absent_when_no_file(self, mock_config_paths, monkeypatch, capsys):
+        monkeypatch.setattr(
+            "ocd.session.app_spec.APP_SPEC_FILE",
+            mock_config_paths / "nonexistent" / "app_spec.txt",
         )
         session_start.main()
         output = capsys.readouterr().out
         result = json.loads(output)
         context = result["hookSpecificOutput"]["additionalContext"]
-        assert "Vision Roadmap" in context
-        assert "Next" in context
+        assert "## App Spec" not in context
 
-    def test_vision_context_absent_when_no_file(self, mock_config_paths, capsys):
-        session_start.main()
-        output = capsys.readouterr().out
-        result = json.loads(output)
-        context = result["hookSpecificOutput"]["additionalContext"]
-        assert "Vision Roadmap" not in context
-
-    def test_total_context_within_hard_cap(self, mock_config_paths, capsys):
-        (mock_config_paths / "VISION.md").write_text(
-            "### 1. Next\n\n" + "x" * 50000 + "\n",
-            encoding="utf-8",
-        )
+    def test_total_context_within_hard_cap(self, mock_config_paths, monkeypatch, capsys):
+        app_spec_path = mock_config_paths.parent / "app_spec.txt"
+        app_spec_path.write_text("x" * 50000, encoding="utf-8")
+        monkeypatch.setattr("ocd.session.app_spec.APP_SPEC_FILE", app_spec_path)
         session_start.main()
         output = capsys.readouterr().out
         result = json.loads(output)
@@ -93,19 +95,3 @@ class TestVisionIntegration:
         from ocd.config import MAX_CONTEXT_CHARS
 
         assert len(context) <= MAX_CONTEXT_CHARS + len("\n\n...(truncated)")
-
-    def test_user_standards_injected_when_both_exist(self, mock_config_paths, capsys):
-        (mock_config_paths / "VISION.md").write_text(
-            "### 1. Next\n\nNext content.\n",
-            encoding="utf-8",
-        )
-        (mock_config_paths / "STANDARDS.md").write_text(
-            "# Standards\n\nBe strict.",
-            encoding="utf-8",
-        )
-        session_start.main()
-        output = capsys.readouterr().out
-        result = json.loads(output)
-        context = result["hookSpecificOutput"]["additionalContext"]
-        assert "User Standards" in context
-        assert "Be strict" in context

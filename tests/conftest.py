@@ -28,9 +28,9 @@ import ocd.kb.relevance
 import ocd.kb.vec
 import ocd.routing.router
 import ocd.routing.standards
+import ocd.session.app_spec
 import ocd.session.flush
 import ocd.session.session_card
-import ocd.session.vision
 import ocd.utils
 
 # flush.py sets CLAUDE_INVOKED_BY at import time — clear again so
@@ -121,9 +121,8 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "SESSION_CARD_FILE": state_dir / "session-card.md",
         "WORKTREES_DIR": tmp_agent_dir.parent / ".claude" / "worktrees",
         "AUTOFIX_LOG": state_dir / "autofix-loop.jsonl",
-        "VISION_FILE": tmp_agent_dir / "VISION.md",
-        "USER_STANDARDS_FILE": tmp_agent_dir / "STANDARDS.md",
-        "VISION_LOG_FILE": tmp_agent_dir / "logs" / "vision.log",
+        "APP_SPEC_FILE": tmp_agent_dir.parent / "app_spec.txt",
+        "MAX_APP_SPEC_CHARS": 4000,
     }
 
     # Patch the canonical source
@@ -150,7 +149,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         ocd.kb.vec,
         ocd.session.session_card,
         ocd.routing.standards,
-        ocd.session.vision,
+        ocd.session.app_spec,
         ocd.utils,
     ):
         for name, value in patches.items():

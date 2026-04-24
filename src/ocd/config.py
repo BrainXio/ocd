@@ -30,11 +30,11 @@ def _find_project_root() -> Path:
         return Path(env_root).resolve()
     current = Path(__file__).resolve()
     for parent in current.parents:
-        if (parent / ".git").is_dir():
+        if (parent / ".git").exists():
             return parent
     current = Path.cwd()
     for parent in [current, *current.parents]:
-        if (parent / ".git").is_dir():
+        if (parent / ".git").exists():
             return parent
     return current
 
@@ -104,11 +104,9 @@ MAX_SESSION_CARD_CHARS = 1200
 WORKTREES_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "worktrees"
 AUTOFIX_LOG: Path = STATE_DIR / "autofix-loop.jsonl"
 
-# Vision roadmap
-VISION_FILE: Path = USER_DIR / "VISION.md"
-USER_STANDARDS_FILE: Path = USER_DIR / "STANDARDS.md"
-MAX_VISION_CONTEXT_CHARS = 4000
-VISION_LOG_FILE: Path = USER_DIR / "logs" / "vision.log"
+# App spec injection
+APP_SPEC_FILE: Path = PROJECT_ROOT / "app_spec.txt"
+MAX_APP_SPEC_CHARS = 4000
 
 # Vector search configuration
 VEC_DIMENSIONS = 384

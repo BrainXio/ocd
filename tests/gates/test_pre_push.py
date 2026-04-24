@@ -15,11 +15,11 @@ class TestGetChangedFiles:
 
     def test_returns_changed_files(self, monkeypatch):
         result = MagicMock()
-        result.stdout = "src/ocd/flush.py\nsrc/ocd/utils.py\n"
+        result.stdout = "src/ocd/session/flush.py\nsrc/ocd/utils.py\n"
         result.returncode = 0
         monkeypatch.setattr(subprocess, "run", lambda *a, **kw: result)
         files = get_changed_files("origin/main")
-        assert "src/ocd/flush.py" in files
+        assert "src/ocd/session/flush.py" in files
         assert "src/ocd/utils.py" in files
 
     def test_returns_empty_on_failure(self, monkeypatch):
@@ -60,16 +60,16 @@ class TestGetChangedFiles:
                 r.stdout = ""
             else:
                 r.returncode = 0
-                r.stdout = "src/ocd/flush.py\n"
+                r.stdout = "src/ocd/session/flush.py\n"
             return r
 
         monkeypatch.setattr(subprocess, "run", fake_run)
         files = get_changed_files("origin/main")
-        assert "src/ocd/flush.py" in files
+        assert "src/ocd/session/flush.py" in files
 
     def test_strips_empty_lines(self, monkeypatch):
         result = MagicMock()
-        result.stdout = "src/ocd/flush.py\n\nsrc/ocd/utils.py\n"
+        result.stdout = "src/ocd/session/flush.py\n\nsrc/ocd/utils.py\n"
         result.returncode = 0
         monkeypatch.setattr(subprocess, "run", lambda *a, **kw: result)
         files = get_changed_files("origin/main")
@@ -80,28 +80,28 @@ class TestMapFilesToTests:
     """map_files_to_tests() maps source files to test files."""
 
     def test_maps_source_module(self):
-        result = map_files_to_tests(["src/ocd/flush.py"])
-        assert result == ["tests/test_flush.py"]
+        result = map_files_to_tests(["src/ocd/session/flush.py"])
+        assert result == ["tests/session/test_flush.py"]
 
     def test_maps_hooks_module(self):
         result = map_files_to_tests(["src/ocd/hooks/lint_work.py"])
-        assert result == ["tests/test_lint_work.py"]
+        assert result == ["tests/hooks/test_lint_work.py"]
 
     def test_maps_test_file(self):
-        result = map_files_to_tests(["tests/test_flush.py"])
-        assert result == ["tests/test_flush.py"]
+        result = map_files_to_tests(["tests/session/test_flush.py"])
+        assert result == ["tests/session/test_flush.py"]
 
     def test_maps_multiple_files(self):
         result = map_files_to_tests(
             [
-                "src/ocd/flush.py",
+                "src/ocd/session/flush.py",
                 "src/ocd/hooks/session_start.py",
-                "tests/test_router.py",
+                "tests/routing/test_router.py",
             ]
         )
-        assert "tests/test_flush.py" in result
-        assert "tests/test_session_start.py" in result
-        assert "tests/test_router.py" in result
+        assert "tests/session/test_flush.py" in result
+        assert "tests/hooks/test_session_start.py" in result
+        assert "tests/routing/test_router.py" in result
 
     def test_infrastructure_file_triggers_full_suite(self):
         for infra in _FULL_SUITE_FILES:
@@ -109,7 +109,7 @@ class TestMapFilesToTests:
             assert result == [], f"{infra} should trigger full suite"
 
     def test_infrastructure_file_mixed_with_source(self):
-        result = map_files_to_tests(["src/ocd/config.py", "src/ocd/flush.py"])
+        result = map_files_to_tests(["src/ocd/config.py", "src/ocd/session/flush.py"])
         assert result == []
 
     def test_non_python_file_returns_empty(self):
@@ -119,11 +119,11 @@ class TestMapFilesToTests:
     def test_deduplicates_test_files(self):
         result = map_files_to_tests(
             [
-                "src/ocd/flush.py",
-                "tests/test_flush.py",
+                "src/ocd/session/flush.py",
+                "tests/session/test_flush.py",
             ]
         )
-        assert result.count("tests/test_flush.py") == 1
+        assert result.count("tests/session/test_flush.py") == 1
 
 
 class TestMainIntegration:
@@ -159,7 +159,7 @@ class TestMainIntegration:
             if "merge-base" in cmd:
                 r.stdout = "abc123\n"
             elif "diff" in cmd:
-                r.stdout = "src/ocd/flush.py\n"
+                r.stdout = "src/ocd/session/flush.py\n"
             return r
 
         monkeypatch.setattr(subprocess, "run", fake_run)
