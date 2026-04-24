@@ -70,7 +70,7 @@ RUN apt-get update \
 COPY pyproject.toml uv.lock /tmp/ocd-build/
 COPY src/ocd/ /tmp/ocd-build/src/ocd/
 COPY .claude/ /tmp/ocd-source/.claude/
-RUN python /tmp/ocd-build/src/ocd/pack.py \
+RUN python /tmp/ocd-build/src/ocd/packaging/pack.py \
         --source /tmp/ocd-source/.claude \
         --output /tmp/ocd-build/src/ocd/data/content.db \
     && uv venv /opt/ocd/venv \
