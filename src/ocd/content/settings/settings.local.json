@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout *)",
+      "Bash(uv run *)",
+      "Bash(.venv/bin/mdformat *)",
+      "Bash(python3 *)",
+      "Bash(python -m ruff check src/ocd/)",
+      "Bash(python -m ruff format --check src/ocd/)",
+      "Bash(grep -v \"^[0-9]*:def \\\\|^#\\\\|^from \\\\|^import \\\\|^$\")",
+      "Bash(git check-ignore *)"
+    ]
+  },
+  "sandbox": {
+    "enabled": false,
+    "autoAllowBashIfSandboxed": false
+  }
+}

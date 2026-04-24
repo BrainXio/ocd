@@ -315,7 +315,15 @@ def _cmd_materialize(args: argparse.Namespace) -> None:
     """Materialize .claude/ content from database to target directory."""
     from ocd.packaging.materialize import run_materialize
 
-    sys.exit(run_materialize(target=args.target, db=args.db, force=args.force, vendor=args.vendor))
+    sys.exit(
+        run_materialize(
+            target=args.target,
+            db=args.db,
+            force=args.force,
+            vendor=args.vendor,
+            docs_dir=args.docs_dir,
+        )
+    )
 
 
 def _cmd_compile(args: argparse.Namespace) -> None:
@@ -433,10 +441,12 @@ def _cmd_lint_kb(args: argparse.Namespace) -> None:
 
 
 def _cmd_compile_db(args: argparse.Namespace) -> None:
-    """Compile .claude/ content into bundled SQLite database."""
+    """Compile content into bundled SQLite database."""
     from ocd.packaging.pack import run_compile_db
 
-    sys.exit(run_compile_db(output=args.output, source=args.source))
+    sys.exit(
+        run_compile_db(output=args.output, source=args.source, portable_source=args.portable_source)
+    )
 
 
 def _cmd_pre_push(args: argparse.Namespace) -> None:
@@ -680,6 +690,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Vendor format (aider, cursor, copilot, windsurf, amazonq, all, agents-md)",
     )
+    mat_parser.add_argument(
+        "--docs-dir",
+        default=None,
+        help="Path to docs/reference/ for creating symlinks to portable content",
+    )
     mat_parser.set_defaults(func=_cmd_materialize)
 
     # compile
@@ -761,9 +776,16 @@ def _build_parser() -> argparse.ArgumentParser:
     lk_parser.set_defaults(func=_cmd_lint_kb)
 
     # compile-db
-    cdb_parser = subparsers.add_parser("compile-db", help="Compile .claude/ into SQLite database")
+    cdb_parser = subparsers.add_parser("compile-db", help="Compile content into SQLite database")
     cdb_parser.add_argument("--output", "-o", default=None, help="Output database path")
-    cdb_parser.add_argument("--source", default=None, help="Source directory")
+    cdb_parser.add_argument(
+        "--source", default=None, help="OCD content directory (default: src/ocd/content/)"
+    )
+    cdb_parser.add_argument(
+        "--portable-source",
+        default=None,
+        help="Portable content directory (default: docs/reference/)",
+    )
     cdb_parser.set_defaults(func=_cmd_compile_db)
 
     # pre-push

@@ -44,6 +44,7 @@ PROJECT_ROOT: Path = _find_project_root()
 # ── Core paths (built from the single source above) ───────────────────────
 USER_DIR: Path = PROJECT_ROOT / _RUNTIME_DIR_NAME
 AGENTS_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "agents"
+RULES_DIR: Path = PROJECT_ROOT / _CLAUDE_DIR_NAME / "rules"
 VENV_BIN: Path = Path(sys.executable).parent
 
 DAILY_DIR: Path = USER_DIR / "logs" / "daily"
@@ -97,6 +98,9 @@ STANDARDS_FILE: Path = SKILLS_DIR / "standards.md"
 # Canonical portable content (skills/agents shared across AI tools)
 DOCS_SKILLS_DIR: Path = PROJECT_ROOT / "docs" / "reference" / "skills"
 DOCS_AGENTS_DIR: Path = PROJECT_ROOT / "docs" / "reference" / "agents"
+
+# OCD-specific content source (agents, rules, skills, standards, settings)
+CONTENT_DIR: Path = Path(__file__).parent / "content"
 
 # Bundled content database (for release packaging)
 BUNDLED_DB_PATH: Path = Path(__file__).parent / "data" / "content.db"

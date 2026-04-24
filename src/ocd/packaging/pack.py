@@ -1,14 +1,16 @@
-"""Compile .claude/ content into SQLite database for release packaging.
+"""Compile OCD content into SQLite database for release packaging.
 
-Reads agents, rules, skills, and standards from the source .claude/ directory
-and compiles them into a single content.db that ships inside the Python
-wheel. The runtime materializer (ocd materialize) reconstructs the files from
-this database into any target directory.
+Reads OCD-specific content (agents, rules, skills, standards, settings) from
+a source directory and portable content (skills, agents) from a portable
+source directory, compiling both into a single content.db that ships inside
+the Python wheel. The runtime materializer (ocd materialize) reconstructs
+the files from this database into any target directory.
 
 Usage:
-    ocd compile-db                     # compile to default location
-    ocd compile-db -o /tmp/content.db    # compile to specific path
-    ocd compile-db --source /path/.claude  # use non-default source
+    ocd compile-db                                        # defaults
+    ocd compile-db -o /tmp/content.db                     # specific output
+    ocd compile-db --source src/ocd/content               # OCD content only
+    ocd compile-db --portable-source docs/reference        # with portable content
 """
 
 from __future__ import annotations
@@ -20,10 +22,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 try:
-    from ocd.config import _CLAUDE_DIR_NAME, PROJECT_ROOT
+    from ocd.config import CONTENT_DIR, DOCS_AGENTS_DIR, DOCS_SKILLS_DIR, PROJECT_ROOT
 except ImportError:
     PROJECT_ROOT = Path.cwd()
-    _CLAUDE_DIR_NAME = ".claude"
+    CONTENT_DIR = Path.cwd() / "src" / "ocd" / "content"
+    DOCS_SKILLS_DIR = Path.cwd() / "docs" / "reference" / "skills"
+    DOCS_AGENTS_DIR = Path.cwd() / "docs" / "reference" / "agents"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS agents (
@@ -56,6 +60,13 @@ CREATE TABLE IF NOT EXISTS standards (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     version TEXT NOT NULL,
     hash TEXT NOT NULL,
+    body TEXT NOT NULL,
+    created TEXT NOT NULL,
+    updated TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+    name TEXT PRIMARY KEY,
     body TEXT NOT NULL,
     created TEXT NOT NULL,
     updated TEXT NOT NULL
@@ -169,6 +180,38 @@ def _load_skills(db: sqlite3.Connection, skills_dir: Path) -> int:
     return count
 
 
+def _load_portable_skills(db: sqlite3.Connection, skills_dir: Path) -> int:
+    """Load portable skill .md files from a flat directory structure.
+
+    Unlike _load_skills which expects skills/<name>/SKILL.md subdirectories,
+    portable skills are stored as flat files: skills/<name>.md with the
+    skill name derived from the file stem.
+    """
+    count = 0
+    for path in sorted(skills_dir.glob("*.md")):
+        name = path.stem
+        content = path.read_text()
+        frontmatter, body = _split_frontmatter(content)
+        if not frontmatter:
+            continue
+        parsed = _parse_simple_frontmatter(frontmatter)
+        description = parsed.get("description", "")
+        argument_hint = parsed.get("argument-hint")
+        db.execute(
+            "INSERT OR REPLACE INTO skills VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                name,
+                description,
+                argument_hint,
+                body,
+                _iso_mtime(path),
+                _iso_mtime(path),
+            ),
+        )
+        count += 1
+    return count
+
+
 def _load_standards(db: sqlite3.Connection, standards_file: Path) -> int:
     """Load the standards document into the singleton standards table."""
     if not standards_file.exists():
@@ -187,10 +230,36 @@ def _load_standards(db: sqlite3.Connection, standards_file: Path) -> int:
     return 1
 
 
-def compile_db(source: Path, output: Path) -> dict[str, int]:
-    """Compile .claude/ content into a SQLite database.
+def _load_settings(db: sqlite3.Connection, settings_dir: Path) -> int:
+    """Load .json settings files into the settings table."""
+    count = 0
+    for path in sorted(settings_dir.glob("*.json")):
+        name = path.stem
+        body = path.read_text()
+        db.execute(
+            "INSERT OR REPLACE INTO settings VALUES (?, ?, ?, ?)",
+            (name, body, _iso_mtime(path), _iso_mtime(path)),
+        )
+        count += 1
+    return count
 
-    Returns a dict with counts: {agents: N, rules: N, skills: N, standards: N}.
+
+def compile_db(
+    source: Path,
+    output: Path,
+    portable_source: Path | None = None,
+) -> dict[str, int]:
+    """Compile content into a SQLite database.
+
+    Args:
+        source: OCD-specific content directory (agents, rules, skills, standards, settings).
+        output: Path to the output database file.
+        portable_source: Optional portable content directory (skills/ and agents/ subdirs).
+            When provided, portable content is loaded first, then OCD content is loaded
+            with INSERT OR REPLACE so OCD items override any same-name portable items.
+
+    Returns:
+        Dict with counts for each content type.
     """
     output.parent.mkdir(parents=True, exist_ok=True)
     if output.exists():
@@ -198,10 +267,19 @@ def compile_db(source: Path, output: Path) -> dict[str, int]:
 
     db = sqlite3.connect(str(output))
     _create_schema(db)
-    n_agents = _load_agents(db, source / "agents")
+
+    n_agents = 0
+    n_skills = 0
+
+    if portable_source and portable_source.exists():
+        n_agents += _load_agents(db, portable_source / "agents")
+        n_skills += _load_portable_skills(db, portable_source / "skills")
+
+    n_agents += _load_agents(db, source / "agents")
     n_rules = _load_rules(db, source / "rules")
-    n_skills = _load_skills(db, source / "skills")
+    n_skills += _load_skills(db, source / "skills")
     n_standards = _load_standards(db, source / "skills" / "ocd" / "standards.md")
+    n_settings = _load_settings(db, source / "settings")
     db.commit()
     db.close()
 
@@ -210,32 +288,40 @@ def compile_db(source: Path, output: Path) -> dict[str, int]:
         "rules": n_rules,
         "skills": n_skills,
         "standards": n_standards,
+        "settings": n_settings,
     }
 
 
 # ── Public API ────────────────────────────────────────────────────────────
 
 
-def run_compile_db(output: str | None = None, source: str | None = None) -> int:
-    """Compile .claude/ content into content.db.
+def run_compile_db(
+    output: str | None = None,
+    source: str | None = None,
+    portable_source: str | None = None,
+) -> int:
+    """Compile content into content.db.
 
     Args:
         output: Output database path, or None for default (src/ocd/data/content.db).
-        source: Source .claude/ directory, or None for auto-detect.
+        source: OCD content directory, or None for default (src/ocd/content/).
+        portable_source: Portable content directory (docs/reference/), or None for default.
 
     Returns:
         0 on success.
     """
-    src = Path(source) if source else PROJECT_ROOT / _CLAUDE_DIR_NAME
+    src = Path(source) if source else CONTENT_DIR
     out = Path(output) if output else PROJECT_ROOT / "src" / "ocd" / "data" / "content.db"
+    psrc = Path(portable_source) if portable_source else None
 
-    counts = compile_db(src, out)
+    counts = compile_db(src, out, portable_source=psrc)
     size = out.stat().st_size
     total = sum(counts.values())
     print(f"Compiled {total} entries ({size:,} bytes) to {out}")
     print(
         f"  agents: {counts['agents']}, rules: {counts['rules']}, "
-        f"skills: {counts['skills']}, standards: {counts['standards']}"
+        f"skills: {counts['skills']}, standards: {counts['standards']}, "
+        f"settings: {counts['settings']}"
     )
     return 0
 
@@ -245,7 +331,7 @@ def run_compile_db(output: str | None = None, source: str | None = None) -> int:
 
 def main() -> None:
     """Entry point for ocd compile-db command."""
-    parser = argparse.ArgumentParser(description="Compile .claude/ content into content.db")
+    parser = argparse.ArgumentParser(description="Compile content into content.db")
     parser.add_argument(
         "--output",
         "-o",
@@ -255,11 +341,18 @@ def main() -> None:
     parser.add_argument(
         "--source",
         default=None,
-        help="Source .claude/ directory (default: auto-detect from project root)",
+        help="OCD content directory (default: src/ocd/content/)",
+    )
+    parser.add_argument(
+        "--portable-source",
+        default=None,
+        help="Portable content directory (default: docs/reference/)",
     )
     args = parser.parse_args()
 
-    sys.exit(run_compile_db(output=args.output, source=args.source))
+    sys.exit(
+        run_compile_db(output=args.output, source=args.source, portable_source=args.portable_source)
+    )
 
 
 if __name__ == "__main__":
