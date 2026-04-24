@@ -331,6 +331,45 @@ def autofix_loop(
     return loop_result
 
 
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_autofix(
+    target: str, batch: bool = False, max_iterations: int = 5, dry_run: bool = False
+) -> int:
+    """Run a self-corrective fix loop in an isolated worktree.
+
+    Args:
+        target: File or directory path to fix.
+        batch: If True, use lint-and-fix strategy instead of fix-cycle.
+        max_iterations: Max loop iterations (default: 5).
+        dry_run: If True, report findings only, no merge.
+
+    Returns:
+        Exit code from the fix loop (0 on success, non-zero on failure).
+    """
+    # Recursion guard
+    if os.environ.get(_GUARD_ENV):
+        return 0
+
+    strategy = "lint-and-fix" if batch else "fix-cycle"
+    intent = _slugify(target) or "autofix"
+
+    os.environ[_GUARD_ENV] = "1"
+    try:
+        result = autofix_loop(
+            target,
+            intent,
+            max_iterations=max_iterations,
+            strategy=strategy,
+            dry_run=dry_run,
+        )
+        print(result.to_json())
+        return result.result.exit_code
+    finally:
+        os.environ.pop(_GUARD_ENV, None)
+
+
 # ── CLI entry point ──────────────────────────────────────────────────────────
 
 
@@ -364,22 +403,14 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    strategy = "lint-and-fix" if args.batch else "fix-cycle"
-    intent = _slugify(args.target) or "autofix"
-
-    os.environ[_GUARD_ENV] = "1"
-    try:
-        result = autofix_loop(
-            args.target,
-            intent,
+    sys.exit(
+        run_autofix(
+            target=args.target,
+            batch=args.batch,
             max_iterations=args.max_iterations,
-            strategy=strategy,
             dry_run=args.dry_run,
         )
-        print(result.to_json())
-        sys.exit(result.result.exit_code)
-    finally:
-        os.environ.pop(_GUARD_ENV, None)
+    )
 
 
 if __name__ == "__main__":

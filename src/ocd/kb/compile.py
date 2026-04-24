@@ -223,42 +223,49 @@ The Paths section is authoritative — do not hardcode or assume any other locat
     return cost
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Compile daily logs into knowledge articles")
-    parser.add_argument("--all", action="store_true", help="Force recompile all logs")
-    parser.add_argument("--file", type=str, help="Compile a specific daily log file")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be compiled")
-    parser.add_argument(
-        "--manifest", action="store_true", help="Rebuild agent manifest after compilation"
-    )
-    parser.add_argument(
-        "--update-standards-hash",
-        action="store_true",
-        help="Recompute and update the standards.md hash",
-    )
-    args = parser.parse_args()
+# ── Public API ────────────────────────────────────────────────────────────
 
+
+def run_compile(
+    all_logs: bool = False,
+    file: str | None = None,
+    dry_run: bool = False,
+    manifest: bool = False,
+    update_standards_hash: bool = False,
+) -> int:
+    """Compile daily conversation logs into structured knowledge articles.
+
+    Args:
+        all_logs: Force recompile all logs.
+        file: Compile a specific daily log file.
+        dry_run: Show what would be compiled without compiling.
+        manifest: Rebuild agent manifest after compilation.
+        update_standards_hash: Recompute and update the standards.md hash.
+
+    Returns:
+        0 on success, 1 on error.
+    """
     state = load_state()
 
     # Determine which files to compile
-    if args.file:
-        target = Path(args.file)
+    if file:
+        target = Path(file)
         if not target.is_absolute():
             target = DAILY_DIR / target.name
         if not target.exists():
             # Try resolving relative to user data directory
-            target = USER_DIR / args.file
+            target = USER_DIR / file
         if not target.exists():
-            print(f"Error: {args.file} not found")
-            sys.exit(1)
+            print(f"Error: {file} not found")
+            return 1
         to_compile = [target]
     else:
-        all_logs = list_raw_files()
-        if args.all:
-            to_compile = all_logs
+        all_log_files = list_raw_files()
+        if all_logs:
+            to_compile = all_log_files
         else:
             to_compile = []
-            for log_path in all_logs:
+            for log_path in all_log_files:
                 rel = log_path.name
                 prev = state.get("ingested", {}).get(rel, {})
                 if not prev or prev.get("hash") != file_hash(log_path):
@@ -266,14 +273,14 @@ def main() -> None:
 
     if not to_compile:
         print("Nothing to compile - all daily logs are up to date.")
-        return
+        return 0
 
-    print(f"{'[DRY RUN] ' if args.dry_run else ''}Files to compile ({len(to_compile)}):")
+    print(f"{'[DRY RUN] ' if dry_run else ''}Files to compile ({len(to_compile)}):")
     for f in to_compile:
         print(f"  - {f.name}")
 
-    if args.dry_run:
-        return
+    if dry_run:
+        return 0
 
     # Compile each file sequentially
     total_cost = 0.0
@@ -306,24 +313,55 @@ def main() -> None:
     print(f"Index saved: {len(index['articles'])} articles indexed")
 
     # Rebuild agent manifest if requested
-    if args.manifest:
+    if manifest:
         from ocd.routing.router import build_manifest, save_manifest
 
         print("Rebuilding agent manifest...")
-        manifest = build_manifest()
-        save_manifest(manifest)
-        print(f"Manifest saved: {len(manifest['agents'])} agents")
+        manifest_data = build_manifest()
+        save_manifest(manifest_data)
+        print(f"Manifest saved: {len(manifest_data['agents'])} agents")
 
     # Update standards hash if requested
-    if args.update_standards_hash:
-        from ocd.routing.standards import update_standards_hash
+    if update_standards_hash:
+        from ocd.routing.standards import update_standards_hash as update_hash
 
         print("Updating standards hash...")
-        new_hash = update_standards_hash()
+        new_hash = update_hash()
         if new_hash:
             print(f"Standards hash updated: {new_hash}")
         else:
             print("Warning: standards.md not found", file=sys.stderr)
+
+    return 0
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Compile daily logs into knowledge articles")
+    parser.add_argument("--all", action="store_true", help="Force recompile all logs")
+    parser.add_argument("--file", type=str, help="Compile a specific daily log file")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be compiled")
+    parser.add_argument(
+        "--manifest", action="store_true", help="Rebuild agent manifest after compilation"
+    )
+    parser.add_argument(
+        "--update-standards-hash",
+        action="store_true",
+        help="Recompute and update the standards.md hash",
+    )
+    args = parser.parse_args()
+
+    sys.exit(
+        run_compile(
+            all_logs=args.all,
+            file=args.file,
+            dry_run=args.dry_run,
+            manifest=args.manifest,
+            update_standards_hash=args.update_standards_hash,
+        )
+    )
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import sqlite3
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -212,6 +213,36 @@ def compile_db(source: Path, output: Path) -> dict[str, int]:
     }
 
 
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_compile_db(output: str | None = None, source: str | None = None) -> int:
+    """Compile .claude/ content into content.db.
+
+    Args:
+        output: Output database path, or None for default (src/ocd/data/content.db).
+        source: Source .claude/ directory, or None for auto-detect.
+
+    Returns:
+        0 on success.
+    """
+    src = Path(source) if source else PROJECT_ROOT / _CLAUDE_DIR_NAME
+    out = Path(output) if output else PROJECT_ROOT / "src" / "ocd" / "data" / "content.db"
+
+    counts = compile_db(src, out)
+    size = out.stat().st_size
+    total = sum(counts.values())
+    print(f"Compiled {total} entries ({size:,} bytes) to {out}")
+    print(
+        f"  agents: {counts['agents']}, rules: {counts['rules']}, "
+        f"skills: {counts['skills']}, standards: {counts['standards']}"
+    )
+    return 0
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
 def main() -> None:
     """Entry point for ocd compile-db command."""
     parser = argparse.ArgumentParser(description="Compile .claude/ content into content.db")
@@ -228,17 +259,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    source = Path(args.source) if args.source else PROJECT_ROOT / _CLAUDE_DIR_NAME
-    output = Path(args.output)
-
-    counts = compile_db(source, output)
-    size = output.stat().st_size
-    total = sum(counts.values())
-    print(f"Compiled {total} entries ({size:,} bytes) to {output}")
-    print(
-        f"  agents: {counts['agents']}, rules: {counts['rules']}, "
-        f"skills: {counts['skills']}, standards: {counts['standards']}"
-    )
+    sys.exit(run_compile_db(output=args.output, source=args.source))
 
 
 if __name__ == "__main__":

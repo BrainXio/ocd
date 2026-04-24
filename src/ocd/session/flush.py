@@ -88,7 +88,7 @@ def append_to_daily_log(content: str, section: str = "Session") -> None:
         f.write(entry)
 
 
-async def run_flush(context: str) -> str:
+async def _flush_with_llm(context: str) -> str:
     """Use Claude Agent SDK to extract important knowledge from conversation context."""
     from claude_agent_sdk import (
         AssistantMessage,
@@ -197,48 +197,55 @@ def maybe_trigger_compilation() -> None:
         logging.error("Failed to spawn compile: %s", e)
 
 
-def main() -> None:
-    if len(sys.argv) < 3:
-        logging.error("Usage: %s <context_file.md> <session_id>", sys.argv[0])
-        sys.exit(1)
+# ── Public API ────────────────────────────────────────────────────────────
 
-    context_file = Path(sys.argv[1])
-    session_id = sys.argv[2]
+
+def run_flush_standalone(context_file: str, session_id: str) -> int:
+    """Run the memory flush pipeline: validate, dedup, extract, append, clean up.
+
+    Args:
+        context_file: Path to the context .md file.
+        session_id: Session identifier for deduplication.
+
+    Returns:
+        0 on success, 1 on error.
+    """
+    ctx_path = Path(context_file)
 
     # Validate session_id (no path traversal)
     if "/" in session_id or "\\" in session_id or ".." in session_id:
         logging.error("Invalid session_id: %s", session_id)
-        sys.exit(1)
+        return 1
 
     # Validate context_file stays within STATE_DIR
-    if not context_file.resolve().is_relative_to(STATE_DIR.resolve()):
-        logging.error("Context file escapes STATE_DIR: %s", context_file)
-        sys.exit(1)
+    if not ctx_path.resolve().is_relative_to(STATE_DIR.resolve()):
+        logging.error("Context file escapes STATE_DIR: %s", ctx_path)
+        return 1
 
-    logging.info("flush started for session %s, context: %s", session_id, context_file)
+    logging.info("flush started for session %s, context: %s", session_id, ctx_path)
 
-    if not context_file.exists():
-        logging.error("Context file not found: %s", context_file)
-        return
+    if not ctx_path.exists():
+        logging.error("Context file not found: %s", ctx_path)
+        return 1
 
     # Deduplication: skip if same session was flushed within 60 seconds
     state = load_flush_state()
     if state.get("session_id") == session_id and time.time() - state.get("timestamp", 0) < 60:
         logging.info("Skipping duplicate flush for session %s", session_id)
-        context_file.unlink(missing_ok=True)
-        return
+        ctx_path.unlink(missing_ok=True)
+        return 0
 
     # Read pre-extracted context
-    context = context_file.read_text(encoding="utf-8").strip()
+    context = ctx_path.read_text(encoding="utf-8").strip()
     if not context:
         logging.info("Context file is empty, skipping")
-        context_file.unlink(missing_ok=True)
-        return
+        ctx_path.unlink(missing_ok=True)
+        return 0
 
     logging.info("Flushing session %s: %d chars", session_id, len(context))
 
     # Run the LLM extraction
-    response = asyncio.run(run_flush(context))
+    response = asyncio.run(_flush_with_llm(context))
 
     # Append to daily log
     if "FLUSH_OK" in response:
@@ -255,13 +262,28 @@ def main() -> None:
     save_flush_state({"session_id": session_id, "timestamp": time.time()})
 
     # Clean up context file
-    context_file.unlink(missing_ok=True)
+    ctx_path.unlink(missing_ok=True)
 
     # End-of-day auto-compilation: if it's past the compile hour and today's
     # log hasn't been compiled yet, trigger compile in the background.
     maybe_trigger_compilation()
 
     logging.info("Flush complete for session %s", session_id)
+    return 0
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
+def main() -> None:
+    if len(sys.argv) < 3:
+        logging.error("Usage: %s <context_file.md> <session_id>", sys.argv[0])
+        sys.exit(1)
+
+    context_file = sys.argv[1]
+    session_id = sys.argv[2]
+
+    sys.exit(run_flush_standalone(context_file=context_file, session_id=session_id))
 
 
 if __name__ == "__main__":

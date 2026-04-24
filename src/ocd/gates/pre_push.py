@@ -78,8 +78,15 @@ def _run_tests(test_files: list[str]) -> int:
     return result.returncode
 
 
-def main() -> None:
-    """Entry point: run diff-aware tests before push."""
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_pre_push() -> int:
+    """Run diff-aware tests before push.
+
+    Returns:
+        0 if tests pass, non-zero on failure.
+    """
     # Verify origin/main exists
     remote_check = subprocess.run(
         ["git", "rev-parse", "--verify", "origin/main"],
@@ -88,17 +95,17 @@ def main() -> None:
     )
     if remote_check.returncode != 0:
         print("pre-push: no origin/main, running full suite", file=sys.stderr)
-        sys.exit(_run_tests([]))
+        return _run_tests([])
 
     changed = get_changed_files("origin/main")
     if not changed:
         print("pre-push: could not determine changed files, running full suite", file=sys.stderr)
-        sys.exit(_run_tests([]))
+        return _run_tests([])
 
     test_files = map_files_to_tests(changed)
     if not test_files:
         print("pre-push: infrastructure change detected, running full suite", file=sys.stderr)
-        sys.exit(_run_tests([]))
+        return _run_tests([])
 
     print(
         f"pre-push: running {len(test_files)} test file(s) for {len(changed)} changed file(s)",
@@ -109,7 +116,15 @@ def main() -> None:
         print("error: tests failed — push aborted", file=sys.stderr)
     else:
         print("pre-push: tests passed", file=sys.stderr)
-    sys.exit(rc)
+    return rc
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
+def main() -> None:
+    """Entry point: run diff-aware tests before push."""
+    sys.exit(run_pre_push())
 
 
 if __name__ == "__main__":

@@ -178,6 +178,44 @@ def route_query(query: str, manifest: dict[str, Any], max_agents: int = 3) -> li
     return scored[:max_agents]
 
 
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_route(query: str, rebuild_manifest: bool = False, max_agents: int = 3) -> int:
+    """Route a user request to the optimal agent(s).
+
+    Args:
+        query: The user request to route.
+        rebuild_manifest: If True, rebuild the agent manifest and exit.
+        max_agents: Maximum number of agents to return.
+
+    Returns:
+        0 on success.
+    """
+    if rebuild_manifest:
+        print("Building agent manifest...")
+        manifest = build_manifest()
+        path = save_manifest(manifest)
+        print(f"Manifest saved to {path} ({len(manifest['agents'])} agents)")
+        return 0
+
+    loaded = load_manifest()
+    if loaded is None:
+        print("Building agent manifest (first time)...", file=sys.stderr)
+        loaded = build_manifest()
+        save_manifest(loaded)
+
+    results = route_query(query, loaded, max_agents)
+
+    if not results:
+        print("No matching agents found.")
+        return 0
+
+    for entry in results:
+        print(f"  {entry['name']} (score: {entry['score']})")
+    return 0
+
+
 # ── CLI ──────────────────────────────────────────────────────────────────
 
 
@@ -198,30 +236,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.build_manifest:
-        print("Building agent manifest...")
-        manifest = build_manifest()
-        path = save_manifest(manifest)
-        print(f"Manifest saved to {path} ({len(manifest['agents'])} agents)")
-        return
-
-    if not args.query:
+    if not args.build_manifest and not args.query:
         parser.error("query is required unless --build-manifest is used")
 
-    loaded = load_manifest()
-    if loaded is None:
-        print("Building agent manifest (first time)...", file=sys.stderr)
-        loaded = build_manifest()
-        save_manifest(loaded)
-
-    results = route_query(args.query, loaded, args.max)
-
-    if not results:
-        print("No matching agents found.")
-        return
-
-    for entry in results:
-        print(f"  {entry['name']} (score: {entry['score']})")
+    sys.exit(
+        run_route(
+            query=args.query or "",
+            rebuild_manifest=args.build_manifest,
+            max_agents=args.max,
+        )
+    )
 
 
 if __name__ == "__main__":

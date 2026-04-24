@@ -268,15 +268,18 @@ def generate_report(all_issues: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Lint the knowledge base")
-    parser.add_argument(
-        "--structural-only",
-        action="store_true",
-        help="Skip LLM-based checks (contradictions) - faster and free",
-    )
-    args = parser.parse_args()
+# ── Public API ────────────────────────────────────────────────────────────
 
+
+def run_lint_kb(structural_only: bool = False) -> int:
+    """Lint the knowledge base for structural and semantic health.
+
+    Args:
+        structural_only: If True, skip LLM-based checks (contradictions).
+
+    Returns:
+        0 if no errors, 1 if errors found.
+    """
     print("Running knowledge base lint checks...")
     all_issues: list[dict[str, Any]] = []
 
@@ -297,7 +300,7 @@ def main() -> int:
         print(f"    Found {len(issues)} issue(s)")
 
     # LLM check (costs money)
-    if not args.structural_only:
+    if not structural_only:
         print("  Checking: Contradictions (LLM)...")
         issues = asyncio.run(check_contradictions())
         all_issues.extend(issues)
@@ -327,6 +330,21 @@ def main() -> int:
         print("\nErrors found - knowledge base needs attention!")
         return 1
     return 0
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Lint the knowledge base")
+    parser.add_argument(
+        "--structural-only",
+        action="store_true",
+        help="Skip LLM-based checks (contradictions) - faster and free",
+    )
+    args = parser.parse_args()
+
+    return run_lint_kb(structural_only=args.structural_only)
 
 
 if __name__ == "__main__":

@@ -69,7 +69,7 @@ class TestAppendToDailyLog:
 class TestRunFlush:
     @pytest.mark.asyncio
     async def test_returns_text_from_sdk(self, monkeypatch):
-        """run_flush should return the text from the LLM response."""
+        """_flush_with_llm should return the text from the LLM response."""
 
         async def mock_query(*, prompt, options):
             from claude_agent_sdk import AssistantMessage, ResultMessage, TextBlock
@@ -86,19 +86,19 @@ class TestRunFlush:
             )
 
         monkeypatch.setattr("claude_agent_sdk.query", mock_query)
-        result = await flush.run_flush("some context")
+        result = await flush._flush_with_llm("some context")
         assert "FLUSH_OK" in result
 
     @pytest.mark.asyncio
     async def test_handles_sdk_error(self, monkeypatch):
-        """run_flush should return FLUSH_ERROR on SDK exception."""
+        """_flush_with_llm should return FLUSH_ERROR on SDK exception."""
 
         async def mock_query(*, prompt, options):
             raise RuntimeError("SDK connection failed")
             yield  # makes this an async generator
 
         monkeypatch.setattr("claude_agent_sdk.query", mock_query)
-        result = await flush.run_flush("some context")
+        result = await flush._flush_with_llm("some context")
         assert "FLUSH_ERROR" in result
 
 

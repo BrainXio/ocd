@@ -310,6 +310,62 @@ def vec_status(db_path: Path) -> dict[str, Any]:
     return status
 
 
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_vec_rebuild(force: bool = False) -> int:
+    """Rebuild all vector embeddings.
+
+    Args:
+        force: Force rebuild even if embedding model changed.
+
+    Returns:
+        Number of vectors rebuilt.
+
+    Raises:
+        RuntimeError: If vector support is not available.
+        ValueError: If embedding model changed and force is False.
+    """
+    if not is_vec_available():
+        raise RuntimeError("Vector support not available. Install vec extras: uv sync --extra vec")
+    return rebuild_vectors(WIKI_DB, force=force)
+
+
+def run_vec_search(query: str, top_k: int = 5) -> list[tuple[str, float]]:
+    """Search the knowledge base using vector embeddings.
+
+    Args:
+        query: Search query text.
+        top_k: Number of results to return (default: 5).
+
+    Returns:
+        List of (article_path, cosine_distance) tuples sorted by similarity.
+
+    Raises:
+        RuntimeError: If vector support is not available.
+        FileNotFoundError: If no vector index exists.
+    """
+    if not is_vec_available():
+        raise RuntimeError("Vector support not available. Install vec extras: uv sync --extra vec")
+    db = sqlite3.connect(str(WIKI_DB))
+    try:
+        results = search_vectors(db, query, top_k=top_k)
+    except sqlite3.OperationalError:
+        db.close()
+        raise FileNotFoundError("No vector index found. Run 'ocd vec rebuild' first.") from None
+    db.close()
+    return results or []
+
+
+def run_vec_status() -> dict[str, Any]:
+    """Return vector index status information.
+
+    Returns:
+        Dict with keys: available, db_exists, embedding_count, model.
+    """
+    return vec_status(WIKI_DB)
+
+
 # ── CLI entry point ──────────────────────────────────────────────────────────
 
 
@@ -344,29 +400,30 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    if not args.vec_command:
+        parser.print_help()
+        sys.exit(1)
+
     if args.vec_command == "rebuild":
-        if not is_vec_available():
-            print("Vector support not available. Install vec extras: uv sync --extra vec")
-            sys.exit(1)
         try:
-            count = rebuild_vectors(WIKI_DB, force=args.force)
+            count = run_vec_rebuild(force=args.force)
             print(f"Rebuilt {count} vector embeddings")
+        except RuntimeError as e:
+            print(str(e), file=sys.stderr)
+            sys.exit(1)
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
 
     elif args.vec_command == "search":
-        if not is_vec_available():
-            print("Vector support not available. Install vec extras: uv sync --extra vec")
-            sys.exit(1)
-        db = sqlite3.connect(str(WIKI_DB))
         try:
-            results = search_vectors(db, args.query, top_k=args.top_k)
-        except sqlite3.OperationalError:
-            print("No vector index found. Run 'ocd vec rebuild' first.")
-            db.close()
+            results = run_vec_search(args.query, top_k=args.top_k)
+        except RuntimeError as e:
+            print(str(e), file=sys.stderr)
             sys.exit(1)
-        db.close()
+        except FileNotFoundError as e:
+            print(str(e), file=sys.stderr)
+            sys.exit(1)
         if results:
             for path, dist in results:
                 print(f"  {path} (distance={dist:.4f})")
@@ -374,7 +431,7 @@ def main() -> None:
             print("No results found.")
 
     elif args.vec_command == "status":
-        info = vec_status(WIKI_DB)
+        info = run_vec_status()
         print(f"Vector support: {'available' if info['available'] else 'not installed'}")
         if info.get("db_exists"):
             print(f"  Embeddings: {info.get('embedding_count', 0)}")
@@ -382,10 +439,6 @@ def main() -> None:
                 print(f"  Model: {info['model']}")
         elif info.get("available"):
             print("  No vector index found. Run 'ocd vec rebuild' to create one.")
-
-    else:
-        parser.print_help()
-        sys.exit(1)
 
 
 if __name__ == "__main__":

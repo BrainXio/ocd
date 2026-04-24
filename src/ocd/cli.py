@@ -165,29 +165,62 @@ def _cmd_kb(args: argparse.Namespace) -> None:
 
 def _cmd_route(args: argparse.Namespace) -> None:
     """Route a task to the best-matching agent."""
-    from ocd.routing.router import main as router_main
+    from ocd.routing.router import build_manifest, load_manifest, route_query, save_manifest
 
-    argv = ["ocd-route"]
     if args.build_manifest:
-        argv.append("--build-manifest")
-    if args.max != 3:
-        argv.extend(["--max", str(args.max)])
-    argv.extend(args.query)
-    sys.argv = argv
-    router_main()
+        print("Building agent manifest...")
+        manifest = build_manifest()
+        path = save_manifest(manifest)
+        print(f"Manifest saved to {path} ({len(manifest['agents'])} agents)")
+        return
+
+    loaded = load_manifest()
+    if loaded is None:
+        print("Building agent manifest (first time)...", file=sys.stderr)
+        loaded = build_manifest()
+        save_manifest(loaded)
+
+    query_text = " ".join(args.query) if args.query else ""
+    if not query_text:
+        print("error: route requires a query", file=sys.stderr)
+        sys.exit(2)
+
+    results = route_query(query_text, loaded, args.max)
+    if not results:
+        print("No matching agents found.")
+        return
+
+    for entry in results:
+        print(f"  {entry['name']} (score: {entry['score']})")
 
 
 def _cmd_standards(args: argparse.Namespace) -> None:
     """Manage standards hash reference."""
-    from ocd.routing.standards import main as standards_main
+    from ocd.routing.standards import update_standards_hash, verify_standards_hash
 
-    argv = ["ocd-standards"]
     if args.verify:
-        argv.append("--verify")
-    if args.update:
-        argv.append("--update")
-    sys.argv = argv
-    standards_main()
+        result = verify_standards_hash()
+        if result.get("error"):
+            print(f"error: {result['error']}", file=sys.stderr)
+            sys.exit(1)
+        if result["match"]:
+            print(f"ok: standards v{result['version']} [{result['computed_hash']}]")
+        else:
+            print(
+                f"mismatch: stored={result['stored_hash']}, computed={result['computed_hash']}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+    elif args.update:
+        new_hash = update_standards_hash()
+        if new_hash:
+            print(f"updated: {new_hash}")
+        else:
+            print("error: could not update standards hash", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("error: specify --verify or --update", file=sys.stderr)
+        sys.exit(2)
 
 
 def _cmd_fix(args: argparse.Namespace) -> None:
@@ -223,79 +256,78 @@ def _cmd_check(_args: argparse.Namespace) -> None:
 
 def _cmd_ci_check(args: argparse.Namespace) -> None:
     """Full local CI mirror."""
-    from ocd.gates.ci_check import main as ci_check_main
+    from ocd.gates.ci_check import run_ci_check
 
-    argv = ["ocd-ci-check"]
-    if args.fast:
-        argv.append("--fast")
-    if args.commit_range:
-        argv.extend(["--commit-range", args.commit_range])
-    sys.argv = argv
-    ci_check_main()
+    sys.exit(run_ci_check(fast=args.fast, commit_range=args.commit_range))
 
 
 def _cmd_verify_commit(args: argparse.Namespace) -> None:
     """Verify commit messages."""
-    from ocd.gates.verify_commit import main as verify_commit_main
+    from ocd.gates.verify_commit import check_commit_range, check_message
 
-    argv = ["ocd-verify-commit"]
-    if args.msg_file:
-        argv.append(args.msg_file)
-    if args.range_spec:
-        argv.extend(["--range", args.range_spec])
     if args.message:
-        argv.extend(["--message", args.message])
-    sys.argv = argv
-    verify_commit_main()
+        msg_violations = check_message(args.message)
+        if msg_violations:
+            for pattern, line in msg_violations:
+                print(f"error: AI attribution pattern '{pattern}' found: {line}", file=sys.stderr)
+            sys.exit(1)
+        print("ok: commit message is clean")
+    elif args.range_spec:
+        range_violations = check_commit_range(args.range_spec)
+        if range_violations:
+            for commit_hash, _pattern, line in range_violations:
+                print(
+                    f"error: commit {commit_hash[:8]} contains prohibited AI attribution: {line}",
+                    file=sys.stderr,
+                )
+            sys.exit(1)
+        print("ok: no AI attribution patterns found in commit range")
+    elif args.msg_file:
+        from pathlib import Path
+
+        msg = Path(args.msg_file).read_text(encoding="utf-8")
+        violations = check_message(msg)
+        if violations:
+            for _pattern, line in violations:
+                print(f"error: commit message contains AI attribution: {line}", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("Remove the attribution line and retry.", file=sys.stderr)
+            print("Patterns: .githooks/ai-patterns.txt", file=sys.stderr)
+            sys.exit(1)
+        print("ok: commit message is clean")
+    else:
+        print("error: specify --message, --range, or a msg_file", file=sys.stderr)
+        sys.exit(2)
 
 
 def _cmd_scan_secrets(args: argparse.Namespace) -> None:
     """Scan for secrets in source code."""
-    from ocd.gates.scan_secrets import main as scan_secrets_main
+    from ocd.gates.scan_secrets import scan_secrets
 
-    argv = ["ocd-scan-secrets"]
-    if args.staged:
-        argv.append("--staged")
-    if args.source:
-        argv.extend(["--source", args.source])
-    sys.argv = argv
-    scan_secrets_main()
+    result = scan_secrets(staged=args.staged, source=args.source)
+    sys.exit(result)
 
 
 def _cmd_materialize(args: argparse.Namespace) -> None:
     """Materialize .claude/ content from database to target directory."""
-    from ocd.packaging.materialize import main as materialize_main
+    from ocd.packaging.materialize import run_materialize
 
-    argv = ["ocd-materialize"]
-    if args.target:
-        argv.extend(["--target", args.target])
-    if args.db:
-        argv.extend(["--db", args.db])
-    if args.force:
-        argv.append("--force")
-    if args.vendor:
-        argv.extend(["--vendor", args.vendor])
-    sys.argv = argv
-    materialize_main()
+    sys.exit(run_materialize(target=args.target, db=args.db, force=args.force, vendor=args.vendor))
 
 
 def _cmd_compile(args: argparse.Namespace) -> None:
     """Compile daily logs into knowledge articles."""
-    from ocd.kb.compile import main as compile_main
+    from ocd.kb.compile import run_compile
 
-    argv = ["ocd-compile"]
-    if args.all:
-        argv.append("--all")
-    if args.file:
-        argv.extend(["--file", args.file])
-    if args.dry_run:
-        argv.append("--dry-run")
-    if args.manifest:
-        argv.append("--manifest")
-    if args.update_standards_hash:
-        argv.append("--update-standards-hash")
-    sys.argv = argv
-    compile_main()
+    sys.exit(
+        run_compile(
+            all_logs=args.all,
+            file=args.file,
+            dry_run=args.dry_run,
+            manifest=args.manifest,
+            update_standards_hash=args.update_standards_hash,
+        )
+    )
 
 
 def _cmd_ingest(args: argparse.Namespace) -> None:
@@ -337,95 +369,76 @@ def _cmd_knowledge(args: argparse.Namespace) -> None:
 
 def _cmd_vec(args: argparse.Namespace) -> None:
     """Handle vec subcommands."""
-    from ocd.kb.vec import main as vec_main
+    from ocd.kb.vec import run_vec_rebuild, run_vec_search, run_vec_status
 
-    argv = ["ocd-vec"]
     if args.vec_command == "rebuild":
-        argv.append("rebuild")
-        if args.force:
-            argv.append("--force")
+        sys.exit(run_vec_rebuild(force=args.force))
     elif args.vec_command == "search":
-        argv.append("search")
-        argv.append(args.query)
-        if args.top_k:
-            argv.extend(["--top-k", str(args.top_k)])
+        results = run_vec_search(query=args.query, top_k=args.top_k)
+        if not results:
+            print("No results found.")
+            return
+        print(f"Top {len(results)} results:\n")
+        for path, score in results:
+            print(f"  {path} (score: {score:.4f})")
     elif args.vec_command == "status":
-        argv.append("status")
-    sys.argv = argv
-    vec_main()
+        status = run_vec_status()
+        for key, value in status.items():
+            print(f"{key}: {value}")
 
 
 def _cmd_flush(args: argparse.Namespace) -> None:
     """Flush conversation context to daily log."""
-    from ocd.session.flush import main as flush_main
+    from ocd.session.flush import run_flush_standalone
 
-    argv = ["ocd-flush"]
-    if args.context_file:
-        argv.append(args.context_file)
-    if args.session_id:
-        argv.append(args.session_id)
-    sys.argv = argv
-    flush_main()
+    if not args.context_file or not args.session_id:
+        print("error: flush requires context_file and session_id", file=sys.stderr)
+        sys.exit(2)
+    sys.exit(run_flush_standalone(args.context_file, args.session_id))
 
 
 def _cmd_query(args: argparse.Namespace) -> None:
     """Query the personal knowledge base."""
-    from ocd.kb.query import main as query_main
+    from ocd.kb.query import run_query
 
-    argv = ["ocd-query", args.question]
-    if args.file_back:
-        argv.append("--file-back")
-    sys.argv = argv
-    query_main()
+    result = run_query(question=args.question, file_back=args.file_back)
+    if result:
+        print(result)
 
 
 def _cmd_lint_kb(args: argparse.Namespace) -> None:
     """Lint the knowledge base for structural issues."""
-    from ocd.kb.lint import main as lint_main
+    from ocd.kb.lint import run_lint_kb
 
-    argv = ["ocd-lint-kb"]
-    if args.structural_only:
-        argv.append("--structural-only")
-    sys.argv = argv
-    sys.exit(lint_main())
+    sys.exit(run_lint_kb(structural_only=args.structural_only))
 
 
 def _cmd_compile_db(args: argparse.Namespace) -> None:
     """Compile .claude/ content into bundled SQLite database."""
-    from ocd.packaging.pack import main as pack_main
+    from ocd.packaging.pack import run_compile_db
 
-    argv = ["ocd-compile-db"]
-    if args.output:
-        argv.extend(["--output", args.output])
-    if args.source:
-        argv.extend(["--source", args.source])
-    sys.argv = argv
-    pack_main()
+    sys.exit(run_compile_db(output=args.output, source=args.source))
 
 
 def _cmd_pre_push(args: argparse.Namespace) -> None:
     """Diff-aware pre-push test runner."""
-    from ocd.gates.pre_push import main as pre_push_main
+    from ocd.gates.pre_push import run_pre_push
 
-    sys.argv = ["ocd-pre-push"]
-    pre_push_main()
+    sys.exit(run_pre_push())
 
 
 def _cmd_autofix(args: argparse.Namespace) -> None:
     """Self-corrective fix loop in isolated worktree."""
-    from ocd.fix.autofix import main as autofix_main
+    from ocd.fix.autofix import run_autofix
 
-    argv = ["ocd-autofix"]
-    if args.target:
-        argv.append(args.target)
-    if args.batch:
-        argv.append("--batch")
-    if args.max_iterations:
-        argv.extend(["--max-iterations", str(args.max_iterations)])
-    if args.dry_run:
-        argv.append("--dry-run")
-    sys.argv = argv
-    autofix_main()
+    sys.exit(
+        run_autofix(
+            target=args.target,
+            batch=args.batch,
+            max_iterations=args.max_iterations,
+            dry_run=args.dry_run,
+        )
+    )
 
 
 # ── Hook subcommand handlers ──────────────────────────────────────────────────
@@ -454,54 +467,68 @@ def _cmd_hook_pre_compact(_args: argparse.Namespace) -> None:
 
 def _cmd_hook_format_work(args: argparse.Namespace) -> None:
     """PostToolUse format hook — auto-format edited files."""
-    from ocd.hooks.format_work import main as format_work_main
+    from ocd.hooks.format_work import edit_mode
 
-    argv = ["ocd-format-work"]
-    if args.edit:
-        argv.append("--edit")
-    sys.argv = argv
-    format_work_main()
+    edit_mode()
 
 
 def _cmd_hook_lint_work(args: argparse.Namespace) -> None:
     """PostToolUse/PreToolUse lint hook."""
-    from ocd.hooks.lint_work import main as lint_work_main
+    from ocd.hooks.lint_work import commit_mode, edit_mode
 
-    argv = ["ocd-lint-work"]
     if args.edit:
-        argv.append("--edit")
+        edit_mode()
     elif args.commit:
-        argv.append("--commit")
-    sys.argv = argv
-    lint_work_main()
+        commit_mode()
+    else:
+        print("error: specify --edit or --commit", file=sys.stderr)
+        sys.exit(2)
 
 
 def _cmd_hook_verify_commit(args: argparse.Namespace) -> None:
     """Verify commit messages for AI attribution patterns."""
-    from ocd.gates.verify_commit import main as verify_commit_main
+    from ocd.gates.verify_commit import check_commit_range, check_message
 
-    argv = ["ocd-verify-commit"]
     if args.msg_file:
-        argv.append(args.msg_file)
-    if args.range_spec:
-        argv.extend(["--range", args.range_spec])
-    if args.message:
-        argv.extend(["--message", args.message])
-    sys.argv = argv
-    verify_commit_main()
+        from pathlib import Path
+
+        msg = Path(args.msg_file).read_text(encoding="utf-8")
+        violations = check_message(msg)
+        if violations:
+            for _pattern, line in violations:
+                print(f"error: commit message contains AI attribution: {line}", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("Remove the attribution line and retry.", file=sys.stderr)
+            print("Patterns: .githooks/ai-patterns.txt", file=sys.stderr)
+            sys.exit(1)
+        print("ok: commit message is clean")
+    elif args.range_spec:
+        range_violations = check_commit_range(args.range_spec)
+        if range_violations:
+            for commit_hash, _pattern, line in range_violations:
+                print(
+                    f"error: commit {commit_hash[:8]} contains prohibited AI attribution: {line}",
+                    file=sys.stderr,
+                )
+            sys.exit(1)
+        print("ok: no AI attribution patterns found in commit range")
+    elif args.message:
+        msg_violations = check_message(args.message)
+        if msg_violations:
+            for pattern, line in msg_violations:
+                print(f"error: AI attribution pattern '{pattern}' found: {line}", file=sys.stderr)
+            sys.exit(1)
+        print("ok: commit message is clean")
+    else:
+        print("error: specify msg_file, --range, or --message", file=sys.stderr)
+        sys.exit(2)
 
 
 def _cmd_hook_ci_check(args: argparse.Namespace) -> None:
     """Full local CI mirror."""
-    from ocd.gates.ci_check import main as ci_check_main
+    from ocd.gates.ci_check import run_ci_check
 
-    argv = ["ocd-ci-check"]
-    if args.fast:
-        argv.append("--fast")
-    if args.commit_range:
-        argv.extend(["--commit-range", args.commit_range])
-    sys.argv = argv
-    ci_check_main()
+    sys.exit(run_ci_check(fast=args.fast, commit_range=args.commit_range))
 
 
 # ── Argument parser ─────────────────────────────────────────────────────────

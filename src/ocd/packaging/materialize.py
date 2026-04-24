@@ -238,6 +238,56 @@ def materialize_vendor(db_path: Path, vendor: str, force: bool = False) -> dict[
     return counts
 
 
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_materialize(
+    target: str = ".claude",
+    db: str | None = None,
+    force: bool = False,
+    vendor: str | None = None,
+) -> int:
+    """Materialize agent config from content.db.
+
+    Args:
+        target: Target directory (default: .claude).
+        db: Database path, or None to use the bundled content.db.
+        force: Overwrite existing files.
+        vendor: Vendor format to materialize, or None for default claude format.
+
+    Returns:
+        0 on success, 1 on error.
+    """
+    from ocd.packaging.vendors import VENDORS
+
+    db_path = Path(db) if db else _find_bundled_db()
+
+    if vendor:
+        valid_vendors = set(VENDORS) | {"all", "agents-md"}
+        if vendor not in valid_vendors:
+            print(f"Unknown vendor: {vendor}", file=sys.stderr)
+            print(f"Available: {', '.join(sorted(VENDORS))}, all, agents-md", file=sys.stderr)
+            return 1
+        counts = materialize_vendor(db_path, vendor, force)
+        total = sum(counts.values())
+        print(f"Materialized {total} files for {vendor}")
+        for key, val in sorted(counts.items()):
+            print(f"  {key}: {val}")
+    else:
+        target_path = Path(target)
+        counts = materialize(db_path, target_path, force)
+        total = sum(counts.values())
+        print(f"Materialized {total} files to {target_path}")
+        print(
+            f"  agents: {counts['agents']}, rules: {counts['rules']}, "
+            f"skills: {counts['skills']}, standards: {counts['standards']}"
+        )
+    return 0
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
 def main() -> None:
     """Entry point for ocd materialize command."""
     from ocd.packaging.vendors import VENDORS
@@ -268,23 +318,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    db_path = Path(args.db) if args.db else _find_bundled_db()
-
-    if args.vendor:
-        counts = materialize_vendor(db_path, args.vendor, args.force)
-        total = sum(counts.values())
-        print(f"Materialized {total} files for {args.vendor}")
-        for key, val in sorted(counts.items()):
-            print(f"  {key}: {val}")
-    else:
-        target = Path(args.target)
-        counts = materialize(db_path, target, args.force)
-        total = sum(counts.values())
-        print(f"Materialized {total} files to {target}")
-        print(
-            f"  agents: {counts['agents']}, rules: {counts['rules']}, "
-            f"skills: {counts['skills']}, standards: {counts['standards']}"
+    sys.exit(
+        run_materialize(
+            target=args.target,
+            db=args.db,
+            force=args.force,
+            vendor=args.vendor,
         )
+    )
 
 
 if __name__ == "__main__":

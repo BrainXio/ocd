@@ -29,8 +29,8 @@ def _build_paths_section() -> str:
 All file writes and updates MUST use exactly these paths. Never assume any other layout."""
 
 
-async def run_query(question: str, file_back: bool = False) -> str:
-    """Query the knowledge base and optionally file the answer back."""
+async def _query_async(question: str, file_back: bool = False) -> str:
+    """Use the Agent SDK to query the knowledge base (async implementation)."""
     from claude_agent_sdk import (
         AssistantMessage,
         ClaudeAgentOptions,
@@ -120,6 +120,25 @@ consulting the knowledge base below.
     return answer
 
 
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_query(question: str, file_back: bool = False) -> str:
+    """Query the knowledge base and optionally file the answer back.
+
+    Args:
+        question: The question to ask.
+        file_back: If True, file the answer back into the knowledge base.
+
+    Returns:
+        The answer string.
+    """
+    return asyncio.run(_query_async(question, file_back=file_back))
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Query the personal knowledge base")
     parser.add_argument("question", help="The question to ask")
@@ -134,7 +153,7 @@ def main() -> None:
     print(f"File back: {'yes' if args.file_back else 'no'}")
     print("-" * 60)
 
-    answer = asyncio.run(run_query(args.question, file_back=args.file_back))
+    answer = run_query(args.question, file_back=args.file_back)
     print(answer)
 
     if args.file_back:
