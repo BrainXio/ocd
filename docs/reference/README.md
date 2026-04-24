@@ -226,7 +226,7 @@ Python linters are installed via `uv sync`. Prettier is installed via `npm ci` (
 `ocd format` runs all available formatters with auto-fix. Each formatter is only run if its tool is installed and its config file exists.
 
 | Formatter | Command | Scope |
-| -------------- | ------------------------------------------------------------------------- | ----------------- |
+| -------------- | ------------------------------------------------------------------------- | -------- |
 | `ruff-format` | `ruff format src/ tests/` | Python |
 | `ruff-fix` | `ruff check --fix src/ tests/` | Python |
 | `mdformat` | `mdformat README.md docs/ .claude/skills/ .claude/agents/ .claude/rules/` | Markdown |
@@ -414,7 +414,7 @@ container builds. Also triggered by `workflow_dispatch`.
 ### Container Images
 
 | Image | Base | Purpose |
-| ------------ | ---------------------- | ---------------------------------------------------------------------------- |
+| ------------ | ---------------------- | -------------------------------------------------------------------------- |
 | `ocd-base` | `debian:bookworm-slim` | Hardened foundation: `uv`, `git`, `shellcheck` |
 | `ocd-node` | `ocd-base` | Node.js 22+ toolchain: `pnpm`, `prettier` |
 | `ocd-ollama` | `ocd-base` | Ollama runtime for local LLM inference |

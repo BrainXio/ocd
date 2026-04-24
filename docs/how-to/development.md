@@ -67,7 +67,7 @@ fail when they are missing. CI always installs them.
 Running `npm ci` in the project root installs into `node_modules/`:
 
 | Tool | Purpose |
-| --------- | ------------------------ |
+| -------- | --------------- |
 | prettier | JSON formatting |
 
 ## Devcontainer Setup
