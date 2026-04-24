@@ -30,7 +30,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from ocd.config import WIKI_DB
+from ocd.config import KNOWLEDGE_DB
 from ocd.utils import extract_wikilinks
 
 # ── Schema ───────────────────────────────────────────────────────────────────
@@ -200,7 +200,7 @@ def ingest_raw(
     from ocd.config import KNOWLEDGE_DIR
 
     kdir = knowledge_dir or KNOWLEDGE_DIR
-    db_file = db_path or WIKI_DB
+    db_file = db_path or KNOWLEDGE_DB
     result = IngestResult()
 
     wiki_files = _scan_wiki_files(kdir)
@@ -367,7 +367,7 @@ def kb_status(*, knowledge_dir: Path | None = None, db_path: Path | None = None)
     from ocd.config import KNOWLEDGE_DIR
 
     kdir = knowledge_dir or KNOWLEDGE_DIR
-    db_file = db_path or WIKI_DB
+    db_file = db_path or KNOWLEDGE_DB
 
     wiki_files = _scan_wiki_files(kdir)
     disk_paths: dict[str, float] = {}

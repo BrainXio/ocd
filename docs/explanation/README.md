@@ -3,7 +3,7 @@ title: Explanation
 aliases: [explanation, concepts, architecture, rationale]
 tags: [explanation]
 created: 2026-04-17
-updated: 2026-04-23
+updated: 2026-04-24
 ---
 
 Why things are the way they are. This is not a guide for what to do — see [how-to](../how-to/README.md) for that. This is for understanding the design.
@@ -101,4 +101,23 @@ The main CI pipeline (`.github/workflows/ci.yml`) and the container pipeline (`.
 - **Permissions** — The container pipeline needs `packages: write` to push images to GHCR. The main pipeline only needs `contents: read`. Separating them follows least privilege.
 - **Independent failure** — A trivy image scan failure should not prevent the main pipeline from reporting lint or test results. Each pipeline's status is reported independently on PRs.
 
-The two pipelines share no state — the container pipeline rebuilds images from scratch rather than depending on artifacts from the main pipeline.
+The two pipelines share no state — the container pipeline rebuilds images from
+scratch rather than depending on artifacts from the main pipeline.
+
+## Why a Read-Only Export
+
+The `ocd export` command reads from `knowledge.db` and writes an
+Obsidian-compatible markdown vault. It is deliberately one-directional: the
+knowledge pipeline owns the database, and the export is a derived view.
+
+- **Default target** (`USER/knowledge/`) is gitignored — personal
+  exports never leak to version control
+- **`--commit` flag** targets `docs/knowledge/` for projects that want
+  curated knowledge in version control
+- **Wikilink format** strips same-type prefixes (`[[concepts/other]]` becomes
+  `[[other]]` within concepts) so Obsidian's graph view groups articles by
+  type naturally
+- **MOC index** with Dataview queries gives immediate interactive navigation
+  in Obsidian without any plugins beyond Dataview
+
+The export never writes back to the database. It is a snapshot, not a sync.

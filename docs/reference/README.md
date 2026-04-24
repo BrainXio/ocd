@@ -151,6 +151,8 @@ Hooks receive a JSON object on stdin:
 | `USER/state/autofix-loop.jsonl` | Per-line JSON records of autofix loop iterations (intent, branch, convergence) |
 | `USER/knowledge/ocd.db` | SQLite database: compiled knowledge articles + vector embeddings from raw ingestion |
 | `USER/knowledge/raw/` | Raw knowledge articles (concepts/, connections/, qa/, resources/) |
+| `USER/knowledge/` | Obsidian-compatible vault export (default, gitignored) |
+| `docs/knowledge/` | Commit-friendly knowledge export (via `--commit`) |
 | `.claude/skills/ocd/standards.md` | Nine Standards full text with version + hash frontmatter |
 
 ## Claude Code Rules
@@ -159,12 +161,13 @@ Rules in `.claude/rules/` provide advisory instructions to Claude Code sessions.
 Rules are distinct from hooks: hooks enforce deterministically, rules guide behavior.
 
 | Rule File | Scope | Purpose |
-| ------------------- | -------------------- | --------------------------------------------------------------------- |
+| ------------------- | ----------------------------- | --------------------------------------------------------------------- |
 | `commit-hygiene.md` | Unconditional | Conventional commits, branch naming, no AI attribution |
 | `pr-workflow.md` | Unconditional | PR labels, body template, merge requirements |
 | `doc-sync.md` | Unconditional | Update reference/planning docs when shipping features |
 | `markdown.md` | `**/*.md` | mdformat, frontmatter plugin, quote style, ordered list normalization |
 | `infrastructure.md` | Infrastructure paths | Deny rule modification procedure for protected files |
+| `export.md` | `src/ocd/kb/export.py`, tests | Behavioral guidance for knowledge export command |
 
 All rule files live in `.claude/rules/`. The root `CLAUDE.md` serves as the rules index.
 Path-scoped rules load only when matching files are read; unconditional rules load every session.
@@ -283,6 +286,7 @@ All user-facing commands are available through the `ocd` umbrella CLI. The
 | `ocd pre-push` | `ocd.pre_push` | Diff-aware pre-push test runner |
 | `ocd autofix` | `ocd.autofix` | Self-corrective fix loop in isolated worktree |
 | `ocd ingest` | `ocd.ingest` | Ingest raw knowledge articles into ocd.db |
+| `ocd export` | `ocd.kb.export` | Export knowledge base to Obsidian-compatible vault |
 | `ocd vec rebuild` | `ocd.vec` | Regenerate all vector embeddings (with `--force` for model changes) |
 | `ocd vec search <query>` | `ocd.vec` | Semantic vector search against ocd.db |
 | `ocd vec status` | `ocd.vec` | Show vector availability, embedding count, model name |
@@ -515,6 +519,8 @@ The sandbox restricts Claude's filesystem access at the process level:
 | Autofix audit log | `USER/state/autofix-loop.jsonl` | `ocd.config` |
 | Raw knowledge dir | `USER/knowledge/raw/` | `ocd.config` |
 | Knowledge database | `USER/knowledge/ocd.db` | `ocd.config` |
+| Knowledge export dir | `USER/knowledge/` | `ocd.config` |
+| Commit knowledge dir | `docs/knowledge/` | `ocd.config` |
 | Vector dimensions | 384 | `ocd.config` |
 | Vector embedding model | `BAAI/bge-small-en-v1.5` | `ocd.config` |
 | Vector weight: TF-IDF | 0.4 | `ocd.config` |
@@ -560,4 +566,9 @@ ocd compile-db                           # compile .claude/ → content.db
 ocd materialize                          # materialize content.db → .claude/
 ocd materialize -t /path/.cursor        # materialize to custom target
 ocd materialize -f                       # overwrite existing files
+ocd export                              # export to USER/knowledge/
+ocd export --commit                     # export to docs/knowledge/ (commit-friendly)
+ocd export --output /path               # export to custom path
+ocd export --force                      # overwrite existing files
+ocd export --dry-run                    # report what would be exported
 ```

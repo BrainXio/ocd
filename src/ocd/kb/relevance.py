@@ -24,12 +24,12 @@ from ocd.config import (
     INDEX_FILE,
     KB_INDEX_JSON,
     KB_INJECTION_COUNT,
+    KNOWLEDGE_DB,
     KNOWLEDGE_DIR,
     STATE_DIR,
     VEC_WEIGHT_QUALITY,
     VEC_WEIGHT_TFIDF,
     VEC_WEIGHT_VECTOR,
-    WIKI_DB,
 )
 from ocd.utils import file_hash, list_wiki_articles, load_state
 
@@ -263,10 +263,10 @@ def _build_index_from_db() -> list[dict[str, Any]] | None:
     """
     import sqlite3
 
-    if not WIKI_DB.exists():
+    if not KNOWLEDGE_DB.exists():
         return None
 
-    db = sqlite3.connect(str(WIKI_DB))
+    db = sqlite3.connect(str(KNOWLEDGE_DB))
     try:
         rows = db.execute(
             "SELECT path, title, tags, aliases, sources, body, hash, updated FROM articles"
@@ -669,9 +669,9 @@ def load_articles_for_injection(scored: list[dict[str, Any]], max_chars: int = 8
 
     # Build a lookup from DB for article bodies
     db_bodies: dict[str, str] = {}
-    if WIKI_DB.exists():
+    if KNOWLEDGE_DB.exists():
         try:
-            db = sqlite3.connect(str(WIKI_DB))
+            db = sqlite3.connect(str(KNOWLEDGE_DB))
             rows = db.execute("SELECT path, body FROM articles").fetchall()
             db_bodies = {r[0]: r[1] for r in rows if r[1]}
             db.close()
@@ -743,7 +743,7 @@ def build_relevant_context(
 
     # Score articles — use hybrid search if requested
     if use_vectors:
-        scored = hybrid_score_articles(query, index, db_path=WIKI_DB, top_k=top_k)
+        scored = hybrid_score_articles(query, index, db_path=KNOWLEDGE_DB, top_k=top_k)
     else:
         scored = score_articles(query, index, top_k)
 

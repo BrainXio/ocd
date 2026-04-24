@@ -21,7 +21,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from ocd.config import VEC_DIMENSIONS, VEC_EMBEDDING_MODEL, WIKI_DB
+from ocd.config import KNOWLEDGE_DB, VEC_DIMENSIONS, VEC_EMBEDDING_MODEL
 
 # ── Schema ───────────────────────────────────────────────────────────────────
 
@@ -328,7 +328,7 @@ def run_vec_rebuild(force: bool = False) -> int:
     """
     if not is_vec_available():
         raise RuntimeError("Vector support not available. Install vec extras: uv sync --extra vec")
-    return rebuild_vectors(WIKI_DB, force=force)
+    return rebuild_vectors(KNOWLEDGE_DB, force=force)
 
 
 def run_vec_search(query: str, top_k: int = 5) -> list[tuple[str, float]]:
@@ -347,7 +347,7 @@ def run_vec_search(query: str, top_k: int = 5) -> list[tuple[str, float]]:
     """
     if not is_vec_available():
         raise RuntimeError("Vector support not available. Install vec extras: uv sync --extra vec")
-    db = sqlite3.connect(str(WIKI_DB))
+    db = sqlite3.connect(str(KNOWLEDGE_DB))
     try:
         results = search_vectors(db, query, top_k=top_k)
     except sqlite3.OperationalError:
@@ -363,7 +363,7 @@ def run_vec_status() -> dict[str, Any]:
     Returns:
         Dict with keys: available, db_exists, embedding_count, model.
     """
-    return vec_status(WIKI_DB)
+    return vec_status(KNOWLEDGE_DB)
 
 
 # ── CLI entry point ──────────────────────────────────────────────────────────
