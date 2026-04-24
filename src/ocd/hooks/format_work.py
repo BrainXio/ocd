@@ -20,7 +20,7 @@ from typing import Any
 
 from ocd.config import PROJECT_ROOT, STATE_DIR, VENV_BIN
 from ocd.hooks.hookslib import parse_stdin_json
-from ocd.session_card import update_session_card
+from ocd.session.session_card import update_session_card
 
 VIOLATIONS_LOG = STATE_DIR / "format-violations.jsonl"
 

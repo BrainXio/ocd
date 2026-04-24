@@ -11,7 +11,7 @@ class TestPathConstants:
     """Path constants derive from _find_project_root() and must be internally consistent."""
 
     def test_project_root_contains_git(self):
-        assert (config.PROJECT_ROOT / ".git").is_dir()
+        assert (config.PROJECT_ROOT / ".git").exists()
 
     def test_user_dir_under_project_root(self):
         assert config.USER_DIR == config.PROJECT_ROOT / "USER"

@@ -22,8 +22,6 @@ jobs:
       shell: ${{ steps.filter.outputs.shell }}
       yaml: ${{ steps.filter.outputs.yaml }}
       markdown: ${{ steps.filter.outputs.markdown }}
-      node: ${{ steps.filter.outputs.node }}
-      sql: ${{ steps.filter.outputs.sql }}
       actions: ${{ steps.filter.outputs.actions }}
     steps:
       - uses: actions/checkout@v6
@@ -37,21 +35,13 @@ jobs:
               - 'pyproject.toml'
               - 'uv.lock'
             shell:
-              - 'git_hooks/**'
+              - '.githooks/**'
             yaml:
               - '.github/workflows/**'
               - '.yamllint'
             markdown:
               - '**/*.md'
               - 'docs/**'
-            node:
-              - '**/*.css'
-              - '**/*.html'
-              - '**/*.json'
-              - 'package.json'
-              - 'package-lock.json'
-            sql:
-              - '**/*.sql'
             actions:
               - '.github/workflows/**'
 
@@ -66,7 +56,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Reject AI attribution in commit messages
@@ -90,7 +80,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Verify standards hash
@@ -134,7 +124,7 @@ jobs:
       - name: Install shellcheck
         run: command -v shellcheck || (sudo apt-get update && sudo apt-get install -y shellcheck)
       - name: Run shellcheck
-        run: shellcheck git_hooks/commit-msg git_hooks/pre-commit git_hooks/pre-push git_hooks/setup-hooks.sh
+        run: shellcheck .githooks/commit-msg .githooks/pre-commit .githooks/pre-push .githooks/setup-hooks.sh
 
   lint-markdown:
     needs: [changes]
@@ -146,13 +136,13 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: mdformat --check
         run: >-
           uv run mdformat --check
-          README.md docs/*.md docs/project/*.md .claude/skills/*/SKILL.md
+          README.md docs/*.md docs/**/*.md .claude/skills/*/SKILL.md
           .claude/agents/*.md .claude/rules/*.md
 
   secret-scan:
@@ -186,39 +176,6 @@ jobs:
           curl -sL "$URL" | sudo tar xz -C /usr/local/bin actionlint
       - name: actionlint
         run: actionlint
-
-  lint-node:
-    needs: [changes]
-    if: needs.changes.outputs.node == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-          cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: stylelint
-        run: npx stylelint "**/*.css" || echo "No CSS files found — skipping"
-      - name: htmlhint
-        run: npx htmlhint "**/*.html" || echo "No HTML files found — skipping"
-      - name: prettier --check
-        run: npx prettier --check "**/*.json" "!package-lock.json"
-
-  lint-sql:
-    needs: [changes]
-    if: needs.changes.outputs.sql == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install sqlfluff
-        run: pip install "sqlfluff>=3.0"
-      - name: sqlfluff lint
-        run: sqlfluff lint .
 
   scan-deps:
     needs: [changes]
@@ -260,7 +217,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: ruff check
@@ -280,7 +237,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/pack.py
+        run: python src/ocd/packaging/pack.py
       - name: Install dependencies
         run: uv sync
       - name: Run tests

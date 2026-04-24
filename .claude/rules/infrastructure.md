@@ -3,7 +3,7 @@ description: Deny rule modification procedure for protected files
 paths:
   - .claude/settings.json
   - src/ocd/**
-  - git_hooks/**
+  - .githooks/**
   - .gitleaks.toml
   - pyproject.toml
 ---
@@ -18,7 +18,7 @@ The following files have Edit, Write, and Bash rm deny rules:
 
 - `src/ocd/hooks/*.py` (all hook modules)
 - `src/ocd/{config,compile,flush,lint,query,utils}.py` (core modules)
-- `git_hooks/{commit-msg,pre-commit,pre-push,setup-hooks.sh}`
+- `.githooks/{commit-msg,pre-commit,pre-push,setup-hooks.sh}`
 - `.gitleaks.toml`
 
 You CANNOT directly edit or overwrite these files. The deny rules will block

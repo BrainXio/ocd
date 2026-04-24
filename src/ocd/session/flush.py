@@ -1,0 +1,290 @@
+"""Memory flush agent - extracts important knowledge from conversation context.
+
+Spawned by session-end.py or pre-compact.py as a background process. Reads
+pre-extracted conversation context from a .md file, uses the Claude Agent SDK
+to decide what's worth saving, and appends the result to today's daily log.
+
+Usage:
+    ocd flush <context_file.md> <session_id>
+"""
+
+from __future__ import annotations
+
+# isort: off
+# Recursion prevention: set this BEFORE any imports that might trigger Claude
+import os
+
+os.environ["CLAUDE_INVOKED_BY"] = "memory_flush"
+# isort: on
+
+import asyncio
+import json
+import logging
+import subprocess
+import sys
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+from ocd.config import (
+    DAILY_DIR,
+    FLUSH_LOG_FILE,
+    FLUSH_STATE_FILE,
+    PROJECT_ROOT,
+    STATE_DIR,
+    STATE_FILE,
+)
+from ocd.utils import file_hash
+
+
+def _ensure_state_dir() -> None:
+    """Ensure STATE_DIR exists. Safe to call repeatedly."""
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# Set up file-based logging so we can verify the background process ran.
+# The parent process sends stdout/stderr to DEVNULL (to avoid the inherited
+# file handle bug on Windows), so this is our only observability channel.
+_ensure_state_dir()
+logging.basicConfig(
+    filename=str(FLUSH_LOG_FILE),
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+
+def load_flush_state() -> dict[str, Any]:
+    if FLUSH_STATE_FILE.exists():
+        try:
+            result: dict[str, Any] = json.loads(FLUSH_STATE_FILE.read_text(encoding="utf-8"))
+            return result
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {}
+
+
+def save_flush_state(state: dict[str, Any]) -> None:
+    _ensure_state_dir()
+    FLUSH_STATE_FILE.write_text(json.dumps(state), encoding="utf-8")
+
+
+def append_to_daily_log(content: str, section: str = "Session") -> None:
+    """Append content to today's daily log."""
+    today = datetime.now(UTC).astimezone()
+    log_path = DAILY_DIR / f"{today.strftime('%Y-%m-%d')}.md"
+
+    if not log_path.exists():
+        DAILY_DIR.mkdir(parents=True, exist_ok=True)
+        date_str = today.strftime("%Y-%m-%d")
+        header = f"# Daily Log: {date_str}\n\n## Sessions\n\n## Memory Maintenance\n\n"
+        log_path.write_text(header, encoding="utf-8")
+
+    time_str = today.strftime("%H:%M")
+    entry = f"### {section} ({time_str})\n\n{content}\n\n"
+
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(entry)
+
+
+async def _flush_with_llm(context: str) -> str:
+    """Use Claude Agent SDK to extract important knowledge from conversation context."""
+    from claude_agent_sdk import (
+        AssistantMessage,
+        ClaudeAgentOptions,
+        ResultMessage,
+        TextBlock,
+        query,
+    )
+
+    prompt = f"""Review the conversation context below and respond with a concise summary
+of important items that should be preserved in the daily log.
+Do NOT use any tools — just return plain text.
+
+Format your response as a structured daily log entry with these sections:
+
+**Context:** [One line about what the user was working on]
+
+**Key Exchanges:**
+- [Important Q&A or discussions]
+
+**Decisions Made:**
+- [Any decisions with rationale]
+
+**Lessons Learned:**
+- [Gotchas, patterns, or insights discovered]
+
+**Action Items:**
+- [Follow-ups or TODOs mentioned]
+
+Skip anything that is:
+- Routine tool calls or file reads
+- Content that's trivial or obvious
+- Trivial back-and-forth or clarification exchanges
+
+Only include sections that have actual content. If nothing is worth saving,
+respond with exactly: FLUSH_OK
+
+## Conversation Context
+
+{context}"""
+
+    response = ""
+
+    try:
+        async for message in query(
+            prompt=prompt,
+            options=ClaudeAgentOptions(
+                cwd=str(PROJECT_ROOT),
+                allowed_tools=[],
+                max_turns=2,
+            ),
+        ):
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        response += block.text
+            elif isinstance(message, ResultMessage):
+                pass
+    except Exception as e:
+        import traceback
+
+        logging.error("Agent SDK error: %s\n%s", e, traceback.format_exc())
+        response = f"FLUSH_ERROR: {type(e).__name__}: {e}"
+
+    return response
+
+
+def maybe_trigger_compilation() -> None:
+    """If it's past the compile hour and today's log hasn't been compiled, run compile."""
+    from ocd.config import COMPILE_AFTER_HOUR
+
+    now = datetime.now(UTC).astimezone()
+    if now.hour < COMPILE_AFTER_HOUR:
+        return
+
+    # Check if today's log has already been compiled
+    today_log = f"{now.strftime('%Y-%m-%d')}.md"
+    compile_state_file = STATE_FILE
+    if compile_state_file.exists():
+        try:
+            compile_state = json.loads(compile_state_file.read_text(encoding="utf-8"))
+            ingested = compile_state.get("ingested", {})
+            if today_log in ingested:
+                log_path = DAILY_DIR / today_log
+                if log_path.exists():
+                    current_hash = file_hash(log_path)
+                    if ingested[today_log].get("hash") == current_hash:
+                        return  # log unchanged since last compile
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    logging.info("End-of-day compilation triggered (after %d:00)", COMPILE_AFTER_HOUR)
+
+    cmd = [sys.executable, "-m", "ocd.kb.compile"]
+
+    kwargs: dict[str, Any] = {}
+    if sys.platform == "win32":
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS  # type: ignore[attr-defined]
+    else:
+        kwargs["start_new_session"] = True
+
+    try:
+        with open(str(STATE_DIR / "compile.log"), "a") as log_handle:
+            subprocess.Popen(cmd, stdout=log_handle, stderr=subprocess.STDOUT, **kwargs)
+    except Exception as e:
+        logging.error("Failed to spawn compile: %s", e)
+
+
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+def run_flush_standalone(context_file: str, session_id: str) -> int:
+    """Run the memory flush pipeline: validate, dedup, extract, append, clean up.
+
+    Args:
+        context_file: Path to the context .md file.
+        session_id: Session identifier for deduplication.
+
+    Returns:
+        0 on success, 1 on error.
+    """
+    ctx_path = Path(context_file)
+
+    # Validate session_id (no path traversal)
+    if "/" in session_id or "\\" in session_id or ".." in session_id:
+        logging.error("Invalid session_id: %s", session_id)
+        return 1
+
+    # Validate context_file stays within STATE_DIR
+    if not ctx_path.resolve().is_relative_to(STATE_DIR.resolve()):
+        logging.error("Context file escapes STATE_DIR: %s", ctx_path)
+        return 1
+
+    logging.info("flush started for session %s, context: %s", session_id, ctx_path)
+
+    if not ctx_path.exists():
+        logging.error("Context file not found: %s", ctx_path)
+        return 1
+
+    # Deduplication: skip if same session was flushed within 60 seconds
+    state = load_flush_state()
+    if state.get("session_id") == session_id and time.time() - state.get("timestamp", 0) < 60:
+        logging.info("Skipping duplicate flush for session %s", session_id)
+        ctx_path.unlink(missing_ok=True)
+        return 0
+
+    # Read pre-extracted context
+    context = ctx_path.read_text(encoding="utf-8").strip()
+    if not context:
+        logging.info("Context file is empty, skipping")
+        ctx_path.unlink(missing_ok=True)
+        return 0
+
+    logging.info("Flushing session %s: %d chars", session_id, len(context))
+
+    # Run the LLM extraction
+    response = asyncio.run(_flush_with_llm(context))
+
+    # Append to daily log
+    if "FLUSH_OK" in response:
+        logging.info("Result: FLUSH_OK")
+        append_to_daily_log("FLUSH_OK - Nothing worth saving from this session", "Memory Flush")
+    elif "FLUSH_ERROR" in response:
+        logging.error("Result: %s", response)
+        append_to_daily_log(response, "Memory Flush")
+    else:
+        logging.info("Result: saved to daily log (%d chars)", len(response))
+        append_to_daily_log(response, "Session")
+
+    # Update dedup state
+    save_flush_state({"session_id": session_id, "timestamp": time.time()})
+
+    # Clean up context file
+    ctx_path.unlink(missing_ok=True)
+
+    # End-of-day auto-compilation: if it's past the compile hour and today's
+    # log hasn't been compiled yet, trigger compile in the background.
+    maybe_trigger_compilation()
+
+    logging.info("Flush complete for session %s", session_id)
+    return 0
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+
+
+def main() -> None:
+    if len(sys.argv) < 3:
+        logging.error("Usage: %s <context_file.md> <session_id>", sys.argv[0])
+        sys.exit(1)
+
+    context_file = sys.argv[1]
+    session_id = sys.argv[2]
+
+    sys.exit(run_flush_standalone(context_file=context_file, session_id=session_id))
+
+
+if __name__ == "__main__":
+    main()

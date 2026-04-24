@@ -11,7 +11,7 @@ Inspired by [Karpathy's LLM KB](https://github.com/karpathy/llm-knowledge-base) 
 ```text
 (root)             Project source, tests, docs, pyproject.toml
 src/ocd/           Installable Python package (hooks, scripts, config, utils)
-git_hooks/         Shell git hooks (commit-msg, pre-commit) + setup script
+.githooks/         Shell git hooks (commit-msg, pre-commit) + setup script
 USER/            Data — daily logs, knowledge base, state (git-ignored)
 .claude/           LLM-Processor config — settings.json, skills/, agents/
 ```
@@ -20,7 +20,7 @@ USER/            Data — daily logs, knowledge base, state (git-ignored)
 
 ```bash
 git clone <repo-url> && cd ocd
-bash git_hooks/setup-hooks.sh
+bash .githooks/setup-hooks.sh
 uv sync
 ```
 

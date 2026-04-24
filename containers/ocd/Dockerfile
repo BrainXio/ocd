@@ -70,7 +70,7 @@ RUN apt-get update \
 COPY pyproject.toml uv.lock /tmp/ocd-build/
 COPY src/ocd/ /tmp/ocd-build/src/ocd/
 COPY .claude/ /tmp/ocd-source/.claude/
-RUN python /tmp/ocd-build/src/ocd/pack.py \
+RUN python /tmp/ocd-build/src/ocd/packaging/pack.py \
         --source /tmp/ocd-source/.claude \
         --output /tmp/ocd-build/src/ocd/data/content.db \
     && uv venv /opt/ocd/venv \
@@ -87,7 +87,7 @@ RUN rm -f /home/ocd/.claude/settings.local.json \
 # ── OCD Templates ──────────────────────────────────────────────────
 # Project-level files that ocd init copies to the workspace.
 # These must be at the project root (not user-level) to work correctly.
-COPY git_hooks/ /opt/ocd/templates/git_hooks/
+COPY .githooks/ /opt/ocd/templates/.githooks/
 COPY .gitleaks.toml /opt/ocd/templates/.gitleaks.toml
 COPY package.json package-lock.json /opt/ocd/templates/
 

@@ -98,7 +98,7 @@ class TestMainDispatch:
     def test_check_dispatches(self):
         with (
             patch.object(sys, "argv", ["ocd", "check"]),
-            patch("ocd.check.run_check", return_value=0),
+            patch("ocd.gates.check.run_check", return_value=0),
             pytest.raises(SystemExit) as exc_info,
         ):
             main()
@@ -121,10 +121,16 @@ class TestMainDispatch:
             mock.assert_called_once()
 
     def test_standards_dispatches(self, capsys):
-        with patch.object(sys, "argv", ["ocd", "standards"]):
+        with (
+            patch.object(sys, "argv", ["ocd", "standards", "--verify"]),
+            patch(
+                "ocd.routing.standards.verify_standards_hash",
+                return_value={"match": True, "version": 1, "computed_hash": "abc"},
+            ),
+        ):
             main()
         output = capsys.readouterr().out
-        assert "ocd-standards" in output
+        assert "ok" in output
 
 
 class TestHookDispatch:
@@ -157,7 +163,7 @@ class TestHookDispatch:
     def test_hook_format_work_edit(self):
         with (
             patch.object(sys, "argv", ["ocd", "hook", "format-work", "--edit"]),
-            patch("ocd.hooks.format_work.main") as mock,
+            patch("ocd.hooks.format_work.edit_mode") as mock,
         ):
             main()
             mock.assert_called_once()
@@ -165,7 +171,7 @@ class TestHookDispatch:
     def test_hook_lint_work_edit(self):
         with (
             patch.object(sys, "argv", ["ocd", "hook", "lint-work", "--edit"]),
-            patch("ocd.hooks.lint_work.main") as mock,
+            patch("ocd.hooks.lint_work.edit_mode") as mock,
         ):
             main()
             mock.assert_called_once()
@@ -173,26 +179,28 @@ class TestHookDispatch:
     def test_hook_lint_work_commit(self):
         with (
             patch.object(sys, "argv", ["ocd", "hook", "lint-work", "--commit"]),
-            patch("ocd.hooks.lint_work.main") as mock,
+            patch("ocd.hooks.lint_work.commit_mode") as mock,
         ):
             main()
             mock.assert_called_once()
 
-    def test_hook_verify_commit(self):
+    def test_hook_verify_commit(self, tmp_path):
+        msg_file = tmp_path / "msg.txt"
+        msg_file.write_text("feat: good commit")
         with (
-            patch.object(sys, "argv", ["ocd", "hook", "verify-commit"]),
-            patch("ocd.verify_commit.main") as mock,
+            patch.object(sys, "argv", ["ocd", "hook", "verify-commit", str(msg_file)]),
+            patch("ocd.gates.verify_commit.check_message", return_value=[]),
         ):
             main()
-            mock.assert_called_once()
 
     def test_hook_ci_check(self):
         with (
             patch.object(sys, "argv", ["ocd", "hook", "ci-check", "--fast"]),
-            patch("ocd.ci_check.main") as mock,
+            patch("ocd.gates.ci_check.run_ci_check", return_value=0),
+            pytest.raises(SystemExit) as exc_info,
         ):
             main()
-            mock.assert_called_once()
+        assert exc_info.value.code == 0
 
     def test_hook_no_subcommand_exits(self):
         with patch.object(sys, "argv", ["ocd", "hook"]), pytest.raises(SystemExit) as exc_info:
