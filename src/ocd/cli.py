@@ -330,6 +330,22 @@ def _cmd_compile(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_export(args: argparse.Namespace) -> None:
+    """Export knowledge base to Obsidian-compatible markdown vault."""
+    from ocd.kb.export import run_export
+
+    db_path = Path(args.db) if args.db else None
+    sys.exit(
+        run_export(
+            output=args.output,
+            commit=args.commit,
+            force=args.force,
+            dry_run=args.dry_run,
+            db_path=db_path,
+        )
+    )
+
+
 def _cmd_ingest(args: argparse.Namespace) -> None:
     """Ingest wiki articles into knowledge.db."""
     from ocd.kb.ingest import ingest_raw
@@ -651,6 +667,21 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Recompute standards.md hash",
     )
     comp_parser.set_defaults(func=_cmd_compile)
+
+    # export
+    export_parser = subparsers.add_parser("export", help="Export knowledge base to Obsidian vault")
+    export_parser.add_argument(
+        "--commit", action="store_true", help="Export to docs/knowledge/ (commit-friendly)"
+    )
+    export_parser.add_argument("--output", "-o", default=None, help="Custom output directory path")
+    export_parser.add_argument(
+        "--force", "-f", action="store_true", help="Overwrite existing files"
+    )
+    export_parser.add_argument(
+        "--dry-run", action="store_true", help="Report what would be exported, no file writes"
+    )
+    export_parser.add_argument("--db", default=None, help="Database path (default: knowledge.db)")
+    export_parser.set_defaults(func=_cmd_export)
 
     # ingest
     ingest_parser = subparsers.add_parser("ingest", help="Ingest wiki articles into knowledge.db")

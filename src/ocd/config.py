@@ -53,6 +53,8 @@ CONCEPTS_DIR: Path = KNOWLEDGE_DIR / "concepts"
 CONNECTIONS_DIR: Path = KNOWLEDGE_DIR / "connections"
 QA_DIR: Path = KNOWLEDGE_DIR / "qa"
 RESOURCES_DIR: Path = KNOWLEDGE_DIR / "resources"
+KNOWLEDGE_EXPORT_DIR: Path = USER_DIR / "knowledge-export"
+COMMIT_KNOWLEDGE_DIR: Path = PROJECT_ROOT / "docs" / "knowledge"
 REPORTS_DIR: Path = USER_DIR / "reports"
 
 STATE_DIR: Path = USER_DIR / "state"

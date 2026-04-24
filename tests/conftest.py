@@ -23,6 +23,7 @@ import ocd.hooks.lint_work
 import ocd.hooks.pre_compact
 import ocd.hooks.session_end
 import ocd.hooks.session_start
+import ocd.kb.export
 import ocd.kb.ingest
 import ocd.kb.relevance
 import ocd.kb.vec
@@ -123,6 +124,8 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         "AUTOFIX_LOG": state_dir / "autofix-loop.jsonl",
         "APP_SPEC_FILE": tmp_agent_dir.parent / "app_spec.txt",
         "MAX_APP_SPEC_CHARS": 4000,
+        "KNOWLEDGE_EXPORT_DIR": tmp_agent_dir / "knowledge-export",
+        "COMMIT_KNOWLEDGE_DIR": tmp_agent_dir.parent / "docs" / "knowledge",
     }
 
     # Patch the canonical source
@@ -144,6 +147,7 @@ def mock_config_paths(tmp_agent_dir, monkeypatch):
         ocd.hooks.session_end,
         ocd.hooks.pre_compact,
         ocd.hooks.lint_work,
+        ocd.kb.export,
         ocd.kb.ingest,
         ocd.kb.relevance,
         ocd.kb.vec,
