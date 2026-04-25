@@ -6,7 +6,7 @@ paths:
 
 # Markdown Formatting
 
-Project-specific mdformat conventions. The markdown skill (`.claude/skills/markdown/`)
+Project-specific mdformat conventions. The markdown skill (`src/ocd/content/skills/markdown/`)
 defines general conventions; this rule captures the mdformat pain points that have
 caused CI failures in this project.
 
@@ -20,7 +20,7 @@ plugin, which normalizes double quotes to single quotes. Always install the proj
 
 ## IMPORTANT: Skill File Frontmatter
 
-Skill files (`.claude/skills/*/SKILL.md`) use proper YAML frontmatter with `---`
+Skill files (`src/ocd/content/skills/*/SKILL.md`) use proper YAML frontmatter with `---`
 delimiters — not `## heading` metadata lines and not `______` horizontal rules.
 mdformat normalizes thematic breaks (dashes or underscores) to `______`, but
 preserves `---` as frontmatter delimiters when the frontmatter plugin is active.
@@ -43,7 +43,7 @@ Do not fight the normalization by writing manual numbers.
 The CI lint-markdown job checks these paths:
 
 ```
-mdformat --check README.md docs/*.md docs/**/*.md .claude/skills/*/SKILL.md .claude/agents/*.md .claude/rules/*.md docs/reference/skills/*.md docs/reference/agents/*.md
+mdformat --check README.md docs/*.md docs/**/*.md src/ocd/content/skills/*/SKILL.md src/ocd/content/agents/*.md src/ocd/content/rules/*.md docs/reference/skills/*.md docs/reference/agents/*.md
 ```
 
 Run the same command locally before pushing.

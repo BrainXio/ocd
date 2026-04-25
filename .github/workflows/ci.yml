@@ -56,7 +56,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/packaging/pack.py
+        run: python src/ocd/packaging/pack.py --portable-source docs/reference
       - name: Install dependencies
         run: uv sync
       - name: Reject AI attribution in commit messages
@@ -80,7 +80,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/packaging/pack.py
+        run: python src/ocd/packaging/pack.py --portable-source docs/reference
       - name: Install dependencies
         run: uv sync
       - name: Verify standards hash
@@ -93,8 +93,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Check no local config files are tracked
         run: |
-          if git ls-files --error-unmatch .claude/settings.local.json 2>/dev/null; then
-            echo "ERROR: .claude/settings.local.json is tracked by git but must not be"
+          if git ls-files --error-unmatch src/ocd/content/settings/settings.local.json 2>/dev/null; then
+            echo "ERROR: src/ocd/content/settings/settings.local.json is tracked by git but must not be"
             exit 1
           fi
           echo "OK: no local config files tracked"
@@ -136,14 +136,14 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/packaging/pack.py
+        run: python src/ocd/packaging/pack.py --portable-source docs/reference
       - name: Install dependencies
         run: uv sync
       - name: mdformat --check
         run: >-
           uv run mdformat --check
-          README.md docs/*.md docs/**/*.md .claude/skills/*/SKILL.md
-          .claude/agents/*.md .claude/rules/*.md docs/reference/skills/*.md
+          README.md docs/*.md docs/**/*.md src/ocd/content/skills/*/SKILL.md
+          src/ocd/content/agents/*.md src/ocd/content/rules/*.md docs/reference/skills/*.md
           docs/reference/agents/*.md
 
   secret-scan:
@@ -218,7 +218,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/packaging/pack.py
+        run: python src/ocd/packaging/pack.py --portable-source docs/reference
       - name: Install dependencies
         run: uv sync
       - name: ruff check
@@ -238,7 +238,7 @@ jobs:
         with:
           enable-cache: true
       - name: Compile content database
-        run: python src/ocd/packaging/pack.py
+        run: python src/ocd/packaging/pack.py --portable-source docs/reference
       - name: Install dependencies
         run: uv sync
       - name: Run tests
