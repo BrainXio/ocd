@@ -1,30 +1,34 @@
-"""Materialize .claude/ content from SQLite database into target directory.
+"""Materialize vendor directory content from SQLite database.
 
-Reads agents, rules, skills, and standards from the bundled content.db
-and reconstructs the original markdown files in the target directory. This
-enables deploying the OCD configuration to any agent directory, not just
-.claude/ — for example, .cursor/, .copilot/, etc.
+Reads agents, rules, skills, standards, and settings from the bundled
+content.db and reconstructs the original files in the target directory.
+For Claude Code, also creates symlinks to portable content in
+docs/reference/ and the worktrees directory.
 
 Usage:
     ocd materialize                        # materialize to .claude/
-    ocd materialize -t /path/.claude      # materialize to custom target
+    ocd materialize -t /path/.claude       # materialize to custom target
     ocd materialize --vendor aider          # materialize for Aider
     ocd materialize --vendor all            # materialize for all vendors
     ocd materialize --force                # overwrite existing files
     ocd materialize --db /path/to/db       # use custom database
+    ocd materialize --docs-dir docs         # symlink portable content from here
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import sqlite3
 import sys
 from pathlib import Path
 
 try:
-    from ocd.config import PROJECT_ROOT
+    from ocd.config import DOCS_AGENTS_DIR, DOCS_SKILLS_DIR, PROJECT_ROOT
 except ImportError:
     PROJECT_ROOT = Path.cwd()
+    DOCS_SKILLS_DIR = PROJECT_ROOT / "docs" / "reference" / "skills"
+    DOCS_AGENTS_DIR = PROJECT_ROOT / "docs" / "reference" / "agents"
 
 
 def _find_bundled_db() -> Path:
@@ -165,22 +169,128 @@ def _materialize_standards(db: sqlite3.Connection, target_dir: Path, force: bool
     return 1
 
 
-def materialize(db_path: Path, target: Path, force: bool = False) -> dict[str, int]:
+def _materialize_settings(db: sqlite3.Connection, target_dir: Path, force: bool) -> int:
+    """Write settings .json files from database to target directory."""
+    target_dir.mkdir(parents=True, exist_ok=True)
+    rows = db.execute("SELECT name, body FROM settings").fetchall()
+    count = 0
+    for name, body in rows:
+        path = target_dir / f"{name}.json"
+        if path.exists() and not force:
+            continue
+        path.write_text(body)
+        count += 1
+    return count
+
+
+def _materialize_symlinks(
+    target: Path,
+    skills_dir: Path,
+    agents_dir: Path,
+    force: bool = False,
+) -> dict[str, int]:
+    """Create symlinks from target to portable content directories.
+
+    Creates symlinks for each portable skill and agent file, pointing
+    to their canonical source in docs/reference/. Symlinks use relative
+    paths that work when target and docs share a common project root:
+      .claude/skills/<name>/SKILL.md -> ../../../docs/reference/skills/<name>.md
+      .claude/agents/<name>.md       -> ../../docs/reference/agents/<name>.md
+    """
+    counts: dict[str, int] = {"skill_symlinks": 0, "agent_symlinks": 0}
+
+    # Compute the relative path from target to docs_dir's parent
+    # For .claude/ -> docs/reference/, the relative is ../docs/reference/
+    # But we need per-skill paths from .claude/skills/<name>/SKILL.md
+    # Skill symlinks: target/skills/<name>/SKILL.md -> docs/reference/skills/<name>.md
+    if skills_dir.is_dir():
+        target_skills = target / "skills"
+        target_skills.mkdir(parents=True, exist_ok=True)
+        for skill_file in sorted(skills_dir.glob("*.md")):
+            skill_name = skill_file.stem
+            link_dir = target_skills / skill_name
+            link_dir.mkdir(parents=True, exist_ok=True)
+            link_path = link_dir / "SKILL.md"
+            # 3 levels up from skills/<name>/ to project root
+            rel_target = f"../../../docs/reference/skills/{skill_name}.md"
+            if link_path.is_symlink() or link_path.exists():
+                if force:
+                    link_path.unlink()
+                else:
+                    continue
+            os.symlink(rel_target, link_path)
+            counts["skill_symlinks"] += 1
+
+    # Agent symlinks: target/agents/<name>.md -> docs/reference/agents/<name>.md
+    if agents_dir.is_dir():
+        target_agents = target / "agents"
+        target_agents.mkdir(parents=True, exist_ok=True)
+        for agent_file in sorted(agents_dir.glob("*.md")):
+            agent_name = agent_file.stem
+            link_path = target_agents / f"{agent_name}.md"
+            # From .claude/agents/ go up 2 to project root, then docs/reference/agents/<name>.md
+            rel_target = f"../../docs/reference/agents/{agent_name}.md"
+            if link_path.is_symlink() or link_path.exists():
+                if force:
+                    link_path.unlink()
+                else:
+                    continue
+            os.symlink(rel_target, link_path)
+            counts["agent_symlinks"] += 1
+
+    return counts
+
+
+def _materialize_worktrees_dir(target: Path) -> int:
+    """Create the empty worktrees directory inside target."""
+    worktrees = target / "worktrees"
+    worktrees.mkdir(parents=True, exist_ok=True)
+    return 1
+
+
+def materialize(
+    db_path: Path,
+    target: Path,
+    force: bool = False,
+    docs_dir: Path | None = None,
+) -> dict[str, int]:
     """Materialize all content from database to target directory.
 
-    Returns a dict with counts: {agents: N, rules: N, skills: N, standards: N}.
+    Args:
+        db_path: Path to content.db.
+        target: Target directory (e.g. .claude/).
+        force: Overwrite existing files.
+        docs_dir: Path to docs/reference/ for symlink creation. If provided,
+            creates symlinks for portable skills and agents.
+
+    Returns:
+        Dict with counts for each content type.
     """
     db = sqlite3.connect(str(db_path))
     n_agents = _materialize_agents(db, target / "agents", force)
     n_rules = _materialize_rules(db, target / "rules", force)
     n_skills = _materialize_skills(db, target / "skills", force)
     n_standards = _materialize_standards(db, target / "skills" / "ocd", force)
+    n_settings = _materialize_settings(db, target, force)
     db.close()
+
+    # Create symlinks to portable content if docs_dir is provided
+    symlink_counts: dict[str, int] = {}
+    if docs_dir:
+        skills_dir = docs_dir / "skills"
+        agents_dir = docs_dir / "agents"
+        symlink_counts = _materialize_symlinks(target, skills_dir, agents_dir, force)
+
+    # Create worktrees directory
+    _materialize_worktrees_dir(target)
+
     return {
         "agents": n_agents,
         "rules": n_rules,
         "skills": n_skills,
         "standards": n_standards,
+        "settings": n_settings,
+        **symlink_counts,
     }
 
 
@@ -246,6 +356,7 @@ def run_materialize(
     db: str | None = None,
     force: bool = False,
     vendor: str | None = None,
+    docs_dir: str | None = None,
 ) -> int:
     """Materialize agent config from content.db.
 
@@ -254,6 +365,7 @@ def run_materialize(
         db: Database path, or None to use the bundled content.db.
         force: Overwrite existing files.
         vendor: Vendor format to materialize, or None for default claude format.
+        docs_dir: Path to docs/reference/ for creating symlinks to portable content.
 
     Returns:
         0 on success, 1 on error.
@@ -275,13 +387,20 @@ def run_materialize(
             print(f"  {key}: {val}")
     else:
         target_path = Path(target)
-        counts = materialize(db_path, target_path, force)
+        docs_path = Path(docs_dir) if docs_dir else None
+        counts = materialize(db_path, target_path, force, docs_dir=docs_path)
         total = sum(counts.values())
         print(f"Materialized {total} files to {target_path}")
         print(
             f"  agents: {counts['agents']}, rules: {counts['rules']}, "
-            f"skills: {counts['skills']}, standards: {counts['standards']}"
+            f"skills: {counts['skills']}, standards: {counts['standards']}, "
+            f"settings: {counts['settings']}"
         )
+        if counts.get("skill_symlinks") or counts.get("agent_symlinks"):
+            print(
+                f"  skill_symlinks: {counts.get('skill_symlinks', 0)}, "
+                f"agent_symlinks: {counts.get('agent_symlinks', 0)}"
+            )
     return 0
 
 
@@ -316,6 +435,11 @@ def main() -> None:
         default=None,
         help="Vendor format to materialize (default: claude, uses --target)",
     )
+    parser.add_argument(
+        "--docs-dir",
+        default=None,
+        help="Path to docs/reference/ for creating symlinks to portable content",
+    )
     args = parser.parse_args()
 
     sys.exit(
@@ -324,6 +448,7 @@ def main() -> None:
             db=args.db,
             force=args.force,
             vendor=args.vendor,
+            docs_dir=args.docs_dir,
         )
     )
 
