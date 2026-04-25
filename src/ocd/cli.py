@@ -322,6 +322,9 @@ def _cmd_materialize(args: argparse.Namespace) -> None:
             force=args.force,
             vendor=args.vendor,
             docs_dir=args.docs_dir,
+            include=args.include,
+            all_skills=args.all_skills,
+            minimal=args.minimal,
         )
     )
 
@@ -688,12 +691,30 @@ def _build_parser() -> argparse.ArgumentParser:
     mat_parser.add_argument(
         "--vendor",
         default=None,
-        help="Vendor format (aider, cursor, copilot, windsurf, amazonq, all, agents-md)",
+        help=(
+            "Vendor format: aider, cursor, copilot, windsurf, amazonq, claude-code, all, agents-md"
+        ),
     )
     mat_parser.add_argument(
         "--docs-dir",
         default=None,
         help="Path to docs/reference/ for creating symlinks to portable content",
+    )
+    mat_parser.add_argument(
+        "--include",
+        default=None,
+        help="Comma-separated list of skill names to include (e.g., python,git)",
+    )
+    mat_parser.add_argument(
+        "--all",
+        dest="all_skills",
+        action="store_true",
+        help="Include all skills (default behavior)",
+    )
+    mat_parser.add_argument(
+        "--minimal",
+        action="store_true",
+        help="Include only OCD core skills (rules, ocd skill, standards, settings)",
     )
     mat_parser.set_defaults(func=_cmd_materialize)
 

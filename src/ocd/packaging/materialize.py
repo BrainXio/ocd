@@ -6,13 +6,15 @@ For Claude Code, also creates symlinks to portable content in
 docs/reference/ and the worktrees directory.
 
 Usage:
-    ocd materialize                        # materialize to .claude/
-    ocd materialize -t /path/.claude       # materialize to custom target
-    ocd materialize --vendor aider          # materialize for Aider
-    ocd materialize --vendor all            # materialize for all vendors
-    ocd materialize --force                # overwrite existing files
-    ocd materialize --db /path/to/db       # use custom database
-    ocd materialize --docs-dir docs         # symlink portable content from here
+    ocd materialize                            # materialize OCD core to .claude/
+    ocd materialize --all                      # materialize everything to .claude/
+    ocd materialize --include python,git       # materialize OCD core + specific skills
+    ocd materialize --minimal                  # materialize only OCD core (same as default)
+    ocd materialize --vendor aider             # materialize for Aider
+    ocd materialize --vendor all               # materialize for all vendors
+    ocd materialize --force                    # overwrite existing files
+    ocd materialize --db /path/to/db           # use custom database
+    ocd materialize --docs-dir docs            # symlink portable content from here
 """
 
 from __future__ import annotations
@@ -29,6 +31,9 @@ except ImportError:
     PROJECT_ROOT = Path.cwd()
     DOCS_SKILLS_DIR = PROJECT_ROOT / "docs" / "reference" / "skills"
     DOCS_AGENTS_DIR = PROJECT_ROOT / "docs" / "reference" / "agents"
+
+# OCD core skills: always materialized regardless of --include/--all
+_CORE_SKILLS = {"ocd"}
 
 
 def _find_bundled_db() -> Path:
@@ -139,12 +144,27 @@ def _materialize_rules(db: sqlite3.Connection, target_dir: Path, force: bool) ->
     return count
 
 
-def _materialize_skills(db: sqlite3.Connection, target_dir: Path, force: bool) -> int:
-    """Write skill SKILL.md files from database to target directory."""
+def _materialize_skills(
+    db: sqlite3.Connection,
+    target_dir: Path,
+    force: bool,
+    include: set[str] | None = None,
+) -> int:
+    """Write skill SKILL.md files from database to target directory.
+
+    Args:
+        db: Database connection.
+        target_dir: Target skills directory.
+        force: Overwrite existing files.
+        include: Set of skill names to include. If None, includes all skills.
+            Core skills (ocd) are always included regardless of this filter.
+    """
     target_dir.mkdir(parents=True, exist_ok=True)
     rows = db.execute("SELECT name, description, argument_hint, body FROM skills").fetchall()
     count = 0
     for name, description, argument_hint, body in rows:
+        if include is not None and name not in include and name not in _CORE_SKILLS:
+            continue
         skill_dir = target_dir / name
         skill_dir.mkdir(parents=True, exist_ok=True)
         path = skill_dir / "SKILL.md"
@@ -188,26 +208,32 @@ def _materialize_symlinks(
     skills_dir: Path,
     agents_dir: Path,
     force: bool = False,
+    include: set[str] | None = None,
 ) -> dict[str, int]:
     """Create symlinks from target to portable content directories.
 
     Creates symlinks for each portable skill and agent file, pointing
     to their canonical source in docs/reference/. Symlinks use relative
-    paths that work when target and docs share a common project root:
-      .claude/skills/<name>/SKILL.md -> ../../../docs/reference/skills/<name>.md
-      .claude/agents/<name>.md       -> ../../docs/reference/agents/<name>.md
+    paths that work when target and docs share a common project root.
+
+    Args:
+        target: Target directory (e.g. .claude/).
+        skills_dir: Path to docs/reference/skills/.
+        agents_dir: Path to docs/reference/agents/.
+        force: Overwrite existing symlinks.
+        include: Set of skill names to include. If None, includes all.
+            Core skills (ocd) are always included.
     """
     counts: dict[str, int] = {"skill_symlinks": 0, "agent_symlinks": 0}
 
-    # Compute the relative path from target to docs_dir's parent
-    # For .claude/ -> docs/reference/, the relative is ../docs/reference/
-    # But we need per-skill paths from .claude/skills/<name>/SKILL.md
     # Skill symlinks: target/skills/<name>/SKILL.md -> docs/reference/skills/<name>.md
     if skills_dir.is_dir():
         target_skills = target / "skills"
         target_skills.mkdir(parents=True, exist_ok=True)
         for skill_file in sorted(skills_dir.glob("*.md")):
             skill_name = skill_file.stem
+            if include is not None and skill_name not in include and skill_name not in _CORE_SKILLS:
+                continue
             link_dir = target_skills / skill_name
             link_dir.mkdir(parents=True, exist_ok=True)
             link_path = link_dir / "SKILL.md"
@@ -228,7 +254,7 @@ def _materialize_symlinks(
         for agent_file in sorted(agents_dir.glob("*.md")):
             agent_name = agent_file.stem
             link_path = target_agents / f"{agent_name}.md"
-            # From .claude/agents/ go up 2 to project root, then docs/reference/agents/<name>.md
+            # From target/agents/ go up 2 to project root, then docs/reference/agents/<name>.md
             rel_target = f"../../docs/reference/agents/{agent_name}.md"
             if link_path.is_symlink() or link_path.exists():
                 if force:
@@ -253,6 +279,7 @@ def materialize(
     target: Path,
     force: bool = False,
     docs_dir: Path | None = None,
+    include: set[str] | None = None,
 ) -> dict[str, int]:
     """Materialize all content from database to target directory.
 
@@ -262,6 +289,8 @@ def materialize(
         force: Overwrite existing files.
         docs_dir: Path to docs/reference/ for symlink creation. If provided,
             creates symlinks for portable skills and agents.
+        include: Set of skill names to include alongside core skills. If None,
+            includes all skills. Core skills (ocd) are always included.
 
     Returns:
         Dict with counts for each content type.
@@ -269,7 +298,7 @@ def materialize(
     db = sqlite3.connect(str(db_path))
     n_agents = _materialize_agents(db, target / "agents", force)
     n_rules = _materialize_rules(db, target / "rules", force)
-    n_skills = _materialize_skills(db, target / "skills", force)
+    n_skills = _materialize_skills(db, target / "skills", force, include=include)
     n_standards = _materialize_standards(db, target / "skills" / "ocd", force)
     n_settings = _materialize_settings(db, target, force)
     db.close()
@@ -279,7 +308,9 @@ def materialize(
     if docs_dir:
         skills_dir = docs_dir / "skills"
         agents_dir = docs_dir / "agents"
-        symlink_counts = _materialize_symlinks(target, skills_dir, agents_dir, force)
+        symlink_counts = _materialize_symlinks(
+            target, skills_dir, agents_dir, force, include=include
+        )
 
     # Create worktrees directory
     _materialize_worktrees_dir(target)
@@ -348,6 +379,38 @@ def materialize_vendor(db_path: Path, vendor: str, force: bool = False) -> dict[
     return counts
 
 
+# ── Vendor layout definitions ──────────────────────────────────────────────
+
+VENDOR_LAYOUTS: dict[str, dict[str, str]] = {
+    "claude-code": {
+        "root": ".claude",
+        "agents_dir": "agents",
+        "rules_dir": "rules",
+        "skills_dir": "skills",
+        "settings_file": "settings.json",
+        "local_settings_file": "settings.local.json",
+    },
+    "aider": {
+        "root": ".aider",
+    },
+    "cursor": {
+        "root": ".cursor/rules",
+    },
+    "copilot": {
+        "root": ".",
+    },
+    "windsurf": {
+        "root": ".windsurf/rules",
+    },
+    "amazonq": {
+        "root": ".amazonq/rules",
+    },
+}
+
+# Valid vendor names for CLI choices
+VENDOR_CHOICES = [*sorted(VENDOR_LAYOUTS), "all", "agents-md"]
+
+
 # ── Public API ────────────────────────────────────────────────────────────
 
 
@@ -357,6 +420,9 @@ def run_materialize(
     force: bool = False,
     vendor: str | None = None,
     docs_dir: str | None = None,
+    include: str | None = None,
+    all_skills: bool = False,
+    minimal: bool = False,
 ) -> int:
     """Materialize agent config from content.db.
 
@@ -366,6 +432,10 @@ def run_materialize(
         force: Overwrite existing files.
         vendor: Vendor format to materialize, or None for default claude format.
         docs_dir: Path to docs/reference/ for creating symlinks to portable content.
+        include: Comma-separated list of skill names to include alongside core skills.
+        all_skills: Include all skills (same as default when no flags are given).
+        minimal: Include only OCD core skills (rules, ocd skill, standards, settings).
+            When no include/all/minimal flag is given, defaults to including all skills.
 
     Returns:
         0 on success, 1 on error.
@@ -375,20 +445,42 @@ def run_materialize(
     db_path = Path(db) if db else _find_bundled_db()
 
     if vendor:
-        valid_vendors = set(VENDORS) | {"all", "agents-md"}
+        valid_vendors = set(VENDORS) | {"all", "agents-md", "claude-code"}
         if vendor not in valid_vendors:
             print(f"Unknown vendor: {vendor}", file=sys.stderr)
-            print(f"Available: {', '.join(sorted(VENDORS))}, all, agents-md", file=sys.stderr)
+            print(f"Available: {', '.join(sorted(valid_vendors))}", file=sys.stderr)
             return 1
-        counts = materialize_vendor(db_path, vendor, force)
-        total = sum(counts.values())
-        print(f"Materialized {total} files for {vendor}")
-        for key, val in sorted(counts.items()):
-            print(f"  {key}: {val}")
+        if vendor == "claude-code":
+            # claude-code vendor uses the same materialize() function
+            target_path = Path(target)
+            docs_path = Path(docs_dir) if docs_dir else None
+            skill_filter = _resolve_skill_filter(include, all_skills, minimal)
+            counts = materialize(
+                db_path, target_path, force, docs_dir=docs_path, include=skill_filter
+            )
+            total = sum(counts.values())
+            print(f"Materialized {total} files to {target_path}")
+            print(
+                f"  agents: {counts['agents']}, rules: {counts['rules']}, "
+                f"skills: {counts['skills']}, standards: {counts['standards']}, "
+                f"settings: {counts['settings']}"
+            )
+            if counts.get("skill_symlinks") or counts.get("agent_symlinks"):
+                print(
+                    f"  skill_symlinks: {counts.get('skill_symlinks', 0)}, "
+                    f"agent_symlinks: {counts.get('agent_symlinks', 0)}"
+                )
+        else:
+            counts = materialize_vendor(db_path, vendor, force)
+            total = sum(counts.values())
+            print(f"Materialized {total} files for {vendor}")
+            for key, val in sorted(counts.items()):
+                print(f"  {key}: {val}")
     else:
         target_path = Path(target)
         docs_path = Path(docs_dir) if docs_dir else None
-        counts = materialize(db_path, target_path, force, docs_dir=docs_path)
+        skill_filter = _resolve_skill_filter(include, all_skills, minimal)
+        counts = materialize(db_path, target_path, force, docs_dir=docs_path, include=skill_filter)
         total = sum(counts.values())
         print(f"Materialized {total} files to {target_path}")
         print(
@@ -404,12 +496,33 @@ def run_materialize(
     return 0
 
 
+def _resolve_skill_filter(
+    include: str | None,
+    all_skills: bool,
+    minimal: bool,
+) -> set[str] | None:
+    """Resolve skill filter from CLI flags.
+
+    Returns:
+        None to include all skills, or a set of skill names.
+        Core skills (ocd) are always included regardless of filter.
+    """
+    if minimal:
+        # Only core skills
+        return set(_CORE_SKILLS)
+    if include:
+        # Explicit skill list + core skills
+        names = {s.strip() for s in include.split(",") if s.strip()}
+        return names | _CORE_SKILLS
+    # Default (--all or no flag): include all skills
+    return None
+
+
 # ── CLI ──────────────────────────────────────────────────────────────────
 
 
 def main() -> None:
     """Entry point for ocd materialize command."""
-    from ocd.packaging.vendors import VENDORS
 
     parser = argparse.ArgumentParser(description="Materialize agent config from content.db")
     parser.add_argument(
@@ -431,7 +544,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--vendor",
-        choices=[*sorted(VENDORS), "all", "agents-md"],
+        choices=VENDOR_CHOICES,
         default=None,
         help="Vendor format to materialize (default: claude, uses --target)",
     )
@@ -439,6 +552,22 @@ def main() -> None:
         "--docs-dir",
         default=None,
         help="Path to docs/reference/ for creating symlinks to portable content",
+    )
+    parser.add_argument(
+        "--include",
+        default=None,
+        help="Comma-separated list of skill names to include (e.g., python,git)",
+    )
+    parser.add_argument(
+        "--all",
+        dest="all_skills",
+        action="store_true",
+        help="Include all skills (default behavior)",
+    )
+    parser.add_argument(
+        "--minimal",
+        action="store_true",
+        help="Include only OCD core skills (rules, ocd skill, standards, settings)",
     )
     args = parser.parse_args()
 
@@ -449,6 +578,9 @@ def main() -> None:
             force=args.force,
             vendor=args.vendor,
             docs_dir=args.docs_dir,
+            include=args.include,
+            all_skills=args.all_skills,
+            minimal=args.minimal,
         )
     )
 

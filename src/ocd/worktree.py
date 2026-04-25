@@ -50,7 +50,7 @@ def _is_in_worktree() -> bool:
     dir_result = run_git("rev-parse", "--git-dir", cwd=PROJECT_ROOT)
     if dir_result.returncode != 0:
         return False
-    return ".claude/worktrees" in dir_result.stdout or "worktrees" in dir_result.stdout
+    return ".claude/worktrees" in dir_result.stdout or "/worktrees/" in dir_result.stdout
 
 
 def _branch_to_slug(branch: str) -> str:

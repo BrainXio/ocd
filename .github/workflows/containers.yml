@@ -11,7 +11,8 @@ on:
       - "pyproject.toml"
       - "package.json"
       - "package-lock.json"
-      - ".claude/**"
+      - "src/ocd/content/**"
+      - "docs/reference/**"
       - ".github/workflows/containers.yml"
     tags: ["v*"]
   pull_request:
@@ -23,7 +24,8 @@ on:
       - "pyproject.toml"
       - "package.json"
       - "package-lock.json"
-      - ".claude/**"
+      - "src/ocd/content/**"
+      - "docs/reference/**"
       - ".github/workflows/containers.yml"
   workflow_dispatch:
 

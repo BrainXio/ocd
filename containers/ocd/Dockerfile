@@ -69,11 +69,11 @@ RUN apt-get update \
 # PATH puts OCD entry points before the project venv.
 COPY pyproject.toml uv.lock /tmp/ocd-build/
 COPY src/ocd/ /tmp/ocd-build/src/ocd/
-COPY .claude/ /tmp/ocd-source/.claude/
 COPY docs/reference/skills/ /tmp/ocd-source/docs/reference/skills/
 COPY docs/reference/agents/ /tmp/ocd-source/docs/reference/agents/
 RUN python /tmp/ocd-build/src/ocd/packaging/pack.py \
-        --source /tmp/ocd-source/.claude \
+        --source /tmp/ocd-build/src/ocd/content \
+        --portable-source /tmp/ocd-source/docs/reference \
         --output /tmp/ocd-build/src/ocd/data/content.db \
     && uv venv /opt/ocd/venv \
     && uv pip install --python /opt/ocd/venv/bin/python /tmp/ocd-build \
@@ -82,10 +82,11 @@ RUN python /tmp/ocd-build/src/ocd/packaging/pack.py \
 # ── User-level Claude Code config ───────────────────────────────────
 # Skills, agents, rules, and settings at ~/.claude/ are available
 # to all projects immediately (no ocd init needed for these).
-COPY .claude/ /home/ocd/.claude/
 COPY docs/reference/skills/ /home/ocd/docs/reference/skills/
 COPY docs/reference/agents/ /home/ocd/docs/reference/agents/
-RUN rm -f /home/ocd/.claude/settings.local.json \
+RUN /opt/ocd/venv/bin/ocd materialize --force --target /home/ocd/.claude \
+        --docs-dir /home/ocd/docs/reference \
+    && rm -f /home/ocd/.claude/settings.local.json \
     && chown -R ocd:ocd /home/ocd/.claude
 
 # ── OCD Templates ──────────────────────────────────────────────────

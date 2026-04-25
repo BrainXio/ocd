@@ -13,10 +13,12 @@ import sys
 
 from ocd.config import PROJECT_ROOT, VENV_BIN
 
+_CLAUDE_DIR = ".claude"
+
 
 def _no_local_config_staged() -> tuple[bool, str]:
     """Block local-only config files from being committed."""
-    LOCAL_CONFIGS = [".claude/settings.local.json"]
+    LOCAL_CONFIGS = [f"{_CLAUDE_DIR}/settings.local.json"]
     result = subprocess.run(
         ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
         capture_output=True,

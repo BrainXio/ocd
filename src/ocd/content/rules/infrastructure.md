@@ -18,6 +18,7 @@ The following files have Edit, Write, and Bash rm deny rules:
 
 - `src/ocd/hooks/*.py` (all hook modules)
 - `src/ocd/{config,compile,flush,lint,query,utils}.py` (core modules)
+- `src/ocd/content/**` (canonical OCD content: agents, rules, skills, settings)
 - `.githooks/{commit-msg,pre-commit,pre-push,setup-hooks.sh}`
 - `.gitleaks.toml`
 
