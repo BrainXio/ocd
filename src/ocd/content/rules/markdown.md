@@ -1,36 +1,47 @@
 ---
-description: mdformat, frontmatter plugin, ordered list normalization, CI check paths
+description: mdformat, GFM plugin, frontmatter plugin, ordered list normalization, CI check paths
 paths:
   - "**/*.md"
 ---
 
 # Markdown Formatting
 
-Project-specific mdformat conventions. The markdown skill (`src/ocd/content/skills/markdown/`)
-defines general conventions; this rule captures the mdformat pain points that have
-caused CI failures in this project.
+Project-specific mdformat conventions. The markdown skill
+(`src/ocd/content/skills/markdown/`) defines general conventions; this rule
+captures the mdformat pain points that have caused CI failures in this
+project.
+
+## IMPORTANT: GFM Plugin
+
+This project uses `mdformat-gfm` for proper GFM table formatting. Without it,
+mdformat 1.0.0 only strips padding from table header rows while leaving
+separator and data rows wide — creating inconsistent column widths and causing
+perpetual format/reformat drift. The GFM plugin uses `wcswidth` for correct
+Unicode-aware padding across all table rows.
 
 ## IMPORTANT: Frontmatter Plugin
 
-This project uses a custom mdformat plugin (`mdformat_frontmatter_preserve`) that
-preserves YAML frontmatter quote styles. It replaces the upstream `mdformat-frontmatter`
-plugin, which normalizes double quotes to single quotes. Always install the project
-(via `uv sync`) so the custom plugin is registered. Do NOT install the upstream
+This project uses a custom mdformat plugin (`mdformat_frontmatter_preserve`)
+that preserves YAML frontmatter quote styles. It replaces the upstream
+`mdformat-frontmatter` plugin, which normalizes double quotes to single quotes.
+Always install the project (via `uv sync`) so both the custom frontmatter
+plugin and `mdformat-gfm` are registered. Do NOT install the upstream
 `mdformat-frontmatter` package — it conflicts with our preserve-quotes plugin.
 
 ## IMPORTANT: Skill File Frontmatter
 
-Skill files (`src/ocd/content/skills/*/SKILL.md`) use proper YAML frontmatter with `---`
-delimiters — not `## heading` metadata lines and not `______` horizontal rules.
-mdformat normalizes thematic breaks (dashes or underscores) to `______`, but
-preserves `---` as frontmatter delimiters when the frontmatter plugin is active.
-Always use YAML frontmatter in skill files.
+Skill files (`src/ocd/content/skills/*/SKILL.md`) use proper YAML frontmatter
+with `---` delimiters — not `## heading` metadata lines and not `______`
+horizontal rules. mdformat normalizes thematic breaks (dashes or underscores)
+to `______`, but preserves `---` as frontmatter delimiters when the frontmatter
+plugin is active. Always use YAML frontmatter in skill files.
 
 ## Configuration
 
-mdformat settings are pinned in `.mdformat.toml` at the project root. The current
-configuration sets `wrap = "keep"` (preserve existing line wrapping). Do not add
-`--wrap` flags on the command line — let the config file control wrapping behavior.
+mdformat settings are pinned in `.mdformat.toml` at the project root. The
+current configuration sets `wrap = "keep"` (preserve existing line wrapping).
+Do not add `--wrap` flags on the command line — let the config file control
+wrapping behavior.
 
 ## Ordered List Markers
 
@@ -42,8 +53,11 @@ Do not fight the normalization by writing manual numbers.
 
 The CI lint-markdown job checks these paths:
 
-```
-mdformat --check README.md docs/*.md docs/**/*.md src/ocd/content/skills/*/SKILL.md src/ocd/content/agents/*.md src/ocd/content/rules/*.md docs/reference/skills/*.md docs/reference/agents/*.md
+```bash
+mdformat --check \
+  README.md docs/*.md docs/**/*.md \
+  src/ocd/content/skills/*/SKILL.md src/ocd/content/agents/*.md src/ocd/content/rules/*.md \
+  docs/reference/skills/*.md docs/reference/agents/*.md
 ```
 
 Run the same command locally before pushing.

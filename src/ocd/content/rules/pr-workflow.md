@@ -11,18 +11,18 @@ Rules for creating and managing pull requests on this project.
 Every PR MUST have at least one label. Apply labels based on the conventional
 commit prefix of the PR title:
 
-| Prefix | Primary label | Additional labels |
+| Prefix    | Primary label | Additional labels                              |
 | --------- | ------------- | ---------------------------------------------- |
-| feat: | enhancement | + documentation if docs/ changed |
-| fix: | bug | |
-| docs: | documentation | |
-| ci: | ci | + github-actions if .github/workflows/ changed |
-| refactor: | enhancement | |
-| test: | ci | |
-| perf: | enhancement | |
-| chore: | enhancement | |
-| style: | enhancement | |
-| security: | security | |
+| feat:     | enhancement   | + documentation if docs/ changed               |
+| fix:      | bug           |                                                |
+| docs:     | documentation |                                                |
+| ci:       | ci            | + github-actions if .github/workflows/ changed |
+| refactor: | enhancement   |                                                |
+| test:     | ci            |                                                |
+| perf:     | enhancement   |                                                |
+| chore:    | enhancement   |                                                |
+| style:    | enhancement   |                                                |
+| security: | security      |                                                |
 
 Add `documentation` as a second label when the PR changes any file in `docs/`.
 Add `github-actions` when the PR changes `.github/workflows/`.

@@ -16,6 +16,7 @@ directly on main.**
    ```
 
 1. Use conventional branch prefixes:
+
    - `feat/` — new features
    - `fix/` — bug fixes
    - `refactor/` — code restructuring
@@ -26,6 +27,7 @@ directly on main.**
    - `chore/` — maintenance tasks
 
 1. After work is done:
+
    - Push branch and create PR from the worktree
    - Delete worktree after merge: `ocd worktree remove <slug>`
 
