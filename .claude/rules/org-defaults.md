@@ -1,3 +1,7 @@
+---
+description: Respect org defaults for linter/formatter configs; check source before modifying
+---
+
 # Org Defaults Rule
 
 When modifying `.yamllint`, `.hadolint.yaml`, `.mdformat.toml`, or `.prettierrc`, read `docs/explanation/org-defaults.md` first.
