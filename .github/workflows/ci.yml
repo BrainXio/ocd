@@ -93,8 +93,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Check no local config files are tracked
         run: |
-          if git ls-files --error-unmatch src/ocd/content/settings/settings.local.json 2>/dev/null; then
-            echo "ERROR: src/ocd/content/settings/settings.local.json is tracked by git but must not be"
+          if git ls-files --error-unmatch .claude/settings.local.json 2>/dev/null; then
+            echo "ERROR: .claude/settings.local.json is tracked by git but must not be"
             exit 1
           fi
           echo "OK: no local config files tracked"

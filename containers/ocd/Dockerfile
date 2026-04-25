@@ -84,7 +84,7 @@ RUN python /tmp/ocd-build/src/ocd/packaging/pack.py \
 # to all projects immediately (no ocd init needed for these).
 COPY docs/reference/skills/ /home/ocd/docs/reference/skills/
 COPY docs/reference/agents/ /home/ocd/docs/reference/agents/
-RUN ocd materialize --force --target /home/ocd/.claude \
+RUN /opt/ocd/venv/bin/ocd materialize --force --target /home/ocd/.claude \
         --docs-dir /home/ocd/docs/reference \
     && rm -f /home/ocd/.claude/settings.local.json \
     && chown -R ocd:ocd /home/ocd/.claude
