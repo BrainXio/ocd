@@ -31,9 +31,9 @@ dependencies = [
 ocd-mcp = "ocd.mcp_server:main"
 
 [project.urls]
-Homepage = "https://github.com/BrainXio/ocd"
-Documentation = "https://github.com/BrainXio/ocd/tree/main/docs"
-Repository = "https://github.com/BrainXio/ocd"
+Homepage = "https://github.com/BrainXio/OCD"
+Documentation = "https://github.com/BrainXio/OCD/tree/main/docs"
+Repository = "https://github.com/BrainXio/OCD"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ocd"]
@@ -42,6 +42,7 @@ packages = ["src/ocd"]
 dev = [
     "build>=1.0",
     "mdformat>=1.0.0",
+    "mdformat-frontmatter>=2.0",
     "mdformat-gfm>=1.0.0",
     "mypy>=1.10",
     "pytest>=8.0",
