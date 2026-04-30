@@ -2,7 +2,7 @@
   "mcpServers": {
     "ocd": {
       "command": "uv",
-      "args": ["--directory", ".", "run", "ocd-mcp"]
+      "args": ["run", "ocd-mcp"]
     }
   }
 }
