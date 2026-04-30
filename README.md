@@ -79,7 +79,7 @@ server when Claude Code opens the project.
 
 ```bash
 # Clone the repo
-git clone git@github.com:BrainXio/OCD.git
+git clone git@github.com:BrainXio/obsessive-compulsive-driver.git
 
 # Install the package
 uv pip install -e .

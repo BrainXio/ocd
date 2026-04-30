@@ -31,9 +31,9 @@ dependencies = [
 ocd-mcp = "ocd.mcp_server:main"
 
 [project.urls]
-Homepage = "https://github.com/BrainXio/OCD"
-Documentation = "https://github.com/BrainXio/OCD/tree/main/docs"
-Repository = "https://github.com/BrainXio/OCD"
+Homepage = "https://github.com/BrainXio/obsessive-compulsive-driver"
+Documentation = "https://github.com/BrainXio/obsessive-compulsive-driver/tree/main/docs"
+Repository = "https://github.com/BrainXio/obsessive-compulsive-driver"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ocd"]
