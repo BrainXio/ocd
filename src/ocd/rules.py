@@ -146,6 +146,12 @@ def get_rules() -> dict[str, object]:
             {"tool": "ocd_task_get", "purpose": "Get single task by ID with full details"},
             {"tool": "ocd_task_update", "purpose": "Update task fields with validation"},
             {"tool": "ocd_task_lifecycle_gate", "purpose": "Check task transition validity"},
+            {"tool": "ocd_remember_issue", "purpose": "Record a new issue precedent"},
+            {
+                "tool": "ocd_check_precedents",
+                "purpose": "Run recorded issue checks, with escalation",
+            },
+            {"tool": "ocd_list_precedents", "purpose": "List known issue precedents"},
             {"tool": "ocd_get_rules", "purpose": "Return these enforcement rules"},
         ],
     }
