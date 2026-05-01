@@ -14,6 +14,7 @@ from typing import Any, cast
 from mcp.server.fastmcp import FastMCP
 
 from ocd.modes import ALLOWED_MODES
+from ocd.precedents import check_precedents, list_precedents, remember_issue
 from ocd.rules import (
     get_rules as get_ocd_rules,
 )
@@ -103,6 +104,58 @@ async def ocd_set_mode(mode: str) -> str:
 async def ocd_get_mode() -> str:
     """Return the currently active mode."""
     return json.dumps({"mode": _current_mode})
+
+
+# ── Precedent tools ───────────────────────────────────────────────────────────
+
+
+@mcp.tool()
+async def ocd_remember_issue(
+    description: str, check: str, fix: str, scope: str = "both", severity: str = "warning"
+) -> str:
+    """Record a new issue pattern so it can be prevented in future.
+
+    Args:
+        description: Short human-readable description of the issue.
+        check: Shell command that returns 0 if the issue is present.
+        fix: Human-readable instructions to resolve the issue.
+        scope: When to check this — "local", "ci", or "both" (default).
+        severity: Base severity — "info", "warning", "error", or "fatal".
+    """
+    result = remember_issue(
+        description=description,
+        check=check,
+        fix=fix,
+        scope=scope,
+        severity=severity,
+    )
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def ocd_check_precedents(scope: str = "both") -> str:
+    """Run all recorded precedent checks for the given scope.
+
+    If a precedent has been hit 2+ times, its effective severity escalates
+    by one level (warning -> error, error -> fatal).
+
+    Args:
+        scope: "local", "ci", or "both" (default).
+    """
+    result = check_precedents(scope=scope)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def ocd_list_precedents(scope: str | None = None, min_hits: int = 0) -> str:
+    """List recorded issue precedents.
+
+    Args:
+        scope: Filter by scope — "local", "ci", or omit for all.
+        min_hits: Only show precedents with at least this many hits.
+    """
+    result = list_precedents(scope=scope, min_hits=min_hits)
+    return json.dumps(result, indent=2)
 
 
 # ── Quality gate tools ───────────────────────────────────────────────────────
@@ -198,14 +251,34 @@ async def ocd_check() -> str:
     else:
         results.append({"check": "ruff-check", "status": "skip", "detail": "ruff not installed"})
 
+    # Precedent checks
+    prec_result = check_precedents(scope="local", root=root)
+    if prec_result["status"] == "pass":
+        results.append(
+            {"check": "precedent-check", "status": "pass", "detail": prec_result["detail"]}
+        )
+    elif prec_result["status"] == "warn":
+        results.append(
+            {
+                "check": "precedent-check",
+                "status": "warn",
+                "detail": prec_result["summary"],
+            }
+        )
+    else:
+        hits = prec_result.get("hits", [])
+        detail = " | ".join(f"{h['description']} ({h['severity']})" for h in hits if h["hit"])
+        results.append({"check": "precedent-check", "status": "fail", "detail": detail})
+
     passed = sum(1 for r in results if r["status"] == "pass")
     failed = sum(1 for r in results if r["status"] == "fail")
     skipped = sum(1 for r in results if r["status"] == "skip")
+    warned = sum(1 for r in results if r["status"] == "warn")
 
     return json.dumps(
         {
             "all_passed": failed == 0,
-            "summary": f"{passed} passed, {failed} failed, {skipped} skipped",
+            "summary": f"{passed} passed, {failed} failed, {skipped} skipped, {warned} warned",
             "results": results,
         },
         indent=2,
