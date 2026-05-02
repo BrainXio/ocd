@@ -8,8 +8,9 @@ import re
 import shutil
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Iterator, cast
 
 from mcp.server.fastmcp import FastMCP
 
@@ -36,6 +37,29 @@ mcp = FastMCP(
         "verify standards, scan for secrets, run formatters, and lint code."
     ),
 )
+
+
+@contextmanager
+def _file_lock(path: Path) -> Iterator[None]:
+    """Acquire an advisory exclusive lock on *path* for the duration of the block."""
+    import fcntl
+
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    fh = lock_path.open("w")
+    try:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        yield
+    finally:
+        try:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+        except OSError:
+            pass
+        fh.close()
+        try:
+            lock_path.unlink()
+        except OSError:
+            pass
+
 
 # ── Mode state ────────────────────────────────────────────────────────────────
 
@@ -832,7 +856,8 @@ def _load_tasks_json(root: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
     try:
-        return cast(dict[str, Any], json.loads(path.read_text()))
+        with _file_lock(path):
+            return cast(dict[str, Any], json.loads(path.read_text()))
     except (json.JSONDecodeError, OSError):
         return {}
 
@@ -934,21 +959,23 @@ async def ocd_task_update(task_id: str, updates: dict[str, Any]) -> str:
         return json.dumps({"ok": False, "detail": "tasks.json not found"})
 
     try:
-        data = json.loads(path.read_text())
+        with _file_lock(path):
+            data = json.loads(path.read_text())
+
+            updated = False
+            for t in data.get("pending", []):
+                if isinstance(t, dict) and t.get("id") == task_id:
+                    t.update(updates)
+                    updated = True
+                    break
+
+            if not updated:
+                return json.dumps({"ok": False, "detail": f"task '{task_id}' not found"})
+
+            path.write_text(json.dumps(data, indent=2) + "\n")
     except (json.JSONDecodeError, OSError) as exc:
         return json.dumps({"ok": False, "detail": f"cannot read tasks.json: {exc}"})
 
-    updated = False
-    for t in data.get("pending", []):
-        if isinstance(t, dict) and t.get("id") == task_id:
-            t.update(updates)
-            updated = True
-            break
-
-    if not updated:
-        return json.dumps({"ok": False, "detail": f"task '{task_id}' not found"})
-
-    path.write_text(json.dumps(data, indent=2) + "\n")
     return json.dumps({"ok": True, "detail": f"task '{task_id}' updated", "applied": updates})
 
 
