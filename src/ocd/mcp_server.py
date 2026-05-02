@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, cast
 
@@ -36,6 +37,29 @@ mcp = FastMCP(
         "verify standards, scan for secrets, run formatters, and lint code."
     ),
 )
+
+
+@contextmanager
+def _file_lock(path: Path):
+    """Acquire an advisory exclusive lock on *path* for the duration of the block."""
+    import fcntl
+
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    fh = lock_path.open("w")
+    try:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        yield
+    finally:
+        try:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+        except OSError:
+            pass
+        fh.close()
+        try:
+            lock_path.unlink()
+        except OSError:
+            pass
+
 
 # ── Mode state ────────────────────────────────────────────────────────────────
 
@@ -810,7 +834,8 @@ def _load_tasks_json(root: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
     try:
-        return cast(dict[str, Any], json.loads(path.read_text()))
+        with _file_lock(path):
+            return cast(dict[str, Any], json.loads(path.read_text()))
     except (json.JSONDecodeError, OSError):
         return {}
 
@@ -912,21 +937,23 @@ async def ocd_task_update(task_id: str, updates: dict[str, Any]) -> str:
         return json.dumps({"ok": False, "detail": "tasks.json not found"})
 
     try:
-        data = json.loads(path.read_text())
+        with _file_lock(path):
+            data = json.loads(path.read_text())
+
+            updated = False
+            for t in data.get("pending", []):
+                if isinstance(t, dict) and t.get("id") == task_id:
+                    t.update(updates)
+                    updated = True
+                    break
+
+            if not updated:
+                return json.dumps({"ok": False, "detail": f"task '{task_id}' not found"})
+
+            path.write_text(json.dumps(data, indent=2) + "\n")
     except (json.JSONDecodeError, OSError) as exc:
         return json.dumps({"ok": False, "detail": f"cannot read tasks.json: {exc}"})
 
-    updated = False
-    for t in data.get("pending", []):
-        if isinstance(t, dict) and t.get("id") == task_id:
-            t.update(updates)
-            updated = True
-            break
-
-    if not updated:
-        return json.dumps({"ok": False, "detail": f"task '{task_id}' not found"})
-
-    path.write_text(json.dumps(data, indent=2) + "\n")
     return json.dumps({"ok": True, "detail": f"task '{task_id}' updated", "applied": updates})
 
 
@@ -1022,63 +1049,72 @@ async def ocd_task_claim(task_id: str = "") -> str:
         task_id: Specific task to claim, or empty string to auto-select.
     """
     root = _find_project_root()
-    data = _load_tasks_json(root)
-    pending = data.get("pending", [])
-
-    if not pending:
-        return json.dumps({"ok": False, "detail": "no pending tasks"})
-
-    completed_ids = {c.split(":")[0].strip() for c in data.get("completed", [])}
-
-    claimable: list[tuple[int, dict[str, Any]]] = []
-    for t in pending:
-        if not isinstance(t, dict):
-            continue
-        if t.get("done"):
-            continue
-        status = t.get("kanban_status", "backlog")
-        if status not in ("ready", "backlog"):
-            continue
-
-        deps = t.get("dependencies", [])
-        if deps:
-            unmet = [d for d in deps if d not in completed_ids]
-            if unmet:
-                continue
-
-        p = t.get("priority", {})
-        level = p.get("level", 3) if isinstance(p, dict) else (p if isinstance(p, int) else 3)
-        claimable.append((level, t))
-
-    if not claimable:
-        return json.dumps(
-            {
-                "ok": False,
-                "detail": (
-                    "no claimable tasks — all are done, in_progress, "
-                    "blocked, or have unmet dependencies"
-                ),
-            }
-        )
-
-    if task_id:
-        matches = [(lvl, t) for lvl, t in claimable if t.get("id") == task_id]
-        if not matches:
-            return json.dumps(
-                {"ok": False, "detail": f"task '{task_id}' not found or not claimable"}
-            )
-        _, selected = matches[0]
-    else:
-        claimable.sort(key=lambda x: (x[0], x[1].get("id", "")))
-        _, selected = claimable[0]
-
-    tid = selected["id"]
-    repo = data.get("meta", {}).get("repository", root.name)
-
-    selected["kanban_status"] = "in_progress"
-
     path = root / "tasks.json"
-    path.write_text(json.dumps(data, indent=2) + "\n")
+
+    if not path.exists():
+        return json.dumps({"ok": False, "detail": "tasks.json not found"})
+
+    try:
+        with _file_lock(path):
+            data = json.loads(path.read_text())
+            pending = data.get("pending", [])
+
+            if not pending:
+                return json.dumps({"ok": False, "detail": "no pending tasks"})
+
+            completed_ids = {c.split(":")[0].strip() for c in data.get("completed", [])}
+
+            claimable: list[tuple[int, dict[str, Any]]] = []
+            for t in pending:
+                if not isinstance(t, dict):
+                    continue
+                if t.get("done"):
+                    continue
+                status = t.get("kanban_status", "backlog")
+                if status not in ("ready", "backlog"):
+                    continue
+
+                deps = t.get("dependencies", [])
+                if deps:
+                    unmet = [d for d in deps if d not in completed_ids]
+                    if unmet:
+                        continue
+
+                p = t.get("priority", {})
+                level = (
+                    p.get("level", 3) if isinstance(p, dict) else (p if isinstance(p, int) else 3)
+                )
+                claimable.append((level, t))
+
+            if not claimable:
+                return json.dumps(
+                    {
+                        "ok": False,
+                        "detail": (
+                            "no claimable tasks — all are done, in_progress, "
+                            "blocked, or have unmet dependencies"
+                        ),
+                    }
+                )
+
+            if task_id:
+                matches = [(lvl, t) for lvl, t in claimable if t.get("id") == task_id]
+                if not matches:
+                    return json.dumps(
+                        {"ok": False, "detail": f"task '{task_id}' not found or not claimable"}
+                    )
+                _, selected = matches[0]
+            else:
+                claimable.sort(key=lambda x: (x[0], x[1].get("id", "")))
+                _, selected = claimable[0]
+
+            tid = selected["id"]
+            repo = data.get("meta", {}).get("repository", root.name)
+
+            selected["kanban_status"] = "in_progress"
+            path.write_text(json.dumps(data, indent=2) + "\n")
+    except (json.JSONDecodeError, OSError) as exc:
+        return json.dumps({"ok": False, "detail": f"cannot read tasks.json: {exc}"})
 
     claim_msg = {
         "type": "status",
